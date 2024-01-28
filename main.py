@@ -1,3 +1,5 @@
+# To Create ENV: py -m venv env
+# To Enter ENV: env/scripts/activate.ps1
 import pygame
 from constants import *
 from classes import Aircraft, Bullet
