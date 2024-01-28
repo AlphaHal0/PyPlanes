@@ -13,7 +13,7 @@ pygame.mouse.set_visible(False)
 background_image = pygame.transform.scale(pygame.image.load("./assets/side-scroll.jpg").convert(), (SCREEN_WIDTH, SCREEN_HEIGHT))
 scroll_x = 0
 
-bullet_image = pygame.image.load("./assets/planes/Shot1.png").convert_alpha()
+bullet_image = pygame.image.load("./assets/planes/bullets/Shot1.png").convert_alpha()
 my_bullet = Bullet(INITIAL_BULLET_X, INITIAL_BULLET_Y)
 
 aircraft_image = pygame.transform.scale(pygame.image.load("./assets/planes/spitfire.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )

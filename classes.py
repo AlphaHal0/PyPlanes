@@ -86,7 +86,7 @@ class Entity:
 
 class Bullet(Entity):
     def __init__(self, x, y):
-        bullet_image = pygame.image.load("./assets/planes/Shot1.png").convert_alpha()
+        bullet_image = pygame.image.load("./assets/planes//bullets/Shot1.png").convert_alpha()
         bullet_image = pygame.transform.scale(bullet_image, (bullet_image.get_width() * 3, bullet_image.get_height() * 3))
         rect = bullet_image.get_rect(topleft=(x, y))
         super().__init__(rect, 0, bullet_image)
