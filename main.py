@@ -10,13 +10,13 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.mouse.set_visible(False)
 
 # Load background image
-background_image = pygame.transform.scale(pygame.image.load("./assets/side-scroll.jpg").convert(), (SCREEN_WIDTH, SCREEN_HEIGHT))
+background_image = pygame.transform.scale(pygame.image.load("./assets/sky/side-scroll.jpg").convert(), (SCREEN_WIDTH, SCREEN_HEIGHT))
 scroll_x = 0
 
-bullet_image = pygame.image.load("./assets/planes/bullets/Shot1.png").convert_alpha()
+bullet_image = pygame.image.load("./assets/bullets/Shot1.png").convert_alpha()
 my_bullet = Bullet(INITIAL_BULLET_X, INITIAL_BULLET_Y)
 
-aircraft_image = pygame.transform.scale(pygame.image.load("./assets/planes/spitfire.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
+aircraft_image = pygame.transform.scale(pygame.image.load("./assets/planes/player/spitfire.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
 my_aircraft = Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image)
 
 # Game loop
