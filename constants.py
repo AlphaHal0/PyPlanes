@@ -16,3 +16,9 @@ INITIAL_BULLET_X = 0.1 * SCREEN_WIDTH
 INITIAL_BULLET_Y = 0.1 * SCREEN_HEIGHT
 
 INITIAL_ENEMY_AIRCRAFT = 1
+ENEMY_COUNT_INCREMENT = 0.5
+
+INITIAL_LIVES = 10
+
+# Spawn enemy aircraft in waves instead of persistently.
+WAVE_MODE = False

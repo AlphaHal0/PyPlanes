@@ -3,7 +3,7 @@ import random
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Aircraft:
-    def __init__(self, width, height, x, y, image, is_enemy = False):
+    def __init__(self, width, height, x, y, image, is_enemy = False, shoot_cooldown = 400, spawn_cooldown = 1000):
         self.width = width
         self.height = height
         self.x = x
@@ -14,7 +14,9 @@ class Aircraft:
         self.acceleration = 0.8
         self.friction = 0.92
         self.last_shot_time = 0
-        self.shoot_cooldown = 400
+        self.shoot_cooldown = shoot_cooldown
+        self.spawn_cooldown = spawn_cooldown
+        self.time_of_spawn = pygame.time.get_ticks()
         self.rect = image.get_rect(topleft=(x, y))
         self.alive = True
         self.falling = False
@@ -36,9 +38,12 @@ class Aircraft:
         self.alive = False
 
     def fall(self):
+        if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
         if not self.falling:
             self.falling = True
             self.image = pygame.transform.rotate(self.image, 10 if self.is_enemy else -10)
+            return True
+        else: return False
 
     def apply_acceleration(self, target_x, target_y, trackable_distance=50):
         dx = target_x - self.x
@@ -87,9 +92,13 @@ class EnemyAircraft(Aircraft):
     def __init__(self, width, height, y, image, is_enemy):
 
         # Call Aircraft()
-        super().__init__(width, height, SCREEN_WIDTH - width, y, image, is_enemy)
+        super().__init__(width, height, SCREEN_WIDTH, y, image, is_enemy, 50)
 
-        self.ai = BotAI.Fly(SCREEN_WIDTH - self.x, 0.5 * SCREEN_HEIGHT - (0.12 * SCREEN_HEIGHT))
+        ai_type = random.randint(1, 2)
+
+        if ai_type == 1: self.ai = BotAI.Fly()
+        elif ai_type == 2: self.ai = BotAI.Turret()
+        else: self.ai = BotAI.BaseAI()
 
     def ai_tick(self):
         self.ai.tick()
@@ -101,14 +110,14 @@ class EnemyAircraft(Aircraft):
 
 class BotAI:
     class BaseAI: # The base AI with no special features.
-        def __init__(self, target_x, target_y, xmin = SCREEN_WIDTH * 0.5, xmax = SCREEN_WIDTH, ymin = 0, ymax = SCREEN_HEIGHT - (0.2 * SCREEN_HEIGHT), speed = 100):
-            self.xmin = xmin
-            self.xmax = xmax
-            self.ymin = ymin
-            self.ymax = ymax
-            self.speed = speed
-            self.target_x = target_x
-            self.target_y = target_y
+        def __init__(self):
+            self.xmin = SCREEN_WIDTH * 0.5
+            self.xmax = SCREEN_WIDTH
+            self.ymin = 0
+            self.ymax = SCREEN_HEIGHT - (0.2 * SCREEN_HEIGHT)
+            self.speed = 100
+            self.target_x = self.xmax
+            self.target_y = self.ymax * random.random() + self.ymin
             self.shoot = 0
 
         def constrain(self):
@@ -122,18 +131,35 @@ class BotAI:
             elif self.target_y < self.ymin:
                 self.target_y += self.speed
 
-        def tick(self):
-            self.constrain()
+        def tick(self): pass
 
     class Fly(BaseAI): # AI with basic random movements.
         def tick(self):
             self.target_x += random.randint(-self.speed, self.speed)
             self.target_y += random.randint(-self.speed, self.speed)
 
-            if random.random() > 0.9:
+            if random.random() > 0.97:
                 self.shoot += 1 # fire
 
             self.constrain()
+
+    class Turret(BaseAI): # Move to a random position and shoot.
+        def __init__(self):
+            self.iteration = 0
+            super().__init__()
+
+        def tick(self):
+            if self.iteration == 0:
+                self.target_x = random.randint(self.xmin, self.xmax)
+                self.target_y = random.randint(self.ymin, self.ymax)
+                self.iteration = 100
+            else:
+                if self.iteration <= 50 and self.iteration % 10 == 0:
+                    self.shoot += 1
+                self.iteration -= 1
+            self.constrain()
+                
+
 
 class Entity:
     def __init__(self, rect: pygame.Rect, gravity: int, sprite=None):
