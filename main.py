@@ -24,7 +24,7 @@ my_aircraft = Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_
 enemies = []
 
 for i in range(INITIAL_ENEMY_AIRCRAFT):
-    enemies.append(EnemyAircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_Y, enemy_aircraft_image))
+    enemies.append(EnemyAircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_Y, enemy_aircraft_image, is_enemy = True))
 
 # Game loop
 bullets = []
@@ -81,11 +81,12 @@ while running:
 
         if bullet.is_enemy:
             if bullet.is_colliding(my_aircraft.rect):
-                my_aircraft.falling = True
+                my_aircraft.fall()
+                bullet.destroy()
         else:
             collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])
             if collided_aircraft > -1:
-               enemies[collided_aircraft].falling = True # delete enemy
+               enemies[collided_aircraft].fall() # delete enemy
                bullet.destroy() # delete bullet
 
         bullet.draw(screen)

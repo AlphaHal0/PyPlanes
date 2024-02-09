@@ -3,7 +3,7 @@ import random
 from constants import SCREEN_WIDTH, SCREEN_HEIGHT
 
 class Aircraft:
-    def __init__(self, width, height, x, y, image):
+    def __init__(self, width, height, x, y, image, is_enemy = False):
         self.width = width
         self.height = height
         self.x = x
@@ -18,6 +18,7 @@ class Aircraft:
         self.rect = image.get_rect(topleft=(x, y))
         self.alive = True
         self.falling = False
+        self.is_enemy = is_enemy
 
     def update_position(self):
         if self.falling:
@@ -33,6 +34,11 @@ class Aircraft:
 
     def destroy(self):
         self.alive = False
+
+    def fall(self):
+        if not self.falling:
+            self.falling = True
+            self.image = pygame.transform.rotate(self.image, 10 if self.is_enemy else -10)
 
     def apply_acceleration(self, target_x, target_y, trackable_distance=50):
         dx = target_x - self.x
@@ -78,10 +84,10 @@ class Aircraft:
 
 # Create a new AI aircraft that inherits properties from Aircraft.
 class EnemyAircraft(Aircraft):
-    def __init__(self, width, height, y, image):
+    def __init__(self, width, height, y, image, is_enemy):
 
         # Call Aircraft()
-        super().__init__(width, height, SCREEN_WIDTH - width, y, image)
+        super().__init__(width, height, SCREEN_WIDTH - width, y, image, is_enemy)
 
         self.ai = BotAI.Fly(SCREEN_WIDTH - self.x, 0.5 * SCREEN_HEIGHT - (0.12 * SCREEN_HEIGHT))
 
