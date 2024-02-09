@@ -21,6 +21,7 @@ class Aircraft:
         self.alive = True
         self.falling = False
         self.is_enemy = is_enemy
+        self.last_particle_time = 0
 
     def update_position(self):
         if self.falling:
@@ -44,6 +45,13 @@ class Aircraft:
             self.image = pygame.transform.rotate(self.image, 10 if self.is_enemy else -10)
             return True
         else: return False
+
+    def display_particle(self, image):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_particle_time > 400:
+            self.last_particle_time = current_time
+            return Particle(self.x + random.randint(0, self.width), self.y + random.randint(0, self.height), image, 100)
+        else: return None
 
     def apply_acceleration(self, target_x, target_y, trackable_distance=50):
         dx = target_x - self.x
@@ -206,3 +214,18 @@ class Bullet(Entity):
     def update_position(self):
         self.rect.move_ip(self.velocity, 0)
     
+
+class Particle:
+    def __init__(self, x, y, image, duration) -> None:
+        self.x = x
+        self.y = y
+        self.image = image
+        self.time_of_spawn = pygame.time.get_ticks()
+        self.duration = duration
+        self.alive = True
+
+    def draw(self, screen):
+        if pygame.time.get_ticks() - self.duration >= self.time_of_spawn:
+            self.alive = False
+        else:
+            screen.blit(self.image, (self.x, self.y))
