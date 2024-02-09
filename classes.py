@@ -15,14 +15,24 @@ class Aircraft:
         self.friction = 0.92
         self.last_shot_time = 0
         self.shoot_cooldown = 400
+        self.rect = image.get_rect(topleft=(x, y))
+        self.alive = True
+        self.falling = False
 
     def update_position(self):
+        if self.falling:
+            self.velocity_y = max(2, self.velocity_y) # clamp the velocity so the aircraft is always falling
+
         self.x += self.velocity_x
         self.y += self.velocity_y
+        self.rect.update((self.x, self.y), (self.width, self.height))
 
     def apply_friction(self):
         self.velocity_x *= self.friction
         self.velocity_y *= self.friction
+
+    def destroy(self):
+        self.alive = False
 
     def apply_acceleration(self, target_x, target_y, trackable_distance=50):
         dx = target_x - self.x
@@ -68,8 +78,7 @@ class Aircraft:
 
 # Create a new AI aircraft that inherits properties from Aircraft.
 class EnemyAircraft(Aircraft):
-    def __init__(self, width, height, y, image, speed = 100):
-        self.speed = speed
+    def __init__(self, width, height, y, image):
 
         # Call Aircraft()
         super().__init__(width, height, SCREEN_WIDTH - width, y, image)
@@ -126,6 +135,7 @@ class Entity:
         self.gravity = gravity
         self.sprite = sprite
         self.velocity = (0, 0)
+        self.alive = True
     
     def update_position(self):
         self.rect.move_ip(*self.velocity)
@@ -135,9 +145,15 @@ class Entity:
             pygame.draw.rect(screen, (255, 0, 0), self.rect)
         else:
             screen.blit(self.sprite, self.rect)
+
+    def destroy(self):
+        self.alive = False
     
     def is_colliding(self, rect):
-        return pygame.Rect.colliderect(self.rect, rect)
+        if isinstance(rect, list):
+            return pygame.Rect.collidelist(self.rect, rect)
+        else:    
+            return pygame.Rect.colliderect(self.rect, rect)
 
 class Bullet(Entity):
     def __init__(self, x, y, is_enemy = False, velocity = 15):
@@ -146,6 +162,8 @@ class Bullet(Entity):
         if is_enemy:
             bullet_image = pygame.transform.flip(bullet_image, True, False)
         rect = bullet_image.get_rect(topleft=(x, y))
+        self.is_enemy = is_enemy
+
         super().__init__(rect, 0, bullet_image)
 
         if is_enemy:

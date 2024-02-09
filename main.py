@@ -19,9 +19,12 @@ bullet_image = pygame.image.load("./assets/bullets/Shot1.png").convert_alpha()
 my_bullet = Bullet(INITIAL_BULLET_X, INITIAL_BULLET_Y)
 
 aircraft_image = pygame.transform.scale(pygame.image.load("./assets/planes/player/spitfire.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
+enemy_aircraft_image = pygame.transform.scale(pygame.image.load("./assets/planes/enemies/enemy_lvl_1.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
 my_aircraft = Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image)
+enemies = []
 
-sample_enemy = EnemyAircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_Y, pygame.transform.flip(aircraft_image, True, False))
+for i in range(INITIAL_ENEMY_AIRCRAFT):
+    enemies.append(EnemyAircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_Y, enemy_aircraft_image))
 
 # Game loop
 bullets = []
@@ -60,20 +63,31 @@ while running:
         print("Player hit the floor. Game over.")
         running = False
 
-    if sample_enemy:
-        sample_enemy.ai_tick()
-        sample_enemy.draw(screen)
-        if sample_enemy.ground_collision():
-            sample_enemy = None
+    enemies = [enemy for enemy in enemies if enemy.alive]
+    for enemy in enemies:
+        enemy.ai_tick()
+        enemy.draw(screen)
+        if enemy.ground_collision():
+            enemy.destroy()
             print("Enemy hit the floor")
-        if sample_enemy.ai.shoot:
-            bullets.append(sample_enemy.shoot(True))
-            sample_enemy.ai.shoot -= 1
+        if enemy.ai.shoot:
+            bullets.append(enemy.shoot(True))
+            enemy.ai.shoot -= 1
 
     # Update and draw bullets
-    bullets = [bullet for bullet in bullets if bullet is not None and 0 <= bullet.rect.x <= SCREEN_WIDTH]
+    bullets = [bullet for bullet in bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= SCREEN_WIDTH]
     for bullet in bullets:
         bullet.update_position()
+
+        if bullet.is_enemy:
+            if bullet.is_colliding(my_aircraft.rect):
+                my_aircraft.falling = True
+        else:
+            collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])
+            if collided_aircraft > -1:
+               enemies[collided_aircraft].falling = True # delete enemy
+               bullet.destroy() # delete bullet
+
         bullet.draw(screen)
 
     # Draw aircraft
