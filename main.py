@@ -23,7 +23,7 @@ my_bullet = Bullet(INITIAL_BULLET_X, INITIAL_BULLET_Y)
 
 aircraft_image = pygame.transform.scale(pygame.image.load("./assets/planes/player/spitfire.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
 enemy_aircraft_image = pygame.transform.scale(pygame.image.load("./assets/planes/enemies/enemy_lvl_1.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
-my_aircraft = Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image)
+my_aircraft = Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image, shoot_cooldown=SHOOT_COOLDOWN)
 enemies = []
 enemy_count = INITIAL_ENEMY_AIRCRAFT
 
@@ -37,6 +37,8 @@ for i in range(enemy_count):
 bullets = []
 score = 0
 lives = INITIAL_LIVES
+spam_fire = False
+wave = 1
 running = True
 while running:
     for event in pygame.event.get():
@@ -51,6 +53,16 @@ while running:
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
             for enemy in enemies:
                 enemy.fall()
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+            if spam_fire:
+                spam_fire = False
+            else:
+                spam_fire = True
+
+    if spam_fire:
+        new_bullet = my_aircraft.shoot()
+        if new_bullet is not None:
+            bullets.append(new_bullet)
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_SPACE]:
@@ -85,7 +97,6 @@ while running:
             enemy.destroy()
             score += 20 if WAVE_MODE else 70
             enemy_count += ENEMY_COUNT_INCREMENT
-            print("Enemy hit the floor")
         if enemy.ai.shoot:
             bullets.append(enemy.shoot(True))
             enemy.ai.shoot -= 1
@@ -95,7 +106,8 @@ while running:
         to_spawn = int(enemy_count) if WAVE_MODE else 1
         if WAVE_MODE: 
             score += 50 * to_spawn
-            print("Wave complete!")
+            print(f"Wave {wave} complete!")
+            wave += 1
         for i in range(to_spawn):
             spawn_enemy()
 
@@ -120,9 +132,11 @@ while running:
     # Draw aircraft
     my_aircraft.draw(screen)
 
-    scoredisplay = font.render(f'Lives: {lives} | Score {score}', False, (0, 0, 0))
+    scoredisplay = f"Lives {lives} | Score {score} | Difficulty {round(enemy_count, 1)} "
+    if WAVE_MODE: scoredisplay += f"| Wave {wave}"
+    scoredisplay_render = font.render(scoredisplay, False, (0, 0, 0))
 
-    screen.blit(scoredisplay, (0, 0))
+    screen.blit(scoredisplay_render, (0, 0))
 
     # Update display
     pygame.display.update()
