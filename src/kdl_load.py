@@ -1,65 +1,47 @@
 import kdl
-from constants import *  # Import all constants from constants.py
 
-# Define constants in a dictionary
-constants = {
-    'system': {
-        'screen-width': SCREEN_WIDTH,
-        'screen-height': SCREEN_HEIGHT
-    },
-    'player': {
-        'aircraft-width': INITIAL_AIRCRAFT_WIDTH,
-        'aircraft-height': INITIAL_AIRCRAFT_HEIGHT,
-        'aircraft-x': INITIAL_AIRCRAFT_X,
-        'aircraft-y': INITIAL_AIRCRAFT_Y
-    },
-    'bullet': {
-        'bullet-x': INITIAL_BULLET_X,
-        'bullet-y': INITIAL_BULLET_Y
-    },
-    'enemy': {},
-    'background': {
-        'scroll-speed': SCROLL_SPEED,
-        'scroll-speed-ratio': SCROLL_SPEED_RATIO
-    }
-}
+def kdl_load():
+    # Load your KDL document from a file
+    with open('config/config.kdl', 'r') as file:
+        doc = kdl.parse(file.read())
 
-# Parse KDL document
-doc = kdl.parse("""
-data {
-    system {
-        screen-width
-        screen-height
-    }
+    # Initialize an empty dictionary to store your constants
+    constants = {}
 
-    player {
-        aircraft-width
-        aircraft-height
-        aircraft-x
-        aircraft-y
-    }
+    # Iterate over the nodes in the document
+    for node in doc.nodes:
+        if node.name == 'data':
+            for child in node.nodes:
+                constants[child.name] = {}
+                for grandchild in child.nodes:
+                    # Store each constant in the dictionary
+                    if grandchild.args:
+                        constants[child.name][grandchild.name] = grandchild.args[0]
+    print(constants)
 
-    bullet {
-        bullet-x
-        bullet-y
-    }
+def kdl_save(constants):
+    # Create a new KDL document
+    doc = kdl.Document()
 
-    enemy {
+    # Create a new node for your data
+    data_node = kdl.Node('data')
 
-    }
+    # Iterate over your constants
+    for key, value in constants.items():
+        # Create a new child node for each constant
+        child_node = kdl.Node(key)
+        for subkey, subvalue in value.items():
+            # Create a new grandchild node for each sub-constant
+            grandchild_node = kdl.Node(subkey)
+            grandchild_node.args.append(subvalue)
+            child_node.children.append(grandchild_node)
+        data_node.children.append(child_node)
 
-    background {
-        scroll-speed
-        scroll-speed-ratio
-    }
-}
-""")
+    # Add your data node to the document
+    doc.nodes.append(data_node)
 
-# Iterate over the nodes in the document
-for node in doc.nodes:
-    if node.name in constants:
-        for child in node.children:
-            if child.name in constants[node.name]:
-                # Replace the node with a new one that includes the constant value
-                node.children.remove(child)
-                node.children.append(kdl.Node(child.name, args=[constants[node.name][child.name]]))
+    # Save your KDL document to a file
+    with open('config/config.kdl', 'w') as file:
+        file.write(str(doc))
+
+kdl_load()

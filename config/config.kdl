@@ -1,6 +1,6 @@
 data {
     system {
-        screen-width
+        screen-width 7
         screen-height
     }
 
