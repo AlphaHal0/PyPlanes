@@ -1,0 +1,13 @@
+pyplanes {
+    name "pyplanes"
+    version "0.0.1a"
+    author "FrogFlavouredWater"
+    contributor "Electro3020"
+
+    title "PyPlanes" lang="en"
+
+    dependencies {
+        kdl-py "^1.2.0" optional=false alias="kdl"
+        pygame "^2.5.2" optional=false
+    }
+}
