@@ -95,3 +95,6 @@ class Bullet(Entity):
     def update_position(self):
         self.rect.move_ip(self.velocity, 0)
     
+class Enemy(Entity):
+    def __init__(self, rect: pygame.Rect, gravity: int, sprite=None):
+        super().__init__(rect, gravity, sprite)
