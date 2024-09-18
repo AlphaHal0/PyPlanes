@@ -17,10 +17,11 @@ class Aircraft:
         self.shoot_cooldown = shoot_cooldown
         self.spawn_cooldown = spawn_cooldown
         self.time_of_spawn = pygame.time.get_ticks()
-        self.rect = image.get_rect(topleft=(x, y))
+        self.rect = image.surface.get_rect(topleft=(x, y))
         self.alive = True
         self.falling = False
         self.is_enemy = is_enemy
+        self.last_particle_time = 0
 
     def update_position(self):
         if self.falling:
@@ -44,6 +45,13 @@ class Aircraft:
             self.image = pygame.transform.rotate(self.image, 10 if self.is_enemy else -10)
             return True
         else: return False
+
+    def display_particle(self, image):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_particle_time > 400:
+            self.last_particle_time = current_time
+            return Particle(self.x + random.randint(0, self.width), self.y + random.randint(0, self.height), image, 100)
+        else: return None
 
     def apply_acceleration(self, target_x, target_y, trackable_distance=50):
         dx = target_x - self.x
@@ -85,7 +93,7 @@ class Aircraft:
 
     def draw(self, screen):
         # pygame.draw.rect(screen, (0, 255, 255), (self.x, self.y, self.width, self.height))
-        screen.blit(self.image, (self.x, self.y))
+        screen.blit(self.image.surface, (self.x, self.y))
 
 # Create a new AI aircraft that inherits properties from Aircraft.
 class EnemyAircraft(Aircraft):
@@ -150,16 +158,14 @@ class BotAI:
 
         def tick(self):
             if self.iteration == 0:
-                self.target_x = random.randint(self.xmin, self.xmax)
-                self.target_y = random.randint(self.ymin, self.ymax)
+                self.target_x = random.randint(int(self.xmin), int(self.xmax))
+                self.target_y = random.randint(int(self.ymin), int(self.ymax))
                 self.iteration = 100
             else:
                 if self.iteration <= 50 and self.iteration % 10 == 0:
                     self.shoot += 1
                 self.iteration -= 1
             self.constrain()
-                
-
 
 class Entity:
     def __init__(self, rect: pygame.Rect, gravity: int, sprite=None):
@@ -193,7 +199,7 @@ class Bullet(Entity):
         bullet_image = pygame.transform.scale(bullet_image, (bullet_image.get_width() * 3, bullet_image.get_height() * 3))
         if is_enemy:
             bullet_image = pygame.transform.flip(bullet_image, True, False)
-        rect = bullet_image.get_rect(topleft=(x, y))
+        rect = bullet_image.surface.get_rect(topleft=(x, y))
         self.is_enemy = is_enemy
 
         super().__init__(rect, 0, bullet_image)
@@ -205,7 +211,29 @@ class Bullet(Entity):
 
     def update_position(self):
         self.rect.move_ip(self.velocity, 0)
-    
-class Enemy(Entity):
-    def __init__(self, rect: pygame.Rect, gravity: int, sprite=None):
-        super().__init__(rect, gravity, sprite)
+
+class Particle:
+    def __init__(self, x, y, image, duration) -> None:
+        self.x = x
+        self.y = y
+        self.image = image
+        self.time_of_spawn = pygame.time.get_ticks()
+        self.duration = duration
+        self.alive = True
+
+    def draw(self, screen):
+        if pygame.time.get_ticks() - self.duration >= self.time_of_spawn:
+            self.alive = False
+        else:
+            screen.blit(self.image.surface, (self.x, self.y))
+
+class Image():
+    def __init__(self, file: str, scale: tuple|None = None):
+        self.base = pygame.image.load(file).convert_alpha()
+        if scale:
+            self.surface = pygame.transform.scale(self.base, scale)
+        else:
+            self.surface = self.base
+
+    def copy(self, scale: tuple):
+        return pygame.transform.scale(self.surface, scale)
