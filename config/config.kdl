@@ -1,0 +1,23 @@
+data {
+    system {
+        screen-width 7
+        screen-height
+    }
+
+    player {
+
+    }
+
+    bullet {
+
+    }
+
+    enemy {
+
+    }
+
+    background {
+        scroll-speed
+        scroll-multiplier
+    }
+}
