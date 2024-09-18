@@ -17,23 +17,35 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.mouse.set_visible(False)
 
 # Load background image
-background_image = Image("./assets/sky/side-scroll.jpg", (SCREEN_WIDTH, SCREEN_HEIGHT))
+background_image = pygame.transform.scale(pygame.image.load("./assets/sky/side-scroll.jpg").convert(), (SCREEN_WIDTH, SCREEN_HEIGHT))
 scroll_x = 0
 
-bullet_image = Image("./assets/bullets/Shot1.png")
+bullet_image = pygame.image.load("./assets/bullets/Shot1.png").convert_alpha()
 my_bullet = Bullet(INITIAL_BULLET_X, INITIAL_BULLET_Y)
 
-aircraft_image = Image("./assets/planes/player/spitfire.png", (SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20))
-enemy_aircraft_image = Image("./assets/planes/enemies/enemy_lvl_1.png", (SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20))
-my_aircraft = Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image, shoot_cooldown=SHOOT_COOLDOWN)
+aircraft_image = pygame.transform.scale(pygame.image.load("./assets/planes/player/spitfire.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
+enemy_image = pygame.transform.scale(pygame.image.load("./assets/planes/enemies/enemy_lvl_1.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
+player = Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image, shoot_cooldown=SHOOT_COOLDOWN, health=INITIAL_HEALTH)
 enemies = []
 enemy_count = INITIAL_ENEMY_AIRCRAFT
 
-base_explosion_image = Image("./assets/particle/explosion.png")
-small_explosion_image = base_explosion_image.copy((50, 50))
-large_explosion_image = base_explosion_image.copy((200, 200))
+large_explosions = []
+for i in range(4):
+    large_explosions.append(
+        pygame.transform.scale(
+        pygame.image.load(f"./assets/particle/fire/large-{i+1}.png")
+        .convert_alpha(),
+        (200, 200)))
 
-def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT, image = enemy_aircraft_image):
+small_explosions = []
+for i in range(4):
+    small_explosions.append(
+        pygame.transform.scale(
+        pygame.image.load(f"./assets/particle/fire/large-{i+1}.png")
+        .convert_alpha(),
+        (50, 50)))
+
+def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT, image = enemy_image):
     enemies.append(EnemyAircraft(width, height, INITIAL_AIRCRAFT_Y, image, is_enemy = True))
 
 for i in range(enemy_count):
@@ -43,7 +55,6 @@ for i in range(enemy_count):
 bullets = []
 particles = []
 score = 0
-lives = INITIAL_LIVES
 spam_fire = False
 wave = 1
 running = True
@@ -52,11 +63,11 @@ while running:
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
             running = False
         elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
-            new_bullet = my_aircraft.shoot()
+            new_bullet = player.shoot()
             if new_bullet is not None:
                 bullets.append(new_bullet)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
-            spawn_enemy(INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5, image=pygame.transform.scale(enemy_aircraft_image, (INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5)))
+            spawn_enemy(INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5, image=pygame.transform.scale(enemy_image, (INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5)))
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
             for enemy in enemies:
                 enemy.fall()
@@ -67,13 +78,13 @@ while running:
                 spam_fire = True
 
     if spam_fire:
-        new_bullet = my_aircraft.shoot()
+        new_bullet = player.shoot()
         if new_bullet is not None:
             bullets.append(new_bullet)
 
     keys = pygame.key.get_pressed()
     if keys[pygame.K_SPACE]:
-        bullets.append(my_aircraft.shoot())
+        bullets.append(player.shoot())
 
     pygame.event.set_grab(True)
 
@@ -88,16 +99,16 @@ while running:
 
     # Update aircraft position and check for collisions
     target_x, target_y = pygame.mouse.get_pos()
-    my_aircraft.apply_acceleration(target_x, target_y, trackable_distance=50)
-    my_aircraft.update_position()
-    my_aircraft.apply_friction()
+    player.apply_acceleration(target_x, target_y, trackable_distance=50)
+    player.update_position()
+    player.apply_friction()
 
-    if my_aircraft.ground_collision():
+    if player.ground_collision():
         print("Player hit the floor. Game over.")
         running = False
 
-    if my_aircraft.falling:
-        particle = my_aircraft.display_particle(small_explosion_image)
+    if player.falling:
+        particle = player.display_particle(images=small_explosions)
         if particle: particles.append(particle)
 
     enemies = [enemy for enemy in enemies if enemy.alive]
@@ -106,14 +117,14 @@ while running:
         enemy.draw(screen)
         if enemy.ground_collision():
             enemy.destroy()
-            particles.append(Particle(enemy.x, enemy.y, large_explosion_image, 400))
+            particles.append(Particle(enemy.x, enemy.y, images=large_explosions, duration=400))
             score += 20 if WAVE_MODE else 70
             enemy_count += ENEMY_COUNT_INCREMENT
         if enemy.ai.shoot:
             bullets.append(enemy.shoot(True))
             enemy.ai.shoot -= 1
         if enemy.falling:
-            particle = enemy.display_particle(small_explosion_image)
+            particle = enemy.display_particle(images=small_explosions)
             if particle: particles.append(particle)
 
     # Spawn all enemies in one go if WAVE_MODE is True, otherwise spawn one enemy to keep up with the count.
@@ -132,9 +143,9 @@ while running:
         bullet.update_position()
 
         if bullet.is_enemy:
-            if bullet.is_colliding(my_aircraft.rect):
-                lives -= 1
-                if lives <= 0: my_aircraft.fall()
+            if bullet.is_colliding(player.rect):
+                player.health -= 10
+                player.check_health()
                 bullet.destroy()
         else:
             collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])
@@ -149,9 +160,20 @@ while running:
         particle.draw(screen)
 
     # Draw aircraft
-    my_aircraft.draw(screen)
+    player.draw(screen)
 
-    scoredisplay = f"Lives {lives} | Score {score} | Difficulty {round(enemy_count, 1)} "
+    health_bar = pygame.Surface((150,10))
+    health_bar.fill(0xFF0000)
+    health_bar.fill(0x00FF00, rect=(0,0,player.health*1.5,10)),
+
+    # Draw health bar
+    screen.blit(
+        health_bar,
+        (player.x+(player.width//2-80),
+         player.y-player.height)
+    )
+
+    scoredisplay = f"Score {score} | Difficulty {round(enemy_count, 1)} "
     if WAVE_MODE: scoredisplay += f"| Wave {wave}"
     scoredisplay_render = font.render(scoredisplay, False, (0, 0, 0))
 
