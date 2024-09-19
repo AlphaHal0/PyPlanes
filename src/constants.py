@@ -24,7 +24,7 @@ ENEMY_COUNT_INCREMENT = 0.4
 INITIAL_HEALTH = 100
 
 # Spawn enemy aircraft in waves instead of persistently.
-WAVE_MODE = False
+WAVE_MODE = True
 
 # Enemy Settings
 INITIAL_ENEMY_SPEED = 1
