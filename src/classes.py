@@ -239,6 +239,7 @@ class Bullet(Weapon):
 
     def update_position(self):
         self.rect.move_ip(self.velocity, 0)
+        self.x += self.velocity
 
 class Bomb(Weapon):
     def __init__(self, x, y, is_enemy = False, fall_velocity = 15, x_velocity = 5):

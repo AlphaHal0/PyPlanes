@@ -133,8 +133,9 @@ while running:
             # NOT EFFICIENT: I'm sure there's a better way than this
             for i in bullets:
                 if bullet.is_colliding_entity(i): # Allow bullets to collide
-                    particles.append(Particle(bullet.x, bullet.y, images=small_explosions, duration=30))
+                    particles.append(Particle(bullet.x+10, bullet.y, images=small_explosions, duration=100))
                     bullet.destroy()
+                    i.destroy()
                 
         bullet.draw(screen)
 
