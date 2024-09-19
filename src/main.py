@@ -1,7 +1,8 @@
 # To Create ENV: py -m venv env
 # To Enter ENV: env/scripts/activate.ps1
 import pygame
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, SHOOT_COOLDOWN, INITIAL_HEALTH, INITIAL_ENEMY_AIRCRAFT, SCROLL_SPEED, WAVE_MODE, ENEMY_COUNT_INCREMENT
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, SHOOT_COOLDOWN, INITIAL_HEALTH, INITIAL_ENEMY_AIRCRAFT, SCROLL_SPEED, WAVE_MODE, ENEMY_COUNT_INCREMENT, SHOW_FPS
+import time
 
 # Initialize Pygame
 pygame.init()
@@ -13,8 +14,9 @@ font = pygame.font.Font(size=50)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.mouse.set_visible(False)
 
+from random import randint, choice
 from classes import Aircraft, EnemyAircraft, Particle
-from images import background_image, aircraft_image, enemy_image, large_explosions, small_explosions
+from images import background_image, aircraft_image, enemy_image, large_explosions, small_explosions, moth_images
 
 scroll_x = 0
 
@@ -35,6 +37,7 @@ score = 0
 spam_fire = False
 wave = 1
 running = True
+framestart = time.time()
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
@@ -53,6 +56,12 @@ while running:
                 spam_fire = False
             else:
                 spam_fire = True
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+            particles.append(Particle(
+                player.x, 
+                player.y, 
+                images=choice((large_explosions, small_explosions, moth_images)),
+                duration=randint(60, 500)))
 
     if spam_fire:
         new_bullet = player.shoot()
@@ -157,13 +166,16 @@ while running:
          player.y-player.height)
     )
 
-    scoredisplay = f"Score {score} | Difficulty {round(enemy_count, 1)} "
+    
+    scoredisplay = f"Score {score} | Difficulty {round(enemy_count, 1)}"
     if WAVE_MODE: scoredisplay += f"| Wave {wave}"
+    if SHOW_FPS: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
     scoredisplay_render = font.render(scoredisplay, False, (0, 0, 0))
 
     screen.blit(scoredisplay_render, (0, 0))
 
     # Update display
+    framestart = time.time()
     pygame.display.update()
     pygame.time.Clock().tick(60)
 

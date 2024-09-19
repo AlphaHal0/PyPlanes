@@ -1,6 +1,7 @@
 SCREEN_WIDTH = 1800 
 SCREEN_HEIGHT = 800
 ASSET_FOLDER = "./assets"
+SHOW_FPS = False
 
 # Scroll settings
 SCROLL_SPEED_RATIO = 0.01
