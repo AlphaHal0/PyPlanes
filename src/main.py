@@ -125,14 +125,16 @@ while running:
                 player.check_health()
                 bullet.destroy()
         else:
-            collided_aircraft = bullet.is_colliding_entity([enemy for enemy in enemies])
+            collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])
             if collided_aircraft > -1:
                 if enemies[collided_aircraft].fall(): score += 30
                 bullet.destroy() # delete bullet
                 
-            if bullet.is_bullet_colliding([i for i in bullets]): # Allow bullets to collide
-                particles.append(Particle(bullet.x, bullet.y, images=small_explosions, duration=30))
-                bullet.destroy()
+            # NOT EFFICIENT: I'm sure there's a better way than this
+            for i in bullets:
+                if bullet.is_colliding_entity(i): # Allow bullets to collide
+                    particles.append(Particle(bullet.x, bullet.y, images=small_explosions, duration=30))
+                    bullet.destroy()
                 
         bullet.draw(screen)
 

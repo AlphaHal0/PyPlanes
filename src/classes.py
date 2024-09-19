@@ -216,6 +216,8 @@ class Weapon(Entity):
             image = pygame.transform.flip(image, True, False)
         rect = image.get_rect(topleft=(x, y))
         self.is_enemy = is_enemy
+        self.x = x
+        self.y = y
 
         super().__init__(rect, 0, image)
 

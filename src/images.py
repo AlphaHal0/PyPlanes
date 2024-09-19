@@ -29,3 +29,5 @@ moth_images = []
 for i in range(8):
     moth_images.append(
         scale_image(load_image(f"easteregg/moth/frame_{i}.png"), (200, 200)))
+
+bomb_image = bullet_image
