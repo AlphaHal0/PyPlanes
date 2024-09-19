@@ -1,9 +1,10 @@
 import pygame
 import random
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT
+from images import bullet_image, bomb_image, moth_images
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, BOMB_VELOCITY_DECAY, BULLET_VELOCITY
 
 class Aircraft:
-    def __init__(self, width, height, x, y, image, is_enemy = False, shoot_cooldown = 400, spawn_cooldown = 1000, health=100):
+    def __init__(self, width, height, x, y, image, is_enemy = False, shoot_cooldown = 400, spawn_cooldown = 1000, health=100, bomb_cooldown = 200):
         self.width = width
         self.height = height
         self.x = x
@@ -14,6 +15,7 @@ class Aircraft:
         self.acceleration = 0.8
         self.friction = 0.92
         self.last_shot_time = 0
+        self.last_bomb_time = 0
         self.shoot_cooldown = shoot_cooldown
         self.spawn_cooldown = spawn_cooldown
         self.time_of_spawn = pygame.time.get_ticks()
@@ -23,6 +25,7 @@ class Aircraft:
         self.is_enemy = is_enemy
         self.last_particle_time = 0
         self.health = health
+        self.bomb_cooldown = bomb_cooldown
 
     def update_position(self):
         if self.falling:
@@ -95,7 +98,15 @@ class Aircraft:
             return Bullet((self.x if is_enemy else self.x + self.width), self.y + self.height / 2, is_enemy)
         else:
             return None
-
+    
+    def bomb(self, is_enemy = False):
+        current_time = pygame.time.get_ticks()
+        
+        if current_time - self.last_bomb_time > self.bomb_cooldown:
+            self.last_bomb_time = current_time
+            return 
+            
+    
     def draw(self, screen):
         # pygame.draw.rect(screen, (0, 255, 255), (self.x, self.y, self.width, self.height))
         screen.blit(self.image, (self.x, self.y))
@@ -192,22 +203,32 @@ class Entity:
     def destroy(self):
         self.alive = False
     
-    def is_colliding(self, rect):
+    def is_colliding(self, rect: pygame.Rect):
         if isinstance(rect, list):
             return pygame.Rect.collidelist(self.rect, rect)
         else:    
             return pygame.Rect.colliderect(self.rect, rect)
 
-class Bullet(Entity):
-    def __init__(self, x, y, is_enemy = False, velocity = 15):
-        bullet_image = pygame.image.load("./assets/bullets/Shot1.png").convert_alpha()
-        bullet_image = pygame.transform.scale(bullet_image, (bullet_image.get_width() * 3, bullet_image.get_height() * 3))
+class Weapon(Entity):
+    def __init__(self, x, y, image: pygame.Surface, is_enemy: bool = False):
+        image = image
         if is_enemy:
-            bullet_image = pygame.transform.flip(bullet_image, True, False)
-        rect = bullet_image.get_rect(topleft=(x, y))
+            image = pygame.transform.flip(image, True, False)
+        rect = image.get_rect(topleft=(x, y))
         self.is_enemy = is_enemy
 
-        super().__init__(rect, 0, bullet_image)
+        super().__init__(rect, 0, image)
+
+    def is_colliding(self, other: Entity, ignore_same_team: bool = True):
+        # Do not collide with same-team bullets
+        if ignore_same_team and self.is_enemy == other.is_enemy:
+            return False
+        
+        return super().is_colliding(other.rect)
+
+class Bullet(Weapon):
+    def __init__(self, x, y, is_enemy=False, velocity=BULLET_VELOCITY):
+        super().__init__(x, y, bullet_image, is_enemy)
 
         if is_enemy:
             self.velocity = -velocity
@@ -217,6 +238,16 @@ class Bullet(Entity):
     def update_position(self):
         self.rect.move_ip(self.velocity, 0)
 
+class Bomb(Weapon):
+    def __init__(self, x, y, is_enemy = False, fall_velocity = 15, x_velocity = 5):
+        super.__init__(x, y, bomb_image, is_enemy)
+        self.fall_velocity = fall_velocity
+        self.x_velocity = x_velocity
+        
+    def update_position(self):
+        self.rect.move_ip(self.x_velocity, self.fall_velocity)
+        self.x_velocity // BOMB_VELOCITY_DECAY
+    
 class Particle:
     def __init__(self, x, y, image=None, images=None, duration=60) -> None:
         self.x = x
@@ -236,8 +267,7 @@ class Particle:
             self.alive = False
         else:
             screen.blit(self.images[(tick-self.time_of_spawn)//(self.duration//self.imagecount)-1], (self.x, self.y))
-# c = 10
-# d = 20
-# a = 2
-# t = 5
-# i = 2
+
+class Moth(Entity):
+    def __init__(self, rect, x, y, is_enemy = False):
+        super().__init__(rect, 0, moth_images)

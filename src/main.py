@@ -1,10 +1,7 @@
 # To Create ENV: py -m venv env
 # To Enter ENV: env/scripts/activate.ps1
 import pygame
-from constants import *
-from classes import *
-from kdl_load import *
-from random import randint
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, SHOOT_COOLDOWN, INITIAL_HEALTH, INITIAL_ENEMY_AIRCRAFT, SCROLL_SPEED, WAVE_MODE, ENEMY_COUNT_INCREMENT
 
 # Initialize Pygame
 pygame.init()
@@ -16,34 +13,14 @@ font = pygame.font.Font(size=50)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.mouse.set_visible(False)
 
-# Load background image
-background_image = pygame.transform.scale(pygame.image.load("./assets/sky/side-scroll.jpg").convert(), (SCREEN_WIDTH, SCREEN_HEIGHT))
+from classes import Aircraft, EnemyAircraft, Particle
+from images import background_image, aircraft_image, enemy_image, large_explosions, small_explosions
+
 scroll_x = 0
 
-bullet_image = pygame.image.load("./assets/bullets/Shot1.png").convert_alpha()
-my_bullet = Bullet(INITIAL_BULLET_X, INITIAL_BULLET_Y)
-
-aircraft_image = pygame.transform.scale(pygame.image.load("./assets/planes/player/spitfire.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
-enemy_image = pygame.transform.scale(pygame.image.load("./assets/planes/enemies/enemy_lvl_1.png").convert_alpha(),(SCREEN_WIDTH / 10, SCREEN_HEIGHT / 20) )
 player = Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image, shoot_cooldown=SHOOT_COOLDOWN, health=INITIAL_HEALTH)
 enemies = []
 enemy_count = INITIAL_ENEMY_AIRCRAFT
-
-large_explosions = []
-for i in range(4):
-    large_explosions.append(
-        pygame.transform.scale(
-        pygame.image.load(f"./assets/particle/fire/large-{i+1}.png")
-        .convert_alpha(),
-        (200, 200)))
-
-small_explosions = []
-for i in range(4):
-    small_explosions.append(
-        pygame.transform.scale(
-        pygame.image.load(f"./assets/particle/fire/large-{i+1}.png")
-        .convert_alpha(),
-        (50, 50)))
 
 def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT, image = enemy_image):
     enemies.append(EnemyAircraft(width, height, INITIAL_AIRCRAFT_Y, image, is_enemy = True))
@@ -152,7 +129,11 @@ while running:
             if collided_aircraft > -1:
                 if enemies[collided_aircraft].fall(): score += 30
                 bullet.destroy() # delete bullet
-
+                
+            if bullet.is_bullet_colliding([i for i in bullets]): # Allow bullets to collide
+                particles.append(Particle(bullet.x, bullet.y, images=small_explosions, duration=30))
+                bullet.destroy()
+                
         bullet.draw(screen)
 
     particles = [particle for particle in particles if particle.alive]
