@@ -1,4 +1,7 @@
-/__pycache__
+__pycache__/
 /build
 /bin
 /env
+*.pyc
+.env
+.DS_Store

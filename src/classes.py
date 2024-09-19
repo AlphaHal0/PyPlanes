@@ -219,7 +219,7 @@ class Weapon(Entity):
 
         super().__init__(rect, 0, image)
 
-    def is_colliding(self, other: Entity, ignore_same_team: bool = True):
+    def is_colliding_entity(self, other: Entity, ignore_same_team: bool = True):
         # Do not collide with same-team bullets
         if ignore_same_team and self.is_enemy == other.is_enemy:
             return False
