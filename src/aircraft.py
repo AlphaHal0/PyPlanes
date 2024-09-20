@@ -1,7 +1,7 @@
 import pygame
 import random
 import particle
-from constants import SCREEN_WIDTH, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER, SHOOT_COOLDOWN, BOMB_COOLDOWN, SPAWN_COOLDOWN, FLOOR_Y
+from constants import SCREEN_WIDTH, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER, SHOOT_COOLDOWN, BOMB_COOLDOWN, SPAWN_COOLDOWN, FLOOR_Y, MOTH_MUSIC_IS_MAIN_MUSIC
 import ai
 import weapon
 from entity import Entity
@@ -136,5 +136,6 @@ class Moth(EnemyAircraft):
         super().__init__(y, Sprite(images.moth_images, animation_time=random.randint(1, 10)))
 
     def destroy(self) -> None:
-        pygame.mixer.music.fadeout(1000)
+        if not MOTH_MUSIC_IS_MAIN_MUSIC:
+            pygame.mixer.music.fadeout(1000)
         super().destroy()

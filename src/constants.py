@@ -41,6 +41,7 @@ INITIAL_ENEMY_SPEED = 1
 # Easter eggs
 MOTH_CHANCE = 0.001
 MOTH_MUSIC = True
+MOTH_MUSIC_IS_MAIN_MUSIC = False
 BERRY_BOMB_CHANCE = 0.005
 
 # Debug (some of these options may be slow)
