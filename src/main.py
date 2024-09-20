@@ -15,17 +15,18 @@ screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.mouse.set_visible(False)
 
 from random import randint, choice
-from classes import Aircraft, EnemyAircraft, Particle
+import aircraft
+from particle import Particle
 from images import background_image, aircraft_image, enemy_image, large_explosions, small_explosions, moth_images
 
 scroll_x = 0
 
-player = Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image, shoot_cooldown=SHOOT_COOLDOWN, health=INITIAL_HEALTH)
+player = aircraft.Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image, shoot_cooldown=SHOOT_COOLDOWN, health=INITIAL_HEALTH)
 enemies = []
 enemy_count = INITIAL_ENEMY_AIRCRAFT
 
 def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT, image = enemy_image):
-    enemies.append(EnemyAircraft(width, height, INITIAL_AIRCRAFT_Y, image, is_enemy = True))
+    enemies.append(aircraft.EnemyAircraft(width, height, INITIAL_AIRCRAFT_Y, image, is_enemy = True))
 
 for i in range(enemy_count):
     spawn_enemy()
@@ -152,7 +153,7 @@ while running:
 
         if bullet.ground_collision():
             if bullet.explosion_power:
-                particles.append(Particle(bullet.x+10, bullet.y, images=large_explosions, duration=100))
+                particles.append(Particle(bullet.x, bullet.y-100, images=large_explosions, duration=1000))
             else:
                 particles.append(Particle(bullet.x+10, bullet.y, images=small_explosions, duration=100))
             bullet.destroy()
