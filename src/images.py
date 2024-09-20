@@ -7,6 +7,9 @@ def load_image(file: str):
 def scale_image(surface: surface, size: tuple):
     return transform.scale(surface, size)
 
+def flip_image(surface: surface, flip_x: bool = True, flip_y: bool = False):
+    return transform.flip(surface, flip_x, flip_y)
+
 bullet_image = load_image("weapons/bullets/Shot1.png")
 bullet_image = scale_image(bullet_image, (bullet_image.get_width() * 3, bullet_image.get_height() * 3))
 
@@ -30,4 +33,4 @@ for i in range(8):
     moth_images.append(
         scale_image(load_image(f"easteregg/moth/frame_{i}.png"), (200, 200)))
 
-bomb_image = load_image("weapons/bombs/British/GP-1000lb-MK-IV.png")
+bomb_image = flip_image(scale_image(load_image("weapons/bombs/British/GP-1000lb-MK-IV.png"), (74, 18)))

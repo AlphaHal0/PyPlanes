@@ -46,6 +46,10 @@ while running:
             new_bullet = player.shoot()
             if new_bullet is not None:
                 bullets.append(new_bullet)
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+            new_bomb = player.bomb()
+            if new_bomb is not None:
+                bullets.append(new_bomb)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
             spawn_enemy(INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5, image=pygame.transform.scale(enemy_image, (INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5)))
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
@@ -107,7 +111,7 @@ while running:
             score += 20 if WAVE_MODE else 70
             enemy_count += ENEMY_COUNT_INCREMENT
         if enemy.ai.shoot:
-            bullets.append(enemy.shoot(True))
+            bullets.append(enemy.shoot())
             enemy.ai.shoot -= 1
         if enemy.falling:
             particle = enemy.display_particle(images=small_explosions)

@@ -1,7 +1,7 @@
 import pygame
 import random
 from images import bullet_image, bomb_image, moth_images
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, BOMB_VELOCITY_DECAY, BULLET_VELOCITY
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, BOMB_VELOCITY_DECAY, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER
 
 class Aircraft:
     def __init__(self, width, height, x, y, image, is_enemy = False, shoot_cooldown = 400, spawn_cooldown = 1000, health=100, bomb_cooldown = 200):
@@ -90,23 +90,33 @@ class Aircraft:
     def ground_collision(self):
         return self.y + self.height > SCREEN_HEIGHT - (0.12 * SCREEN_HEIGHT)
     
-    def shoot(self, is_enemy = False):
+    def shoot(self):
         current_time = pygame.time.get_ticks()
 
         if current_time - self.last_shot_time > self.shoot_cooldown:
             self.last_shot_time = current_time
-            return Bullet((self.x if is_enemy else self.x + self.width), self.y + self.height / 2, is_enemy)
+            return Bullet(
+                (self.x if self.is_enemy else self.x + self.width),
+                self.y + self.height / 2,
+                self.is_enemy,
+                velocity=BULLET_VELOCITY+(self.velocity_x*WEAPON_RELATIVE_VELOCITY_MULTIPLIER))
         else:
             return None
     
-    def bomb(self, is_enemy = False):
+    def bomb(self):
         current_time = pygame.time.get_ticks()
         
         if current_time - self.last_bomb_time > self.bomb_cooldown:
             self.last_bomb_time = current_time
-            return 
-            
-    
+            return Bomb(
+                (self.x + self.width // 2),
+                self.y + self.height,
+                self.is_enemy,
+                velocity_x=self.velocity_x
+            )
+        else:
+            return None
+
     def draw(self, screen):
         # pygame.draw.rect(screen, (0, 255, 255), (self.x, self.y, self.width, self.height))
         screen.blit(self.image, (self.x, self.y))
@@ -242,14 +252,14 @@ class Bullet(Weapon):
         self.x += self.velocity
 
 class Bomb(Weapon):
-    def __init__(self, x, y, is_enemy = False, fall_velocity = 15, x_velocity = 5):
-        super.__init__(x, y, bomb_image, is_enemy)
+    def __init__(self, x, y, is_enemy = False, fall_velocity = 5, velocity_x = 5):
+        super().__init__(x, y, bomb_image, is_enemy)
         self.fall_velocity = fall_velocity
-        self.x_velocity = x_velocity
+        self.velocity_x = velocity_x
         
     def update_position(self):
-        self.rect.move_ip(self.x_velocity, self.fall_velocity)
-        self.x_velocity // BOMB_VELOCITY_DECAY
+        self.rect.move_ip(self.velocity_x, self.fall_velocity)
+        self.velocity_x // BOMB_VELOCITY_DECAY
     
 class Particle:
     def __init__(self, x, y, image=None, images=None, duration=60) -> None:
