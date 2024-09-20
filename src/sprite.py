@@ -1,6 +1,6 @@
 import pygame
 import images
-from constants import DISABLE_SPRITE_TEXTURES, SHOW_SPRITE_SIZES
+from config import cfg
 
 class Sprite:
     def __init__(self, image: pygame.Surface|list[pygame.Surface]|None = None, animation_time: int = 1, size: tuple|None = None, size_multiplier: int = 1) -> None:
@@ -21,10 +21,10 @@ class Sprite:
         if image: self.set_size(size, size_multiplier)
 
     def draw(self, screen: pygame.Surface, x: int, y: int, loop: bool = True) -> bool:
-        if SHOW_SPRITE_SIZES:
+        if cfg.show_sprite_sizes:
             pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))
-            
-        if DISABLE_SPRITE_TEXTURES: return False
+
+        if cfg.disable_sprite_textures: return False
 
         if self.image is None:
             pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))

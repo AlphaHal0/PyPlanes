@@ -5,3 +5,8 @@ __pycache__/
 *.pyc
 .env
 .DS_Store
+/public
+/cfg
+!/cfg/default
+/tmp
+/log
