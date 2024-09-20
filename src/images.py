@@ -23,11 +23,11 @@ for i in range(4):
 small_explosions = []
 for i in range(4):
     small_explosions.append(
-        scale_image(load_image(f"particle/fire/large-{i+1}.png"), (50, 50)))
+        scale_image(load_image(f"particle/smoke/large-{i+1}.png"), (50, 50)))
     
 moth_images = []
 for i in range(8):
     moth_images.append(
         scale_image(load_image(f"easteregg/moth/frame_{i}.png"), (200, 200)))
 
-bomb_image = bullet_image
+bomb_image = load_image("weapons/bombs/British/GP-1000lb-MK-IV.png")

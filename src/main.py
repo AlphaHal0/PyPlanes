@@ -157,7 +157,7 @@ while running:
 
     health_bar = pygame.Surface((150,10))
     health_bar.fill(0xFF0000)
-    health_bar.fill(0x00FF00, rect=(0,0,player.health*1.5,10)),
+    health_bar.fill(0x00FF00, rect=(0,0,(player.health/INITIAL_HEALTH)*150,10)),
 
     # Draw health bar
     screen.blit(
