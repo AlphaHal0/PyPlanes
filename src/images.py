@@ -31,7 +31,7 @@ for i in range(4):
 moth_images = []
 for i in range(8):
     moth_images.append(
-        scale_image(load_image(f"easteregg/moth/frame_{i}.png"), (SCREEN_WIDTH / 20, SCREEN_HEIGHT / 20)))
+        scale_image(load_image(f"easteregg/moth/frame_{i}.png"), (SCREEN_HEIGHT / 15, SCREEN_HEIGHT / 15)))
 
 bomb_image = flip_image(scale_image(load_image("weapons/bombs/British/GP-1000lb-MK-IV.png"), (74, 18)))
 
