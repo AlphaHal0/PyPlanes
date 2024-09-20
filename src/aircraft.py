@@ -7,7 +7,7 @@ import weapon
 from entity import Entity
 
 class Aircraft(Entity):
-    def __init__(self, width: int, height: int, x: int, y: int, image: pygame.Surface, is_enemy: bool = False, shoot_cooldown: int = SHOOT_COOLDOWN, spawn_cooldown: int = SPAWN_COOLDOWN, health: int = 100, bomb_cooldown: int = BOMB_COOLDOWN, velocity_x: int = 0, velocity_y : int = 0):
+    def __init__(self, width: int, height: int, x: int, y: int, image: pygame.Surface | list, is_enemy: bool = False, shoot_cooldown: int = SHOOT_COOLDOWN, spawn_cooldown: int = SPAWN_COOLDOWN, health: int = 100, bomb_cooldown: int = BOMB_COOLDOWN, velocity_x: int = 0, velocity_y : int = 0, animation_time: int = 5):
         self.width = width
         self.height = height
         self.acceleration = 0.8
@@ -23,7 +23,7 @@ class Aircraft(Entity):
         self.last_particle_time = 0
         self.health = health
         self.bomb_cooldown = bomb_cooldown
-        super().__init__(image.get_rect(topleft=(x, y)), 0, image, x, y, velocity_x, velocity_y)
+        super().__init__(pygame.Rect(x, y, width, height), 0, image, x, y, velocity_x, velocity_y, animation_time)
 
     def update_position(self) -> None:
         if self.falling:
@@ -42,7 +42,8 @@ class Aircraft(Entity):
         if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
         if not self.falling:
             self.falling = True
-            self.sprite = pygame.transform.rotate(self.sprite, 10 if self.is_enemy else -10)
+            if not self.is_animated:
+                self.sprite = pygame.transform.rotate(self.sprite, 10 if self.is_enemy else -10)
             return True
         else: return False
 
@@ -113,9 +114,9 @@ class Aircraft(Entity):
 
 # Create a new AI aircraft that inherits properties from Aircraft.
 class EnemyAircraft(Aircraft):
-    def __init__(self, width: int, height: int, y: int, image: pygame.Surface):
+    def __init__(self, width: int, height: int, y: int, image: pygame.Surface, animation_time: int = 5):
         # Call Aircraft()
-        super().__init__(width, height, SCREEN_WIDTH, y, image, True, 50)
+        super().__init__(width, height, SCREEN_WIDTH, y, image, True, 50, animation_time=animation_time)
 
         ai_type = random.randint(1, 2)
 
@@ -130,3 +131,11 @@ class EnemyAircraft(Aircraft):
 
         self.update_position()
         self.apply_friction()
+
+class Moth(EnemyAircraft):
+    def __init__(self, width: int, height: int, y: int, image: pygame.Surface):
+        super().__init__(width, height, y, image, animation_time=random.randint(1, 10))
+
+    def destroy(self) -> None:
+        pygame.mixer.music.fadeout(1000)
+        super().destroy()

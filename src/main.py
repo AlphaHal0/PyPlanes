@@ -1,7 +1,7 @@
 # To Create ENV: py -m venv env
 # To Enter ENV: env/scripts/activate.ps1
 import pygame
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, PLAYER_SHOOT_COOLDOWN, INITIAL_HEALTH, INITIAL_ENEMY_AIRCRAFT, SCROLL_SPEED, WAVE_MODE, ENEMY_COUNT_INCREMENT, SHOW_FPS, PLAYER_BOMB_COOLDOWN
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, PLAYER_SHOOT_COOLDOWN, INITIAL_HEALTH, INITIAL_ENEMY_AIRCRAFT, SCROLL_SPEED, WAVE_MODE, ENEMY_COUNT_INCREMENT, SHOW_FPS, PLAYER_BOMB_COOLDOWN, ASSET_FOLDER, MOTH_MUSIC, MOTH_CHANCE
 import time
 
 # Initialize Pygame
@@ -14,7 +14,7 @@ font = pygame.font.Font(size=50)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.mouse.set_visible(False)
 
-from random import randint, choice
+from random import randint, choice, random
 import aircraft
 from particle import Particle
 from images import background_image, aircraft_image, enemy_image, large_explosions, small_explosions, moth_images
@@ -25,8 +25,14 @@ player = aircraft.Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INIT
 enemies = []
 enemy_count = INITIAL_ENEMY_AIRCRAFT
 
-def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT, image = enemy_image):
-    enemies.append(aircraft.EnemyAircraft(width, height, INITIAL_AIRCRAFT_Y, image))
+def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT, image = enemy_image, moth: bool = False):
+    if (MOTH_CHANCE and random() <= MOTH_CHANCE) or moth:
+        if MOTH_MUSIC and not pygame.mixer.music.get_busy():
+            pygame.mixer.music.load(f"{ASSET_FOLDER}/easteregg/really_good_soundtrack.mp3", "music_moth")
+            pygame.mixer.music.play(-1)
+        enemies.append(aircraft.Moth(width, height, INITIAL_AIRCRAFT_Y, moth_images))
+    else:
+        enemies.append(aircraft.EnemyAircraft(width, height, INITIAL_AIRCRAFT_Y, image))
 
 for i in range(enemy_count):
     spawn_enemy()
@@ -53,6 +59,8 @@ while running:
                 bullets.append(new_bomb)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
             spawn_enemy(INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5, image=pygame.transform.scale(enemy_image, (INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5)))
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+            spawn_enemy(moth=True)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
             for enemy in enemies:
                 enemy.fall()

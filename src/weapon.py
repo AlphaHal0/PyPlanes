@@ -1,8 +1,9 @@
 from entity import Entity
 import pygame
 import images
+from random import random
 from particle import Particle
-from constants import BULLET_VELOCITY, BOMB_Y_VELOCITY_GAIN, BOMB_X_VELOCITY_DECAY, BOMB_TERMINAL_VELOCITY
+from constants import BULLET_VELOCITY, BOMB_Y_VELOCITY_GAIN, BOMB_X_VELOCITY_DECAY, BOMB_TERMINAL_VELOCITY, BERRY_BOMB_CHANCE
 
 class Weapon(Entity):
     def __init__(self, x: int = 0, y: int = 0, image: pygame.Surface|None = None, is_enemy: bool = False, explosion_power: int = 0, velocity_x: int = 0, velocity_y: int = 0):
@@ -38,7 +39,11 @@ class Bullet(Weapon):
 
 class Bomb(Weapon):
     def __init__(self, x: int, y: int, is_enemy: bool = False, velocity_x: int = 5, velocity_y: int = 0, drag_multiplier: float = 0.1, explosion_power: int = 0):
-        super().__init__(x, y, images.bomb_image, is_enemy, explosion_power, velocity_x, velocity_y + BOMB_Y_VELOCITY_GAIN)
+        if random() <= BERRY_BOMB_CHANCE:
+            image = images.blueberry
+        else:
+            image = images.bomb_image
+        super().__init__(x, y, image, is_enemy, explosion_power, velocity_x, velocity_y + BOMB_Y_VELOCITY_GAIN)
         self.drag_multiplier = drag_multiplier
         
     def update_position(self):

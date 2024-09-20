@@ -34,3 +34,5 @@ for i in range(8):
         scale_image(load_image(f"easteregg/moth/frame_{i}.png"), (200, 200)))
 
 bomb_image = flip_image(scale_image(load_image("weapons/bombs/British/GP-1000lb-MK-IV.png"), (74, 18)))
+
+blueberry = scale_image(load_image("easteregg/blueberry.png"), (50, 50))
