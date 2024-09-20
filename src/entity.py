@@ -1,21 +1,16 @@
 import pygame
 from constants import SCREEN_HEIGHT
-import images
+from sprite import Sprite
 
 class Entity:
-    def __init__(self, rect: pygame.Rect, gravity: int, sprite: pygame.Surface | list | None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, animation_time: int = 5):
-        self.rect = rect
-        self.gravity = gravity
+    def __init__(self, sprite: Sprite = Sprite(), x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0):
+        self.rect = pygame.Rect((x, y), sprite.size)
         self.sprite = sprite
         self.velocity_x = velocity_x
         self.velocity_y = velocity_y
         self.x, self.y = x, y
+        self.width, self.height = sprite.size
         self.alive = True
-        self.is_animated = isinstance(sprite, list)
-        if self.is_animated:
-            self.anim_time = animation_time
-            self.anim_frame = 0
-            self.anim_frame_count = len(sprite)-1
     
     def update_position(self) -> None:
         self.x += self.velocity_x
@@ -23,18 +18,7 @@ class Entity:
         self.rect.update((self.x, self.y), self.rect.size)
 
     def draw(self, screen: pygame.Surface) -> None:
-        if self.sprite is None:
-            pygame.draw.rect(screen, (255, 0, 0), self.rect)
-        else:
-            if self.is_animated:
-                frame = self.anim_frame//self.anim_time
-                screen.blit(self.sprite[frame], self.rect)
-                if frame >= self.anim_frame_count:
-                    self.anim_frame = 0
-                else:
-                    self.anim_frame += 1
-            else:
-                screen.blit(self.sprite, self.rect)
+        self.sprite.draw(screen, self.x, self.y)
 
     def destroy(self) -> None:
         self.alive = False

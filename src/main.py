@@ -17,11 +17,12 @@ pygame.mouse.set_visible(False)
 from random import randint, choice, random
 import aircraft
 from particle import Particle
+from sprite import Sprite
 from images import background_image, aircraft_image, enemy_image, large_explosions, small_explosions, moth_images
 
 scroll_x = 0
 
-player = aircraft.Aircraft(INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, aircraft_image, shoot_cooldown=PLAYER_SHOOT_COOLDOWN, bomb_cooldown=PLAYER_BOMB_COOLDOWN, health=INITIAL_HEALTH)
+player = aircraft.Aircraft(INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, Sprite(aircraft_image, size=(INITIAL_AIRCRAFT_WIDTH,INITIAL_AIRCRAFT_HEIGHT)), shoot_cooldown=PLAYER_SHOOT_COOLDOWN, bomb_cooldown=PLAYER_BOMB_COOLDOWN, health=INITIAL_HEALTH)
 enemies = []
 enemy_count = INITIAL_ENEMY_AIRCRAFT
 
@@ -30,9 +31,9 @@ def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT
         if MOTH_MUSIC and not pygame.mixer.music.get_busy():
             pygame.mixer.music.load(f"{ASSET_FOLDER}/easteregg/really_good_soundtrack.mp3", "music_moth")
             pygame.mixer.music.play(-1)
-        enemies.append(aircraft.Moth(width, height, INITIAL_AIRCRAFT_Y, moth_images))
+        enemies.append(aircraft.Moth(INITIAL_AIRCRAFT_Y))
     else:
-        enemies.append(aircraft.EnemyAircraft(width, height, INITIAL_AIRCRAFT_Y, image))
+        enemies.append(aircraft.EnemyAircraft(INITIAL_AIRCRAFT_Y, Sprite(image, size=(width, height))))
 
 for i in range(enemy_count):
     spawn_enemy()
@@ -58,7 +59,7 @@ while running:
             if new_bomb is not None:
                 bullets.append(new_bomb)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
-            spawn_enemy(INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5, image=pygame.transform.scale(enemy_image, (INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5)))
+            spawn_enemy(INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
             spawn_enemy(moth=True)
         elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
@@ -73,9 +74,9 @@ while running:
             particles.append(Particle(
                 player.x, 
                 player.y, 
-                images=choice((large_explosions, small_explosions, moth_images)),
-                duration=randint(60, 500),
-                scale=2,
+                sprite=choice((Sprite(large_explosions), Sprite(small_explosions), Sprite(moth_images))),
+                duration=randint(10, 100),
+                scale=randint(1,5),
                 adjust_pos=False))
 
     if spam_fire:
@@ -109,7 +110,7 @@ while running:
         running = False
 
     if player.falling:
-        particle = player.display_particle(images=small_explosions)
+        particle = player.display_particle(Sprite(small_explosions))
         if particle: particles.append(particle)
 
     enemies = [enemy for enemy in enemies if enemy.alive]
@@ -118,14 +119,14 @@ while running:
         enemy.draw(screen)
         if enemy.ground_collision():
             enemy.destroy()
-            particles.append(Particle(enemy.x, enemy.y, images=large_explosions, duration=400, scale=2, adjust_pos=False))
+            particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(large_explosions), duration=30, scale=2, adjust_pos=False))
             score += 20 if WAVE_MODE else 70
             enemy_count += ENEMY_COUNT_INCREMENT
         if enemy.ai.shoot:
             bullets.append(enemy.shoot())
             enemy.ai.shoot -= 1
         if enemy.falling:
-            particle = enemy.display_particle(images=small_explosions)
+            particle = enemy.display_particle(Sprite(small_explosions))
             if particle: particles.append(particle)
 
     # Spawn all enemies in one go if WAVE_MODE is True, otherwise spawn one enemy to keep up with the count.

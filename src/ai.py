@@ -2,11 +2,11 @@ import random
 from constants import SCREEN_HEIGHT, SCREEN_WIDTH
 
 class BaseAI: # The base AI with no special features.
-    def __init__(self):
+    def __init__(self, size: tuple):
         self.xmin = SCREEN_WIDTH * 0.5
-        self.xmax = SCREEN_WIDTH
+        self.xmax = SCREEN_WIDTH - size[0]
         self.ymin = 0
-        self.ymax = SCREEN_HEIGHT - (0.2 * SCREEN_HEIGHT)
+        self.ymax = SCREEN_HEIGHT - size[1] * 2
         self.speed = 100
         self.target_x = self.xmax
         self.target_y = self.ymax * random.random() + self.ymin
@@ -36,9 +36,9 @@ class Fly(BaseAI): # AI with basic random movements.
         self.constrain()
 
 class Turret(BaseAI): # Move to a random position and shoot.
-    def __init__(self):
+    def __init__(self, size: tuple):
         self.iteration = 0
-        super().__init__()
+        super().__init__(size)
 
     def tick(self):
         if self.iteration == 0:
