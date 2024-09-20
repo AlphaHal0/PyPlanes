@@ -1,5 +1,5 @@
 import pygame
-from constants import FLOOR_Y
+from config import cfg
 from sprite import Sprite
 
 # SEAPLANE - HENRY
@@ -32,4 +32,4 @@ class Entity:
             return pygame.Rect.colliderect(self.rect, rect)
         
     def ground_collision(self) -> bool:
-        return self.y + self.height > FLOOR_Y
+        return self.y + self.height > cfg.floor_y

@@ -1,9 +1,9 @@
 # To Create ENV: py -m venv env
 # To Enter ENV: env/scripts/activate.ps1
 import pygame
-from constants import *
 import keybinds
 import time
+from config import cfg
 
 # Initialize Pygame
 pygame.init()
@@ -11,8 +11,8 @@ pygame.font.init()
        
 font = pygame.font.Font(size=50)
 # Set up the screen
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.mouse.set_visible(MOUSE_VISIBILITY)
+screen = pygame.display.set_mode((cfg.screen_width, cfg.screen_height))
+pygame.mouse.set_visible(cfg.mouse_visibility)
 
 from random import randint, choice, random
 import aircraft
@@ -22,24 +22,24 @@ from images import background_image, aircraft_image, enemy_image, large_explosio
 
 scroll_x = 0
 
-player = aircraft.Aircraft(INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, Sprite(aircraft_image, size=(INITIAL_AIRCRAFT_WIDTH,INITIAL_AIRCRAFT_HEIGHT)), shoot_cooldown=PLAYER_SHOOT_COOLDOWN, bomb_cooldown=PLAYER_BOMB_COOLDOWN, health=INITIAL_HEALTH)
+player = aircraft.Aircraft(cfg.initial_aircraft_x, cfg.initial_aircraft_y, Sprite(aircraft_image, size=(cfg.initial_aircraft_width,cfg.initial_aircraft_height)), shoot_cooldown=cfg.player_shoot_cooldown, bomb_cooldown=cfg.player_bomb_cooldown, health=cfg.initial_health)
 enemies = []
-enemy_count = INITIAL_ENEMY_AIRCRAFT
+enemy_count = cfg.initial_enemy_aircraft
 
-if MOTH_MUSIC_IS_MAIN_MUSIC:
-    pygame.mixer.music.load(f"{ASSET_FOLDER}/easteregg/really_good_soundtrack.mp3", "music_moth")
+if cfg.moth_music_is_main_music:
+    pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
     pygame.mixer.music.play(-1)
 
-def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT, image = enemy_image, moth: bool = False):
-    if (MOTH_CHANCE and random() <= MOTH_CHANCE) or moth:
-        if MOTH_MUSIC and not pygame.mixer.music.get_busy():
-            pygame.mixer.music.load(f"{ASSET_FOLDER}/easteregg/really_good_soundtrack.mp3", "music_moth")
+def spawn_enemy(width = cfg.initial_aircraft_width, height = cfg.initial_aircraft_height, image = enemy_image, moth: bool = False):
+    if (cfg.moth_chance and random() <= cfg.moth_chance) or moth:
+        if cfg.moth_music and not pygame.mixer.music.get_busy():
+            pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
             pygame.mixer.music.play(-1)
-        enemies.append(aircraft.Moth(INITIAL_AIRCRAFT_Y))
+        enemies.append(aircraft.Moth(cfg.initial_aircraft_y))
     else:
-        enemies.append(aircraft.EnemyAircraft(INITIAL_AIRCRAFT_Y, Sprite(image, size=(width, height))))
+        enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image, size=(width, height))))
 
-if not WAVE_MODE:
+if not cfg.wave_mode:
     for i in range(enemy_count):
         spawn_enemy()
 
@@ -49,9 +49,9 @@ particles = []
 score = 0
 spam_fire = False
 wave = 1
-wave_warmup_time = 120 if WAVE_MODE else 0
-wave_mode_text_x = SCREEN_WIDTH
-wave_mode_text_y = SCREEN_HEIGHT // 2 - font.get_height() // 2
+wave_warmup_time = 120 if cfg.wave_mode else 0
+wave_mode_text_x = cfg.screen_width
+wave_mode_text_y = cfg.screen_height // 2 - font.get_height() // 2
 wave_mode_text_opacity = 255
 running = True
 framestart = time.time()
@@ -72,7 +72,7 @@ while running:
             if new_bomb is not None:
                 bullets.append(new_bomb)
         elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_ENEMY:
-            spawn_enemy(INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5)
+            spawn_enemy(cfg.initial_aircraft_width * 5, cfg.initial_aircraft_height * 5)
         elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_MOTH:
             spawn_enemy(moth=True)
         elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_KILL_ALL:
@@ -104,7 +104,7 @@ while running:
     pygame.event.set_grab(True)
 
     # Update scrolling background
-    scroll_x -= SCROLL_SPEED
+    scroll_x -= cfg.scroll_speed
     if scroll_x < -background_image.get_width():
         scroll_x = 0
 
@@ -133,8 +133,8 @@ while running:
         if enemy.ground_collision():
             enemy.destroy()
             particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(large_explosions), duration=30, scale=2, adjust_pos=False))
-            score += 20 if WAVE_MODE else 70
-            enemy_count += ENEMY_COUNT_INCREMENT
+            score += 20 if cfg.wave_mode else 70
+            enemy_count += cfg.enemy_count_increment
         if enemy.ai.shoot:
             bullets.append(enemy.shoot())
             enemy.ai.shoot -= 1
@@ -142,7 +142,7 @@ while running:
             particle = enemy.display_particle(Sprite(small_explosions))
             if particle: particles.append(particle)
 
-    # Spawn all enemies in one go if WAVE_MODE is True, otherwise spawn one enemy to keep up with the count.
+    # Spawn all enemies in one go if cfg.wave_mode is True, otherwise spawn one enemy to keep up with the count.
     if wave_warmup_time:
         wave_warmup_time -= 1
         if wave_warmup_time == 0:
@@ -150,19 +150,19 @@ while running:
             for i in range(to_spawn):
                 spawn_enemy()
 
-    elif len(enemies) < int(enemy_count) and not WAVE_MODE:
+    elif len(enemies) < int(enemy_count) and not cfg.wave_mode:
         spawn_enemy()
 
-    elif len(enemies) == 0 and WAVE_MODE:
+    elif len(enemies) == 0 and cfg.wave_mode:
         score += 50 * to_spawn
         print(f"Wave {wave} complete!")
         wave += 1
         wave_warmup_time = 120
-        wave_mode_text_x = SCREEN_WIDTH
+        wave_mode_text_x = cfg.screen_width
         wave_mode_text_opacity = 255
 
     # Update and draw bullets
-    bullets = [bullet for bullet in bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= SCREEN_WIDTH]
+    bullets = [bullet for bullet in bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= cfg.screen_width]
     for bullet in bullets:
         bullet.update_position()
 
@@ -197,7 +197,7 @@ while running:
 
     health_bar = pygame.Surface((150,10))
     health_bar.fill(0xFF0000)
-    health_bar.fill(0x00FF00, rect=(0,0,(player.health/INITIAL_HEALTH)*150,10)),
+    health_bar.fill(0x00FF00, rect=(0,0,(player.health/cfg.initial_health)*150,10)),
 
     # Draw health bar
     screen.blit(
@@ -207,17 +207,17 @@ while running:
     )
     
     scoredisplay = f"Score {score} | Difficulty {round(enemy_count, 1)}"
-    if WAVE_MODE: 
+    if cfg.wave_mode: 
         scoredisplay += f"| Wave {wave}"
         if wave_mode_text_opacity > 0:
             wavemodedisplay = font.render(f"Wave {wave}", False, (0, 0, 0))
             wavemodedisplay.set_alpha(wave_mode_text_opacity)
             screen.blit(wavemodedisplay, (wave_mode_text_x, wave_mode_text_y))
-            wave_mode_text_x -= SCROLL_SPEED * (wave_mode_text_x / SCREEN_WIDTH - 0.4)
+            wave_mode_text_x -= cfg.scroll_speed * (wave_mode_text_x / cfg.screen_width - 0.4)
             if wave_warmup_time <= 0:
                 wave_mode_text_opacity -= 2
 
-    if SHOW_FPS: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
+    if cfg.show_fps: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
     scoredisplay_render = font.render(scoredisplay, False, (0, 0, 0))
 
     screen.blit(scoredisplay_render, (0, 0))

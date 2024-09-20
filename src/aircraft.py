@@ -1,7 +1,7 @@
 import pygame
 import random
 import particle
-from constants import SCREEN_WIDTH, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER, SHOOT_COOLDOWN, BOMB_COOLDOWN, SPAWN_COOLDOWN, FLOOR_Y, MOTH_MUSIC_IS_MAIN_MUSIC, SHOW_TARGET_TRACES
+from config import cfg
 import ai
 import weapon
 from entity import Entity
@@ -9,7 +9,7 @@ from sprite import Sprite
 import images
 
 class Aircraft(Entity):
-    def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = SHOOT_COOLDOWN, spawn_cooldown: int = SPAWN_COOLDOWN, health: int = 100, bomb_cooldown: int = BOMB_COOLDOWN):
+    def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = cfg.shoot_cooldown, spawn_cooldown: int = cfg.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.bomb_cooldown):
         self.acceleration = 0.8
         self.friction = 0.92
         self.last_shot_time = 0
@@ -71,15 +71,15 @@ class Aircraft(Entity):
         if self.x < 0:
             self.x = 0
             self.velocity_x = 0
-        elif self.x + self.width > SCREEN_WIDTH:
-            self.x = SCREEN_WIDTH - self.width
+        elif self.x + self.width > cfg.screen_width:
+            self.x = cfg.screen_width - self.width
             self.velocity_x = 0
 
         if self.y < 0:
             self.y = 0
             self.velocity_y = 0
-        elif self.y + self.height > FLOOR_Y:
-            self.y = FLOOR_Y - self.height
+        elif self.y + self.height > cfg.floor_y:
+            self.y = cfg.floor_y - self.height
             self.velocity_y = 0
     
     def shoot(self) -> weapon.Bullet | None:
@@ -91,7 +91,7 @@ class Aircraft(Entity):
                 (self.x if self.is_enemy else self.x + self.width),
                 self.y + self.height / 2,
                 self.is_enemy,
-                velocity_x=BULLET_VELOCITY+(self.velocity_x*WEAPON_RELATIVE_VELOCITY_MULTIPLIER))
+                velocity_x=cfg.bullet_velocity+(self.velocity_x*cfg.weapon_relative_velocity_multiplier))
         else:
             return None
     
@@ -114,7 +114,7 @@ class Aircraft(Entity):
 class EnemyAircraft(Aircraft):
     def __init__(self, y: int, sprite: Sprite):
         # Call Aircraft()
-        super().__init__(SCREEN_WIDTH, y, sprite, True, 50)
+        super().__init__(cfg.screen_width, y, sprite, True, 50)
 
         ai_type = random.randint(1, 2)
         size = self.sprite.size
@@ -132,7 +132,7 @@ class EnemyAircraft(Aircraft):
         self.apply_friction()
 
     def draw(self, screen: pygame.Surface) -> None:
-        if SHOW_TARGET_TRACES:
+        if cfg.show_target_traces:
             pygame.draw.line(screen, (255, 0, 0), (self.x, self.y), (self.ai.target_x, self.ai.target_y), 5)
         return super().draw(screen)
 
@@ -141,6 +141,6 @@ class Moth(EnemyAircraft):
         super().__init__(y, Sprite(images.moth_images, animation_time=random.randint(1, 10)))
 
     def destroy(self) -> None:
-        if not MOTH_MUSIC_IS_MAIN_MUSIC:
+        if not cfg.moth_music_is_main_music:
             pygame.mixer.music.fadeout(1000)
         super().destroy()
