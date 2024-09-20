@@ -26,7 +26,7 @@ enemies = []
 enemy_count = INITIAL_ENEMY_AIRCRAFT
 
 def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT, image = enemy_image):
-    enemies.append(aircraft.EnemyAircraft(width, height, INITIAL_AIRCRAFT_Y, image, is_enemy = True))
+    enemies.append(aircraft.EnemyAircraft(width, height, INITIAL_AIRCRAFT_Y, image))
 
 for i in range(enemy_count):
     spawn_enemy()
