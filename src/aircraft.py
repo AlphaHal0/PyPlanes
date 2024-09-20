@@ -1,7 +1,7 @@
 import pygame
 import random
 import particle
-from constants import SCREEN_HEIGHT, SCREEN_WIDTH, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER, SHOOT_COOLDOWN, BOMB_COOLDOWN, SPAWN_COOLDOWN
+from constants import SCREEN_WIDTH, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER, SHOOT_COOLDOWN, BOMB_COOLDOWN, SPAWN_COOLDOWN, FLOOR_Y
 import ai
 import weapon
 from entity import Entity
@@ -9,7 +9,7 @@ from sprite import Sprite
 import images
 
 class Aircraft(Entity):
-    def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = SHOOT_COOLDOWN, spawn_cooldown: int = SPAWN_COOLDOWN, health: int = 100, bomb_cooldown: int = BOMB_COOLDOWN, velocity_x: int = 0, velocity_y : int = 0):
+    def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = SHOOT_COOLDOWN, spawn_cooldown: int = SPAWN_COOLDOWN, health: int = 100, bomb_cooldown: int = BOMB_COOLDOWN):
         self.acceleration = 0.8
         self.friction = 0.92
         self.last_shot_time = 0
@@ -23,7 +23,7 @@ class Aircraft(Entity):
         self.last_particle_time = 0
         self.health = health
         self.bomb_cooldown = bomb_cooldown
-        super().__init__(sprite, x, y, velocity_x, velocity_y)
+        super().__init__(sprite, x, y)
 
     def update_position(self) -> None:
         if self.falling:
@@ -78,8 +78,8 @@ class Aircraft(Entity):
         if self.y < 0:
             self.y = 0
             self.velocity_y = 0
-        elif self.y + self.height > SCREEN_HEIGHT:
-            self.y = SCREEN_HEIGHT - self.height
+        elif self.y + self.height > FLOOR_Y:
+            self.y = FLOOR_Y - self.height
             self.velocity_y = 0
     
     def shoot(self) -> weapon.Bullet | None:

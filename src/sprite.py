@@ -1,5 +1,6 @@
 import pygame
 import images
+from constants import DISABLE_SPRITE_TEXTURES, SHOW_SPRITE_SIZES
 
 class Sprite:
     def __init__(self, image: pygame.Surface|list[pygame.Surface]|None = None, animation_time: int = 1, size: tuple|None = None, size_multiplier: int = 1) -> None:
@@ -17,11 +18,16 @@ class Sprite:
             else:
                 size = (100, 100)
 
-        self.size = (size[0] * size_multiplier, size[1] * size_multiplier)
+        if image: self.set_size(size, size_multiplier)
 
     def draw(self, screen: pygame.Surface, x: int, y: int, loop: bool = True) -> bool:
+        if SHOW_SPRITE_SIZES:
+            pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))
+            
+        if DISABLE_SPRITE_TEXTURES: return False
+
         if self.image is None:
-            pygame.draw.rect(screen, (255, 0, 0), ((x,y), self.size))
+            pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))
         else:
             if self.is_animated:
                 frame = self.anim_frame//self.anim_time
@@ -30,9 +36,9 @@ class Sprite:
                     else: return False
                 else:
                     self.anim_frame += 1
-                screen.blit(self.image[frame], ((x,y), self.size))
+                    screen.blit(self.image[frame], ((x,y), self.size))
             else:
-                screen.blit(self.image, ((x,y), self.size))
+                    screen.blit(self.image, ((x,y), self.size))
 
         return True
     
@@ -49,3 +55,14 @@ class Sprite:
             self.image = image
         else:
             self.image = pygame.transform.rotate(self.image, angle)
+
+    def scale(self, size: tuple):
+        if self.is_animated:
+            image = list(map(lambda x: pygame.transform.scale(x, size), self.image))
+            self.image = image
+        else:
+            self.image = pygame.transform.scale(self.image, size)
+
+    def set_size(self, size: tuple, size_multiplier: float = 1):
+        self.size = (size[0] * size_multiplier, size[1] * size_multiplier)
+        self.scale(self.size)

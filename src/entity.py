@@ -30,4 +30,4 @@ class Entity:
             return pygame.Rect.colliderect(self.rect, rect)
         
     def ground_collision(self) -> bool:
-        return self.y + self.rect.height > FLOOR_Y
+        return self.y + self.height > FLOOR_Y
