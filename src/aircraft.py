@@ -1,13 +1,13 @@
 import pygame
 import random
 import particle
-from constants import SCREEN_HEIGHT, SCREEN_WIDTH, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER
+from constants import SCREEN_HEIGHT, SCREEN_WIDTH, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER, SHOOT_COOLDOWN, BOMB_COOLDOWN, SPAWN_COOLDOWN
 import ai
 import weapon
 from entity import Entity
 
 class Aircraft(Entity):
-    def __init__(self, width: int, height: int, x: int, y: int, image: pygame.Surface, is_enemy: bool = False, shoot_cooldown: int = 400, spawn_cooldown: int = 1000, health: int = 100, bomb_cooldown: int = 200, velocity_x: int = 0, velocity_y : int = 0):
+    def __init__(self, width: int, height: int, x: int, y: int, image: pygame.Surface, is_enemy: bool = False, shoot_cooldown: int = SHOOT_COOLDOWN, spawn_cooldown: int = SPAWN_COOLDOWN, health: int = 100, bomb_cooldown: int = BOMB_COOLDOWN, velocity_x: int = 0, velocity_y : int = 0):
         self.width = width
         self.height = height
         self.acceleration = 0.8
