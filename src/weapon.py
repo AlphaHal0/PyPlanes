@@ -47,5 +47,5 @@ class Bomb(Weapon):
         
     def update_position(self):
         super().update_position()
-        self.velocity_x -= cfg.bomb_x_velocity_gain // (1 + self.velocity_x * self.drag_multiplier)
+        self.velocity_x -= cfg.bomb_x_velocity_decay // (1 + self.velocity_x * self.drag_multiplier)
         self.velocity_y += cfg.bomb_y_velocity_gain * (1 + self.velocity_y / cfg.bomb_terminal_velocity)
