@@ -28,7 +28,7 @@ class Weapon(Entity):
         self.destroy()
 
         if self.explosion_power:
-            return Particle(self.x, self.y, sprite=Sprite(images.large_explosions, size = (self.explosion_power * 50)*2), duration=20 * self.explosion_power)
+            return Particle(self.x, self.y, sprite=Sprite(images.large_explosions, size_multiplier=self.explosion_power), duration=20 * self.explosion_power)
         else:
             return Particle(self.x, self.y, sprite=Sprite(images.small_explosions), duration=10)
 

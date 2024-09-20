@@ -46,4 +46,4 @@ BERRY_BOMB_CHANCE = 0.001
 # Debug (some of these options may be slow)
 SHOW_TARGET_TRACES = False
 DISABLE_SPRITE_TEXTURES = False
-SHOW_SPRITE_SIZES = False
+SHOW_SPRITE_SIZES = True
