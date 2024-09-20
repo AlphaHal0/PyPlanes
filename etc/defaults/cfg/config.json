@@ -28,7 +28,7 @@
   "moth_music": true,
   "moth_music_is_main_music": false,
   "berry_bomb_chance": 0.005,
-  "show_fps": true,
+  "show_fps": false,
   "debug_invincible": false,
   "show_target_traces": false,
   "disable_sprite_textures": false,

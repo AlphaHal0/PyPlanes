@@ -11,13 +11,17 @@ def copy_missing_configs(source: str, dest: str):
         with open(dest, 'w') as _d: json.dump(infile, _d)
         return
     
+    has_any_changed = False
+    
     for key, value in infile.items():
         try:
             outfile[key]
         except KeyError:
             outfile[key] = value
+            has_any_changed = True
     
-    with open(dest, 'w') as _s: json.dump(outfile, _s)
+    if has_any_changed:
+        with open(dest, 'w') as _s: json.dump(outfile, _s)
 
 copy_missing_configs("etc/defaults/cfg/config.json", "cfg/config.json")
 
