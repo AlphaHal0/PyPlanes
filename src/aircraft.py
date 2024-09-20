@@ -1,7 +1,7 @@
 import pygame
 import random
 import particle
-from constants import SCREEN_WIDTH, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER, SHOOT_COOLDOWN, BOMB_COOLDOWN, SPAWN_COOLDOWN, FLOOR_Y, MOTH_MUSIC_IS_MAIN_MUSIC
+from constants import SCREEN_WIDTH, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER, SHOOT_COOLDOWN, BOMB_COOLDOWN, SPAWN_COOLDOWN, FLOOR_Y, MOTH_MUSIC_IS_MAIN_MUSIC, SHOW_TARGET_TRACES
 import ai
 import weapon
 from entity import Entity
@@ -130,6 +130,11 @@ class EnemyAircraft(Aircraft):
 
         self.update_position()
         self.apply_friction()
+
+    def draw(self, screen: pygame.Surface) -> None:
+        if SHOW_TARGET_TRACES:
+            pygame.draw.line(screen, (255, 0, 0), (self.x, self.y), (self.ai.target_x, self.ai.target_y), 5)
+        return super().draw(screen)
 
 class Moth(EnemyAircraft):
     def __init__(self, y: int):
