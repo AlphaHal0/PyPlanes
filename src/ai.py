@@ -1,12 +1,12 @@
 import random
-from constants import SCREEN_HEIGHT, SCREEN_WIDTH
+from constants import FLOOR_Y, SCREEN_WIDTH
 
 class BaseAI: # The base AI with no special features.
     def __init__(self, size: tuple):
         self.xmin = SCREEN_WIDTH * 0.5
         self.xmax = SCREEN_WIDTH - size[0]
         self.ymin = 0
-        self.ymax = SCREEN_HEIGHT - size[1] * 2
+        self.ymax = FLOOR_Y - size[1]
         self.speed = 100
         self.target_x = self.xmax
         self.target_y = self.ymax * random.random() + self.ymin

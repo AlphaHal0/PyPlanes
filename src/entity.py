@@ -1,5 +1,5 @@
 import pygame
-from constants import SCREEN_HEIGHT
+from constants import FLOOR_Y
 from sprite import Sprite
 
 class Entity:
@@ -30,4 +30,4 @@ class Entity:
             return pygame.Rect.colliderect(self.rect, rect)
         
     def ground_collision(self) -> bool:
-        return self.y + self.rect.height > SCREEN_HEIGHT - (0.12 * SCREEN_HEIGHT)
+        return self.y + self.rect.height > FLOOR_Y
