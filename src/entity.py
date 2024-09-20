@@ -9,14 +9,13 @@ class Entity:
         self.sprite = sprite
         self.velocity_x = velocity_x
         self.velocity_y = velocity_y
-        self.x = x
-        self.y = y
+        self.x, self.y = x, y
         self.alive = True
     
     def update_position(self) -> None:
-        self.rect.move_ip(self.velocity_x, self.velocity_y)
         self.x += self.velocity_x
         self.y += self.velocity_y
+        self.rect.update((self.x, self.y), self.rect.size)
 
     def draw(self, screen: pygame.Surface) -> None:
         if self.sprite is None:

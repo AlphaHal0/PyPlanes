@@ -21,7 +21,7 @@ enemy_image = scale_image(load_image("planes/enemies/enemy_lvl_1.png"),(SCREEN_W
 large_explosions = []
 for i in range(4):
     large_explosions.append(
-        scale_image(load_image(f"particle/fire/large-{i+1}.png"), (200, 200)))
+        scale_image(load_image(f"particle/fire/large-{i+1}.png"), (50, 50)))
 
 small_explosions = []
 for i in range(4):

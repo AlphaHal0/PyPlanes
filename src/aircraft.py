@@ -29,9 +29,7 @@ class Aircraft(Entity):
         if self.falling:
             self.velocity_y = max(2, self.velocity_y) # clamp the velocity so the aircraft is always falling
 
-        self.x += self.velocity_x
-        self.y += self.velocity_y
-        self.rect.update((self.x, self.y), (self.width, self.height))
+        super().update_position()
 
     def apply_friction(self) -> None:
         self.velocity_x *= self.friction
@@ -107,7 +105,8 @@ class Aircraft(Entity):
                 (self.x + self.width // 2),
                 self.y + self.height,
                 self.is_enemy,
-                self.velocity_x
+                self.velocity_x,
+                explosion_power=random.randint(1,10)
             )
         else:
             return None

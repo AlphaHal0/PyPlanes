@@ -66,7 +66,9 @@ while running:
                 player.x, 
                 player.y, 
                 images=choice((large_explosions, small_explosions, moth_images)),
-                duration=randint(60, 500)))
+                duration=randint(60, 500),
+                scale=2,
+                adjust_pos=False))
 
     if spam_fire:
         new_bullet = player.shoot()
@@ -108,7 +110,7 @@ while running:
         enemy.draw(screen)
         if enemy.ground_collision():
             enemy.destroy()
-            particles.append(Particle(enemy.x, enemy.y, images=large_explosions, duration=400))
+            particles.append(Particle(enemy.x, enemy.y, images=large_explosions, duration=400, scale=2, adjust_pos=False))
             score += 20 if WAVE_MODE else 70
             enemy_count += ENEMY_COUNT_INCREMENT
         if enemy.ai.shoot:
@@ -137,26 +139,21 @@ while running:
             if bullet.is_colliding(player.rect):
                 player.health -= 10
                 player.check_health()
-                bullet.destroy()
+                particles.append(bullet.explode())
         else:
             collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])
             if collided_aircraft > -1:
                 if enemies[collided_aircraft].fall(): score += 30
-                bullet.destroy() # delete bullet
+                particles.append(bullet.explode()) # delete bullet
                 
             # NOT EFFICIENT: I'm sure there's a better way than this
             for i in bullets:
                 if bullet.is_colliding_entity(i): # Allow bullets to collide
-                    particles.append(Particle(bullet.x+10, bullet.y, images=small_explosions, duration=100))
-                    bullet.destroy()
-                    i.destroy()
+                    particles.append(bullet.explode())
+                    i.explode()
 
         if bullet.ground_collision():
-            if bullet.explosion_power:
-                particles.append(Particle(bullet.x, bullet.y-100, images=large_explosions, duration=1000))
-            else:
-                particles.append(Particle(bullet.x+10, bullet.y, images=small_explosions, duration=100))
-            bullet.destroy()
+            particles.append(bullet.explode())
                 
         bullet.draw(screen)
 
