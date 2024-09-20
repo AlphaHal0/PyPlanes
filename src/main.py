@@ -1,7 +1,8 @@
 # To Create ENV: py -m venv env
 # To Enter ENV: env/scripts/activate.ps1
 import pygame
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, INITIAL_AIRCRAFT_WIDTH, INITIAL_AIRCRAFT_HEIGHT, INITIAL_AIRCRAFT_X, INITIAL_AIRCRAFT_Y, PLAYER_SHOOT_COOLDOWN, INITIAL_HEALTH, INITIAL_ENEMY_AIRCRAFT, SCROLL_SPEED, WAVE_MODE, ENEMY_COUNT_INCREMENT, SHOW_FPS, PLAYER_BOMB_COOLDOWN, ASSET_FOLDER, MOTH_MUSIC, MOTH_CHANCE, MOTH_MUSIC_IS_MAIN_MUSIC
+from constants import *
+import keybinds
 import time
 
 # Initialize Pygame
@@ -11,7 +12,7 @@ pygame.font.init()
 font = pygame.font.Font(size=50)
 # Set up the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(MOUSE_VISIBILITY)
 
 from random import randint, choice, random
 import aircraft
@@ -56,29 +57,33 @@ running = True
 framestart = time.time()
 while running:
     for event in pygame.event.get():
-        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE):
+        if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == keybinds.QUIT):
             running = False
-        elif event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:  # Left mouse button
+        elif event.type == keybinds.SHOOT and event.button == 1:  # Left mouse button
             new_bullet = player.shoot()
             if new_bullet is not None:
                 bullets.append(new_bullet)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+        elif event.type == pygame.KEYDOWN and event.key == keybinds.SHOOT_2:
+            new_bullet = player.shoot()
+            if new_bullet is not None:
+                bullets.append(new_bullet)
+        elif event.type == pygame.KEYDOWN and event.key == keybinds.BOMB:
             new_bomb = player.bomb()
             if new_bomb is not None:
                 bullets.append(new_bomb)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_l:
+        elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_ENEMY:
             spawn_enemy(INITIAL_AIRCRAFT_WIDTH * 5, INITIAL_AIRCRAFT_HEIGHT * 5)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_c:
+        elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_MOTH:
             spawn_enemy(moth=True)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_m:
+        elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_KILL_ALL:
             for enemy in enemies:
                 enemy.fall()
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_n:
+        elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_RAPID_FIRE:
             if spam_fire:
                 spam_fire = False
             else:
                 spam_fire = True
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_p:
+        elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_PARTICLE:
             particles.append(Particle(
                 player.x, 
                 player.y, 
@@ -93,7 +98,7 @@ while running:
             bullets.append(new_bullet)
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_b]:
+    if keys[keybinds.RAPID_FIRE]:
         bullets.append(player.shoot())
 
     pygame.event.set_grab(True)

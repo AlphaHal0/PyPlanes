@@ -2,6 +2,8 @@ import pygame
 from constants import FLOOR_Y
 from sprite import Sprite
 
+# SEAPLANE - HENRY
+
 class Entity:
     def __init__(self, sprite: Sprite = Sprite(), x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0):
         self.rect = pygame.Rect((x, y), sprite.size)
