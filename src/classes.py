@@ -1,7 +1,7 @@
 import pygame
 import random
 from images import bullet_image, bomb_image, moth_images
-from constants import SCREEN_WIDTH, SCREEN_HEIGHT, BOMB_VELOCITY_DECAY, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER
+from constants import SCREEN_WIDTH, SCREEN_HEIGHT, BOMB_X_VELOCITY_DECAY, BOMB_Y_VELOCITY_GAIN, BOMB_TERMINAL_VELOCITY, BULLET_VELOCITY, WEAPON_RELATIVE_VELOCITY_MULTIPLIER, SCROLL_SPEED
 
 class Aircraft:
     def __init__(self, width, height, x, y, image, is_enemy = False, shoot_cooldown = 400, spawn_cooldown = 1000, health=100, bomb_cooldown = 200):
@@ -218,9 +218,12 @@ class Entity:
             return pygame.Rect.collidelist(self.rect, rect)
         else:    
             return pygame.Rect.colliderect(self.rect, rect)
+        
+    def ground_collision(self):
+        return self.y + self.rect.height > SCREEN_HEIGHT - (0.12 * SCREEN_HEIGHT)
 
 class Weapon(Entity):
-    def __init__(self, x, y, image: pygame.Surface, is_enemy: bool = False):
+    def __init__(self, x, y, image: pygame.Surface, is_enemy: bool = False, explosion_power: int = 0):
         image = image
         if is_enemy:
             image = pygame.transform.flip(image, True, False)
@@ -228,6 +231,7 @@ class Weapon(Entity):
         self.is_enemy = is_enemy
         self.x = x
         self.y = y
+        self.explosion_power = explosion_power
 
         super().__init__(rect, 0, image)
 
@@ -239,7 +243,7 @@ class Weapon(Entity):
         return super().is_colliding(other.rect)
 
 class Bullet(Weapon):
-    def __init__(self, x, y, is_enemy=False, velocity=BULLET_VELOCITY):
+    def __init__(self, x, y, is_enemy = False, velocity = BULLET_VELOCITY):
         super().__init__(x, y, bullet_image, is_enemy)
 
         if is_enemy:
@@ -252,14 +256,18 @@ class Bullet(Weapon):
         self.x += self.velocity
 
 class Bomb(Weapon):
-    def __init__(self, x, y, is_enemy = False, fall_velocity = 5, velocity_x = 5):
-        super().__init__(x, y, bomb_image, is_enemy)
-        self.fall_velocity = fall_velocity
+    def __init__(self, x, y, is_enemy = False, velocity_y = 0, velocity_x = 5, drag_multiplier = 0.1, explosion_power = 1):
+        super().__init__(x, y, bomb_image, is_enemy, explosion_power)
+        self.velocity_y = velocity_y + BOMB_Y_VELOCITY_GAIN
         self.velocity_x = velocity_x
+        self.drag_multiplier = drag_multiplier
         
     def update_position(self):
-        self.rect.move_ip(self.velocity_x, self.fall_velocity)
-        self.velocity_x // BOMB_VELOCITY_DECAY
+        self.rect.move_ip(self.velocity_x, self.velocity_y)
+        self.x += self.velocity_x
+        self.y += self.velocity_y
+        self.velocity_x -= BOMB_X_VELOCITY_DECAY // (self.velocity_x * self.drag_multiplier)
+        self.velocity_y += BOMB_Y_VELOCITY_GAIN * (1 + self.velocity_y / BOMB_TERMINAL_VELOCITY)
     
 class Particle:
     def __init__(self, x, y, image=None, images=None, duration=60) -> None:

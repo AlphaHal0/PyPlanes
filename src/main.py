@@ -149,6 +149,13 @@ while running:
                     particles.append(Particle(bullet.x+10, bullet.y, images=small_explosions, duration=100))
                     bullet.destroy()
                     i.destroy()
+
+        if bullet.ground_collision():
+            if bullet.explosion_power:
+                particles.append(Particle(bullet.x+10, bullet.y, images=large_explosions, duration=100))
+            else:
+                particles.append(Particle(bullet.x+10, bullet.y, images=small_explosions, duration=100))
+            bullet.destroy()
                 
         bullet.draw(screen)
 
