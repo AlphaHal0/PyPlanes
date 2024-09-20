@@ -38,8 +38,9 @@ def spawn_enemy(width = INITIAL_AIRCRAFT_WIDTH, height = INITIAL_AIRCRAFT_HEIGHT
     else:
         enemies.append(aircraft.EnemyAircraft(INITIAL_AIRCRAFT_Y, Sprite(image, size=(width, height))))
 
-for i in range(enemy_count):
-    spawn_enemy()
+if not WAVE_MODE:
+    for i in range(enemy_count):
+        spawn_enemy()
 
 # Game loop
 bullets = []
@@ -47,6 +48,10 @@ particles = []
 score = 0
 spam_fire = False
 wave = 1
+wave_warmup_time = 120 if WAVE_MODE else 0
+wave_mode_text_x = SCREEN_WIDTH
+wave_mode_text_y = SCREEN_HEIGHT // 2 - font.get_height() // 2
+wave_mode_text_opacity = 255
 running = True
 framestart = time.time()
 while running:
@@ -133,14 +138,23 @@ while running:
             if particle: particles.append(particle)
 
     # Spawn all enemies in one go if WAVE_MODE is True, otherwise spawn one enemy to keep up with the count.
-    if (len(enemies) < int(enemy_count) and not WAVE_MODE) or (len(enemies) == 0 and WAVE_MODE):
-        to_spawn = int(enemy_count) if WAVE_MODE else 1
-        if WAVE_MODE: 
-            score += 50 * to_spawn
-            print(f"Wave {wave} complete!")
-            wave += 1
-        for i in range(to_spawn):
-            spawn_enemy()
+    if wave_warmup_time:
+        wave_warmup_time -= 1
+        if wave_warmup_time == 0:
+            to_spawn = int(enemy_count)
+            for i in range(to_spawn):
+                spawn_enemy()
+
+    elif len(enemies) < int(enemy_count) and not WAVE_MODE:
+        spawn_enemy()
+
+    elif len(enemies) == 0 and WAVE_MODE:
+        score += 50 * to_spawn
+        print(f"Wave {wave} complete!")
+        wave += 1
+        wave_warmup_time = 120
+        wave_mode_text_x = SCREEN_WIDTH
+        wave_mode_text_opacity = 255
 
     # Update and draw bullets
     bullets = [bullet for bullet in bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= SCREEN_WIDTH]
@@ -186,10 +200,18 @@ while running:
         (player.x+(player.width//2-80),
          player.y-player.height)
     )
-
     
     scoredisplay = f"Score {score} | Difficulty {round(enemy_count, 1)}"
-    if WAVE_MODE: scoredisplay += f"| Wave {wave}"
+    if WAVE_MODE: 
+        scoredisplay += f"| Wave {wave}"
+        if wave_mode_text_opacity > 0:
+            wavemodedisplay = font.render(f"Wave {wave}", False, (0, 0, 0))
+            wavemodedisplay.set_alpha(wave_mode_text_opacity)
+            screen.blit(wavemodedisplay, (wave_mode_text_x, wave_mode_text_y))
+            wave_mode_text_x -= SCROLL_SPEED * (wave_mode_text_x / SCREEN_WIDTH - 0.4)
+            if wave_warmup_time <= 0:
+                wave_mode_text_opacity -= 2
+
     if SHOW_FPS: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
     scoredisplay_render = font.render(scoredisplay, False, (0, 0, 0))
 
