@@ -62,7 +62,7 @@ while running:
             new_bullet = player.shoot()
             if new_bullet is not None:
                 bullets.append(new_bullet)
-        elif event.type == pygame.KEYDOWN and event.key == pygame.K_b:
+        elif event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             new_bomb = player.bomb()
             if new_bomb is not None:
                 bullets.append(new_bomb)
@@ -93,7 +93,7 @@ while running:
             bullets.append(new_bullet)
 
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_SPACE]:
+    if keys[pygame.K_b]:
         bullets.append(player.shoot())
 
     pygame.event.set_grab(True)
