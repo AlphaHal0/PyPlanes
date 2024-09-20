@@ -9,7 +9,6 @@ pygame.init()
 pygame.font.init()
        
 font = pygame.font.Font(size=50)
-
 # Set up the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.mouse.set_visible(False)
