@@ -34,14 +34,21 @@ if cfg.moth_music_is_main_music:
     pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
     pygame.mixer.music.play(-1)
 
-def spawn_enemy(image: pygame.Surface = im.enemy_image, difficulty: float = 1, moth: bool = False):
+def spawn_enemy(image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False):
     if (cfg.moth_chance and random() <= cfg.moth_chance) or moth:
         if cfg.moth_music and not pygame.mixer.music.get_busy():
             pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
             pygame.mixer.music.play(-1)
-        enemies.append(aircraft.Moth(cfg.initial_aircraft_y, int(difficulty)))
+        enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
     else:
-        enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image), int(difficulty)))
+        type = randint(1, min(4, difficulty))
+        if image is None:
+            match type:
+                case 1: image = im.enemy_1_image
+                case 2: image = im.enemy_2_image
+                case 3: image = im.enemy_3_image
+                case 4: image = im.enemy_4_image
+        enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image), difficulty, ai_type=type))
 
 if not cfg.wave_mode:
     for i in range(enemy_count):
@@ -98,9 +105,9 @@ while running:
                 if new_bomb is not None:
                     bullets.append(new_bomb)
             elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_ENEMY:
-                spawn_enemy(difficulty=enemy_count)
+                spawn_enemy(difficulty=int(enemy_count))
             elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_MOTH:
-                spawn_enemy(moth=True, difficulty=enemy_count)
+                spawn_enemy(moth=True, difficulty=int(enemy_count))
             elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_KILL_ALL:
                 for enemy in enemies:
                     enemy.fall()
@@ -178,10 +185,10 @@ while running:
             if wave_warmup_time == 0:
                 to_spawn = int(enemy_count)
                 for i in range(to_spawn):
-                    spawn_enemy(difficulty=enemy_count)
+                    spawn_enemy(difficulty=int(enemy_count))
 
         elif len(enemies) < int(enemy_count) and not cfg.wave_mode:
-            spawn_enemy(difficulty=enemy_count)
+            spawn_enemy(difficulty=int(enemy_count))
 
         elif len(enemies) == 0 and cfg.wave_mode:
             score += 50 * to_spawn

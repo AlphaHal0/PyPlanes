@@ -25,7 +25,12 @@ bullet_image = scale_image(bullet_image, sz['bullet_image'])
 background_image = scale_image(load_image("sky/side-scroll.jpg"), sz['background_image'])
 
 aircraft_image = scale_image(load_image("planes/player/spitfire.png"), sz['aircraft_image'])
-enemy_image = scale_image(load_image("planes/enemies/enemy_lvl_1.png"), sz['enemy_image'])
+
+enemy_1_image = scale_image(load_image("planes/enemies/enemy_lvl_1.png"), sz['enemy_image'])
+enemy_2_image = scale_image(load_image("planes/enemies/enemy_lvl_2.png"), sz['enemy_image'])
+enemy_3_image = scale_image(load_image("planes/enemies/enemy_lvl_3.png"), sz['enemy_image'])
+enemy_4_image = scale_image(load_image("planes/enemies/enemy_lvl_4.png"), sz['enemy_image'])
+enemy_5_image = scale_image(load_image("planes/enemies/enemy_lvl_5.png"), sz['enemy_image'])
 
 large_explosions = []
 for i in range(4):
