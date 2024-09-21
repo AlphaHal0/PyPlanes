@@ -42,8 +42,8 @@ class Fly(BaseAI): # AI with basic random movements.
 class Turret(BaseAI): # Move to a random position and shoot.
     debug_color = 0x00FF00
     def __init__(self, size: tuple, difficulty: int):
-        self.iteration = 0
         super().__init__(size, difficulty)
+        self.iteration = 0
 
     def tick(self, ctx: dict):
         if self.iteration == 0:
@@ -59,9 +59,9 @@ class Turret(BaseAI): # Move to a random position and shoot.
 class Dodger(BaseAI): # Avoid player bullets.
     debug_color = 0xFFFF00
     def __init__(self, size: tuple, difficulty: int):
+        super().__init__(size, difficulty)
         self.max_shoot_time = cfg.shoot_cooldown * max(1, 5 - difficulty//5)
         self.shoot_time = self.max_shoot_time
-        super().__init__(size, difficulty)
 
     def tick(self, ctx: dict):
         c = 0
@@ -81,3 +81,20 @@ class Dodger(BaseAI): # Avoid player bullets.
             if abs(self.target_y-i) < 100:
                 return True
         return False
+    
+class Offence(BaseAI): # Follow the player.
+    debug_color = 0x0000FF
+    def __init__(self, size: tuple, difficulty: int):
+        super().__init__(size, difficulty)
+        self.max_shoot_time = cfg.shoot_cooldown * max(1, 5 - difficulty//5)
+        self.shoot_time = self.max_shoot_time
+        self.target_x = random.randint(int(self.xmin), int(self.xmax))
+
+    def tick(self, ctx: dict):
+        self.target_y = ctx['player_y']
+
+        if self.shoot_time == 0:
+            self.shoot += 1
+            self.shoot_time = self.max_shoot_time
+        else:
+            self.shoot_time -= 1

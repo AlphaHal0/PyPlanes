@@ -153,7 +153,7 @@ while running:
 
         enemies = [enemy for enemy in enemies if enemy.alive]
         for enemy in enemies:
-            enemy.ai_tick(danger_zones=enemy_ai_danger_zones)
+            enemy.ai_tick(danger_zones=enemy_ai_danger_zones, player_y=player.y)
             enemy.draw(screen)
             if enemy.ground_collision():
                 enemy.destroy()
