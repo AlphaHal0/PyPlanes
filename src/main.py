@@ -19,71 +19,65 @@ from particle import Particle
 from sprite import Sprite
 import images as im
 from button import Button
-
-BG = pygame.image.load(f"{cfg.asset_folder}/Background.png")
-
-
-
-if cfg.moth_music_is_main_music:
-    pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
-    pygame.mixer.music.play(-1)
     
 def get_font(size): # Returns Press-Start-2P in the desired size
     return pygame.font.Font()
 
 def options():
     while True:
-        OPTIONS_MOUSE_POS = pygame.mouse.get_pos()
+        options_mouse_pos = pygame.mouse.get_pos()
 
         screen.fill("white")
 
-        OPTIONS_TEXT = get_font(45).render("This is the OPTIONS screen.", True, "Black")
-        OPTIONS_RECT = OPTIONS_TEXT.get_rect(center=(640, 260))
-        screen.blit(OPTIONS_TEXT, OPTIONS_RECT)
+        options_text = get_font(45).render("This is the OPTIONS screen.", True, "Black")
+        options_rect = options_text.get_rect(center=(640, 260))
+        screen.blit(options_text, options_rect)
 
-        OPTIONS_BACK = Button(image=None, pos=(640, 460), 
+        options_back = Button(image=None, pos=(640, 460), 
                             text_input="BACK", font=get_font(75), base_color="Black", hovering_color="Green")
 
-        OPTIONS_BACK.changeColor(OPTIONS_MOUSE_POS)
-        OPTIONS_BACK.update(screen)
+        options_back.changeColor(options_mouse_pos)
+        options_back.update(screen)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
-                if OPTIONS_BACK.checkForInput(OPTIONS_MOUSE_POS):
+                if options_back.checkForInput(options_mouse_pos):
                     main_menu()
 
         pygame.display.update()
         
-enemies = []
-enemy_count = cfg.initial_enemy_aircraft
-
-def spawn_enemy(image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False):
-    if (cfg.moth_chance and random() <= cfg.moth_chance) or moth:
-        if cfg.moth_music and not pygame.mixer.music.get_busy():
-            pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
-            pygame.mixer.music.play(-1)
-        enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
-    else:
-        type = randint(1, min(4, difficulty))
-        if image is None:
-            match type:
-                case 1: image = im.enemy_1_image
-                case 2: image = im.enemy_2_image
-                case 3: image = im.enemy_3_image
-                case 4: image = im.enemy_4_image
-        enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image), difficulty, ai_type=type))
-
-if not cfg.wave_mode:
-    for i in range(enemy_count):
-        spawn_enemy()
-
-
-        
 # Game loop
 def play():
+    if cfg.moth_music_is_main_music:
+        pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
+        pygame.mixer.music.play(-1)
+
+    enemies = []
+    enemy_count = cfg.initial_enemy_aircraft
+
+    def spawn_enemy(image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False):
+        if (cfg.moth_chance and random() <= cfg.moth_chance) or moth:
+            if cfg.moth_music and not pygame.mixer.music.get_busy():
+                pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
+                pygame.mixer.music.play(-1)
+            enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
+        else:
+            type = randint(1, min(4, difficulty))
+            if image is None:
+                match type:
+                    case 1: image = im.enemy_1_image
+                    case 2: image = im.enemy_2_image
+                    case 3: image = im.enemy_3_image
+                    case 4: image = im.enemy_4_image
+            enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image), difficulty, ai_type=type))
+
+    if not cfg.wave_mode:
+        for i in range(enemy_count):
+            spawn_enemy()
+
     scroll_x = 0
     player = aircraft.Aircraft(
         cfg.initial_aircraft_x, 
@@ -331,7 +325,7 @@ def play():
 
 def main_menu():
     while True:
-        screen.blit(BG, (0, 0))
+        screen.blit(im.menu_background_image, (0, 0))
 
         MENU_MOUSE_POS = pygame.mouse.get_pos()
 
