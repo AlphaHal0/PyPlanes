@@ -46,6 +46,7 @@ if not cfg.wave_mode:
 # Game loop
 bullets = []
 particles = []
+enemy_ai_danger_zones = []
 score = 0
 spam_fire = False
 wave = 1
@@ -128,7 +129,7 @@ while running:
 
     enemies = [enemy for enemy in enemies if enemy.alive]
     for enemy in enemies:
-        enemy.ai_tick()
+        enemy.ai_tick(danger_zones=enemy_ai_danger_zones)
         enemy.draw(screen)
         if enemy.ground_collision():
             enemy.destroy()
@@ -141,6 +142,11 @@ while running:
         if enemy.falling:
             particle = enemy.display_particle(Sprite(small_explosions))
             if particle: particles.append(particle)
+
+        if cfg.show_ai_type:
+            ai_marker = pygame.Surface((10,10))
+            ai_marker.fill(enemy.ai.debug_color)
+            screen.blit(ai_marker, (enemy.x+enemy.sprite.size[0], enemy.y))
 
     # Spawn all enemies in one go if cfg.wave_mode is True, otherwise spawn one enemy to keep up with the count.
     if wave_warmup_time:
@@ -163,6 +169,7 @@ while running:
 
     # Update and draw bullets
     bullets = [bullet for bullet in bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= cfg.screen_width]
+    enemy_ai_danger_zones = []
     for bullet in bullets:
         bullet.update_position()
 
@@ -182,6 +189,8 @@ while running:
                 if bullet.is_colliding_entity(i): # Allow bullets to collide
                     particles.append(bullet.explode())
                     i.explode()
+
+            enemy_ai_danger_zones.append(bullet.y)
 
         if bullet.ground_collision():
             particles.append(bullet.explode())

@@ -12,9 +12,9 @@ class Aircraft(Entity):
     def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = cfg.shoot_cooldown, spawn_cooldown: int = cfg.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.bomb_cooldown):
         self.acceleration = 0.8
         self.friction = 0.92
-        self.last_shot_time = 0
-        self.last_bomb_time = 0
-        self.shoot_cooldown = shoot_cooldown
+        self.shoot_cooldown = 0
+        self.bomb_cooldown = 0
+        self.max_shoot_cooldown = shoot_cooldown
         self.spawn_cooldown = spawn_cooldown
         self.time_of_spawn = pygame.time.get_ticks()
         self.alive = True
@@ -22,10 +22,13 @@ class Aircraft(Entity):
         self.is_enemy = is_enemy
         self.last_particle_time = 0
         self.health = health
-        self.bomb_cooldown = bomb_cooldown
+        self.max_bomb_cooldown = bomb_cooldown
         super().__init__(sprite, x, y)
 
     def update_position(self) -> None:
+        if self.shoot_cooldown: self.shoot_cooldown -= 1
+        if self.bomb_cooldown: self.bomb_cooldown -= 1
+
         if self.falling:
             self.velocity_y = max(2, self.velocity_y) # clamp the velocity so the aircraft is always falling
 
@@ -83,10 +86,8 @@ class Aircraft(Entity):
             self.velocity_y = 0
     
     def shoot(self) -> weapon.Bullet | None:
-        current_time = pygame.time.get_ticks()
-
-        if current_time - self.last_shot_time > self.shoot_cooldown:
-            self.last_shot_time = current_time
+        if self.shoot_cooldown <= 0:
+            self.shoot_cooldown = self.max_shoot_cooldown
             return weapon.Bullet(
                 (self.x if self.is_enemy else self.x + self.width),
                 self.y + self.height / 2,
@@ -96,10 +97,8 @@ class Aircraft(Entity):
             return None
     
     def bomb(self) -> weapon.Bomb | None:
-        current_time = pygame.time.get_ticks()
-        
-        if current_time - self.last_bomb_time > self.bomb_cooldown:
-            self.last_bomb_time = current_time
+        if self.bomb_cooldown <= 0:
+            self.bomb_cooldown = self.max_bomb_cooldown
             return weapon.Bomb(
                 (self.x + self.width // 2),
                 self.y + self.height,
@@ -116,15 +115,16 @@ class EnemyAircraft(Aircraft):
         # Call Aircraft()
         super().__init__(cfg.screen_width, y, sprite, True, 50)
 
-        ai_type = random.randint(1, 2)
+        ai_type = random.randint(1, 3)
         size = self.sprite.size
 
         if ai_type == 1: self.ai = ai.Fly(size)
         elif ai_type == 2: self.ai = ai.Turret(size)
+        elif ai_type == 3: self.ai = ai.Dodger(size)
         else: self.ai = ai.BaseAI(size)
 
-    def ai_tick(self):
-        self.ai.tick()
+    def ai_tick(self, **ctx):
+        self.ai.tick(ctx)
 
         self.apply_acceleration(self.ai.target_x, self.ai.target_y, trackable_distance=50)
 
