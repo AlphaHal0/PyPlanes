@@ -119,7 +119,7 @@ while running:
     player.update_position()
     player.apply_friction()
 
-    if player.ground_collision():
+    if player.ground_collision() and not cfg.debug_invincible:
         print("Player hit the floor. Game over.")
         running = False
 
@@ -176,7 +176,7 @@ while running:
         if bullet.is_enemy:
             if bullet.is_colliding(player.rect):
                 player.health -= 10
-                player.check_health()
+                if not cfg.debug_invincible: player.check_health()
                 particles.append(bullet.explode())
         else:
             collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])
