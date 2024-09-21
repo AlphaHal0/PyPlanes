@@ -1,6 +1,8 @@
 import json
 import os
 
+if not os.path.exists("./cfg"): os.mkdir("./cfg")
+
 def copy_missing_configs(source: str, dest: str):
     with open(source, 'r') as _s: infile = json.load(_s)
     

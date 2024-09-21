@@ -4,8 +4,12 @@ from config import cfg
 
 class Sprite:
     def __init__(self, image: pygame.Surface|list[pygame.Surface]|None = None, animation_time: int = 1, size: tuple|None = None, size_multiplier: int = 1) -> None:
-        self.image = image
+        self.base_image = image
         self.is_animated = isinstance(image, list)
+        self.rotation = 0
+        self.size = size
+        self.flip_x = False
+        self.flip_y = False
 
         if self.is_animated:
             if not size: size = image[0].get_size()
@@ -19,6 +23,33 @@ class Sprite:
                 size = (100, 100)
 
         if image: self.set_size(size, size_multiplier)
+
+    def update(self):
+        if self.is_animated:
+            image = []
+            for i in self.base_image:
+                image.append(pygame.transform.rotate(
+                    pygame.transform.flip(
+                        pygame.transform.scale(
+                            i,
+                            self.size
+                        ),
+                        self.flip_x, self.flip_y
+                    ),
+                    self.rotation
+                ))
+            self.image = image
+        else:
+            self.image = pygame.transform.rotate(
+                pygame.transform.flip(
+                    pygame.transform.scale(
+                        self.base_image,
+                        self.size
+                    ),
+                    self.flip_x, self.flip_y
+                ),
+                self.rotation
+            )
 
     def draw(self, screen: pygame.Surface, x: int, y: int, loop: bool = True) -> bool:
         if cfg.show_sprite_sizes:
@@ -42,27 +73,18 @@ class Sprite:
 
         return True
     
-    def flip(self, flip_x: bool = True, flip_y: bool = False):
-        if self.is_animated:
-            image = list(map(lambda x: images.flip_image(x, flip_x, flip_y), self.image))
-            self.image = image
-        else:
-            self.image = images.flip_image(self.image, flip_x, flip_y)
+    def flip(self, flip_x: bool = True, flip_y: bool = False, no_update: bool = False):
+        self.flip_x, self.flip_y = flip_x, flip_y
+        if not no_update: self.update()
 
-    def rotate(self, angle: float):
-        if self.is_animated:
-            image = list(map(lambda x: pygame.transform.rotate(x, angle), self.image))
-            self.image = image
-        else:
-            self.image = pygame.transform.rotate(self.image, angle)
+    def rotate(self, angle: float, no_update: bool = False):
+        self.rotation = angle
+        if not no_update: self.update()
 
-    def scale(self, size: tuple):
-        if self.is_animated:
-            image = list(map(lambda x: pygame.transform.scale(x, size), self.image))
-            self.image = image
-        else:
-            self.image = pygame.transform.scale(self.image, size)
+    def scale(self, size: tuple, no_update: bool = False):
+        self.scale = size,
+        if not no_update: self.update()
 
-    def set_size(self, size: tuple, size_multiplier: float = 1):
+    def set_size(self, size: tuple, size_multiplier: float = 1, no_update: bool = False):
         self.size = (size[0] * size_multiplier, size[1] * size_multiplier)
-        self.scale(self.size)
+        self.scale(self.size, no_update=no_update)

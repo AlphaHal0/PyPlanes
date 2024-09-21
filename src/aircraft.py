@@ -23,6 +23,7 @@ class Aircraft(Entity):
         self.last_particle_time = 0
         self.health = health
         self.max_bomb_cooldown = bomb_cooldown
+        self.pitch = 0
         super().__init__(sprite, x, y)
 
     def update_position(self) -> None:
@@ -33,6 +34,15 @@ class Aircraft(Entity):
             self.velocity_y = max(2, self.velocity_y) # clamp the velocity so the aircraft is always falling
 
         super().update_position()
+
+    def set_pitch(self, value: int = 0) -> int:
+        if value != self.pitch:
+            self.sprite.rotate(self.pitch)
+            if self.pitch > value:
+                self.pitch -= 1
+            else:
+                self.pitch += 1
+        return self.pitch
 
     def apply_friction(self) -> None:
         self.velocity_x *= self.friction
