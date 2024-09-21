@@ -40,5 +40,11 @@ class Entity:
         else:    
             return pygame.Rect.colliderect(self.rect, rect)
         
+    def distance_to(self, x: int, y: int):
+        dx = min(abs(x - self.x), abs(x - (self.x + self.width)))**2
+        dy = min(abs(y - self.y), abs(y - (self.y + self.height)))**2
+
+        return math.sqrt(dx+dy)
+        
     def ground_collision(self) -> bool:
         return self.y + self.height > cfg.floor_y

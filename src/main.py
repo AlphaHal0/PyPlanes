@@ -20,7 +20,13 @@ from sprite import Sprite
 import images as im
 
 scroll_x = 0
-player = aircraft.Aircraft(cfg.initial_aircraft_x, cfg.floor_y, Sprite(im.aircraft_image), shoot_cooldown=cfg.player_shoot_cooldown, bomb_cooldown=cfg.player_bomb_cooldown, health=cfg.initial_health)
+player = aircraft.Aircraft(
+    cfg.initial_aircraft_x, 
+    cfg.initial_aircraft_y if cfg.disable_takeoff else cfg.floor_y, 
+    Sprite(im.aircraft_image), 
+    shoot_cooldown=cfg.player_shoot_cooldown, 
+    bomb_cooldown=cfg.player_bomb_cooldown, 
+    health=cfg.initial_health)
 enemies = []
 enemy_count = cfg.initial_enemy_aircraft
 
@@ -195,23 +201,23 @@ while running:
                 if bullet.is_colliding(player.rect):
                     player.health -= 10
                     if not cfg.debug_invincible: player.check_health()
-                    particles.append(bullet.explode())
+                    particles.append(bullet.explode(enemies))
             else:
                 collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])
                 if collided_aircraft > -1:
                     if enemies[collided_aircraft].fall(): score += 30
-                    particles.append(bullet.explode()) # delete bullet
+                    particles.append(bullet.explode(enemies)) # delete bullet
                     
                 # NOT EFFICIENT: I'm sure there's a better way than this
                 for i in bullets:
                     if bullet.is_colliding_entity(i): # Allow bullets to collide
-                        particles.append(bullet.explode())
+                        particles.append(bullet.explode(enemies))
                         i.explode()
 
                 enemy_ai_danger_zones.append(bullet.y)
 
             if bullet.ground_collision():
-                particles.append(bullet.explode())
+                particles.append(bullet.explode(enemies))
                     
             bullet.draw(screen)
 

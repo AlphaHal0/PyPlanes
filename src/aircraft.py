@@ -118,7 +118,7 @@ class Aircraft(Entity):
                 self.y + self.height,
                 self.is_enemy,
                 self.velocity_x,
-                explosion_power=random.randint(1,10),
+                explosion_power=random.randint(4,6),
                 rotation=self.pitch
             )
         else:

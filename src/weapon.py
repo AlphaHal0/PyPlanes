@@ -4,6 +4,7 @@ from random import random
 from particle import Particle
 from sprite import Sprite
 from config import cfg
+import pygame
 
 class Weapon(Entity):
     def __init__(self, x: int = 0, y: int = 0, sprite: Sprite = Sprite(), is_enemy: bool = False, explosion_power: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0):
@@ -23,10 +24,13 @@ class Weapon(Entity):
         
         return super().is_colliding(other.rect)
     
-    def explode(self) -> Particle:
+    def explode(self, entities: list = []) -> Particle:
         self.destroy()
 
         if self.explosion_power:
+            for i in entities:
+                if i.distance_to(self.x, self.y) < self.explosion_power * 30:
+                    i.fall()
             return Particle(self.x, self.y, sprite=Sprite(images.large_explosions, size_multiplier=self.explosion_power), duration=20 * self.explosion_power)
         else:
             return Particle(self.x, self.y, sprite=Sprite(images.small_explosions), duration=10)
