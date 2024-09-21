@@ -12,7 +12,6 @@ pygame.font.init()
 font = pygame.font.Font(size=50)
 # Set up the screen
 screen = pygame.display.set_mode((cfg.screen_width, cfg.screen_height))
-pygame.mouse.set_visible(cfg.mouse_visibility)
 
 from random import random, randint, choice
 import aircraft
@@ -60,6 +59,7 @@ if cfg.disable_takeoff:
     scroll_speed = cfg.scroll_speed
     pregame_timer = 0
     wave_mode_text_opacity = 255
+    pygame.mouse.set_visible(cfg.mouse_visibility)
 else:
     wave_warmup_time = 0
     pregame_timer = 300
@@ -229,6 +229,7 @@ while running:
             wave_warmup_time = 120 if cfg.wave_mode else 0
             wave_mode_text_opacity = 255
             scroll_speed = cfg.scroll_speed
+            pygame.mouse.set_visible(cfg.mouse_visibility)
 
 
     particles = [particle for particle in particles if particle.alive]
@@ -253,7 +254,7 @@ while running:
     if cfg.wave_mode: 
         scoredisplay += f"| Wave {wave}"
         if wave_mode_text_opacity > 0:
-            wavemodedisplay = font.render(f"Wave {wave}", False, (0, 0, 0))
+            wavemodedisplay = font.render(f"Wave {wave}", False, 0)
             wavemodedisplay.set_alpha(wave_mode_text_opacity)
             screen.blit(wavemodedisplay, (wave_mode_text_x, wave_mode_text_y))
             wave_mode_text_x -= cfg.scroll_speed * (wave_mode_text_x / cfg.screen_width - 0.4)
@@ -261,7 +262,7 @@ while running:
                 wave_mode_text_opacity -= 2
 
     if cfg.show_fps: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
-    scoredisplay_render = font.render(scoredisplay, False, (0, 0, 0))
+    scoredisplay_render = font.render(scoredisplay, False, 0)
 
     screen.blit(scoredisplay_render, (0, 0))
 
