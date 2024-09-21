@@ -14,15 +14,15 @@ font = pygame.font.Font(size=50)
 screen = pygame.display.set_mode((cfg.screen_width, cfg.screen_height))
 pygame.mouse.set_visible(cfg.mouse_visibility)
 
-from random import randint, choice, random
+from random import random, randint, choice
 import aircraft
 from particle import Particle
 from sprite import Sprite
-from images import background_image, aircraft_image, enemy_image, large_explosions, small_explosions, moth_images
+import images as im
 
 scroll_x = 0
 
-player = aircraft.Aircraft(cfg.initial_aircraft_x, cfg.initial_aircraft_y, Sprite(aircraft_image, size=(cfg.initial_aircraft_width,cfg.initial_aircraft_height)), shoot_cooldown=cfg.player_shoot_cooldown, bomb_cooldown=cfg.player_bomb_cooldown, health=cfg.initial_health)
+player = aircraft.Aircraft(cfg.initial_aircraft_x, cfg.initial_aircraft_y, Sprite(im.aircraft_image), shoot_cooldown=cfg.player_shoot_cooldown, bomb_cooldown=cfg.player_bomb_cooldown, health=cfg.initial_health)
 enemies = []
 enemy_count = cfg.initial_enemy_aircraft
 
@@ -30,14 +30,14 @@ if cfg.moth_music_is_main_music:
     pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
     pygame.mixer.music.play(-1)
 
-def spawn_enemy(width = cfg.initial_aircraft_width, height = cfg.initial_aircraft_height, image = enemy_image, moth: bool = False):
+def spawn_enemy(image = im.enemy_image, moth: bool = False):
     if (cfg.moth_chance and random() <= cfg.moth_chance) or moth:
         if cfg.moth_music and not pygame.mixer.music.get_busy():
             pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
             pygame.mixer.music.play(-1)
         enemies.append(aircraft.Moth(cfg.initial_aircraft_y))
     else:
-        enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image, size=(width, height))))
+        enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image)))
 
 if not cfg.wave_mode:
     for i in range(enemy_count):
@@ -88,7 +88,7 @@ while running:
             particles.append(Particle(
                 player.x, 
                 player.y, 
-                sprite=choice((Sprite(large_explosions), Sprite(small_explosions), Sprite(moth_images))),
+                sprite=choice((Sprite(im.large_explosions), Sprite(im.small_explosions), Sprite(im.moth_images))),
                 duration=randint(10, 100),
                 scale=randint(1,5),
                 adjust_pos=False))
@@ -114,12 +114,12 @@ while running:
 
     # Update scrolling background
     scroll_x -= cfg.scroll_speed
-    if scroll_x < -background_image.get_width():
+    if scroll_x < -im.background_image.get_width():
         scroll_x = 0
 
     # Draw background
-    screen.blit(background_image, (scroll_x, 0))
-    screen.blit(background_image, (scroll_x + background_image.get_width(), 0))
+    screen.blit(im.background_image, (scroll_x, 0))
+    screen.blit(im.background_image, (scroll_x + im.background_image.get_width(), 0))
 
     # Update aircraft position and check for collisions
     target_x, target_y = pygame.mouse.get_pos()
@@ -132,7 +132,7 @@ while running:
         running = False
 
     if player.falling:
-        particle = player.display_particle(Sprite(small_explosions))
+        particle = player.display_particle(Sprite(im.small_explosions))
         if particle: particles.append(particle)
 
     enemies = [enemy for enemy in enemies if enemy.alive]
@@ -141,14 +141,14 @@ while running:
         enemy.draw(screen)
         if enemy.ground_collision():
             enemy.destroy()
-            particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(large_explosions), duration=30, scale=2, adjust_pos=False))
+            particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.large_explosions), duration=30, scale=2, adjust_pos=False))
             score += 20 if cfg.wave_mode else 70
             enemy_count += cfg.enemy_count_increment
         if enemy.ai.shoot:
             bullets.append(enemy.shoot())
             enemy.ai.shoot -= 1
         if enemy.falling:
-            particle = enemy.display_particle(Sprite(small_explosions))
+            particle = enemy.display_particle(Sprite(im.small_explosions))
             if particle: particles.append(particle)
 
         if cfg.show_ai_type:

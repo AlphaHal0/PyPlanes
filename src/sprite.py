@@ -1,5 +1,4 @@
 import pygame
-import images
 from config import cfg
 
 class Sprite:

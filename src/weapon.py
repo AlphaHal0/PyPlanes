@@ -1,5 +1,4 @@
 from entity import Entity
-import pygame
 import images
 from random import random
 from particle import Particle

@@ -1,5 +1,3 @@
-import pygame
-import images as im
 from sprite import Sprite
 
 class Particle:
