@@ -17,6 +17,8 @@
     "bomb_image": 0.025,
     "blueberry": 0.0625
   },
+  "title_font_size": 100,
+  "font_size": 100,
   "bullet_velocity": 20,
   "weapon_relative_velocity_multiplier": 0.2,
   "bomb_x_velocity_decay": 0.05,
