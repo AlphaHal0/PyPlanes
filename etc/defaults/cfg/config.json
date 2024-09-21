@@ -3,12 +3,18 @@
   "screen_height": 800,
   "scroll_speed_ratio": 0.01,
   "floor_y_ratio": 0.12,
-  "initial_aircraft_width_ratio": 0.1,
-  "initial_aircraft_height_ratio": 0.05,
   "initial_aircraft_x_ratio": 0.1,
   "initial_aircraft_y_ratio": 0.45,
   "sprite_sizes": {
-
+    "bullet_image": 0.025,
+    "background_image": [1, 1],
+    "aircraft_image": 0.05,
+    "enemy_image": 0.05,
+    "large_explosions": 0.05,
+    "small_explosions": 0.05,
+    "moth_images": 0.07,
+    "bomb_image": 0.025,
+    "blueberry": 0.0625
   },
   "bullet_velocity": 20,
   "weapon_relative_velocity_multiplier": 0.2,
