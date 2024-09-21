@@ -1,6 +1,7 @@
 {
   "screen_width": 1800,
   "screen_height": 800,
+  "disable_takeoff": false,
   "scroll_speed_ratio": 0.01,
   "floor_y_ratio": 0.12,
   "initial_aircraft_x_ratio": 0.1,
