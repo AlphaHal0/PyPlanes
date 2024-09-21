@@ -3,13 +3,13 @@ import images
 from config import cfg
 
 class Sprite:
-    def __init__(self, image: pygame.Surface|list[pygame.Surface]|None = None, animation_time: int = 1, size: tuple|None = None, size_multiplier: int = 1) -> None:
+    def __init__(self, image: pygame.Surface|list[pygame.Surface]|None = None, animation_time: int = 1, size: tuple|None = None, size_multiplier: int = 1, rotation: int = 0, flip_x: bool = False, flip_y: bool = False) -> None:
         self.base_image = image
         self.is_animated = isinstance(image, list)
-        self.rotation = 0
+        self.rotation = rotation
         self.size = size
-        self.flip_x = False
-        self.flip_y = False
+        self.flip_x = flip_x
+        self.flip_y = flip_y
 
         if self.is_animated:
             if not size: size = image[0].get_size()

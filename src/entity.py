@@ -1,15 +1,24 @@
 import pygame
 from config import cfg
 from sprite import Sprite
-
-# SEAPLANE - HENRY
+import math
 
 class Entity:
-    def __init__(self, sprite: Sprite = Sprite(), x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0):
+    def __init__(self, sprite: Sprite = Sprite(), x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True):
         self.rect = pygame.Rect((x, y), sprite.size)
         self.sprite = sprite
-        self.velocity_x = velocity_x
-        self.velocity_y = velocity_y
+        if rotation: self.sprite.rotate(rotation)
+
+        if adj_velocity_for_rot and rotation:
+            # Rotate the velocity to the rotation angle using maths
+            rad = -rotation * (math.pi / 180)
+            sr = math.sin(rad)
+            cr = math.cos(rad)
+            self.velocity_x = velocity_x * cr - velocity_y * sr
+            self.velocity_y = velocity_x * sr + velocity_y * cr
+        else:
+            self.velocity_x = velocity_x
+            self.velocity_y = velocity_y
         self.x, self.y = x, y
         self.width, self.height = sprite.size
         self.alive = True

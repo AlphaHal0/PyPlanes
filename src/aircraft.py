@@ -105,7 +105,8 @@ class Aircraft(Entity):
                 (self.x if self.is_enemy else self.x + self.width),
                 self.y + self.height / 2,
                 self.is_enemy,
-                velocity_x=cfg.bullet_velocity+(self.velocity_x*cfg.weapon_relative_velocity_multiplier))
+                velocity_x=cfg.bullet_velocity+(self.velocity_x*cfg.weapon_relative_velocity_multiplier),
+                rotation=self.pitch)
         else:
             return None
     
@@ -117,7 +118,8 @@ class Aircraft(Entity):
                 self.y + self.height,
                 self.is_enemy,
                 self.velocity_x,
-                explosion_power=random.randint(1,10)
+                explosion_power=random.randint(1,10),
+                rotation=self.pitch
             )
         else:
             return None
