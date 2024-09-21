@@ -151,7 +151,7 @@ while running:
             enemy.draw(screen)
             if enemy.ground_collision():
                 enemy.destroy()
-                particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.large_explosions), duration=30, scale=2, adjust_pos=False))
+                particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.large_explosions), duration=40, scale=3, adjust_pos=False))
                 score += 20 if cfg.wave_mode else 70
                 enemy_count += cfg.enemy_count_increment
             if enemy.ai.shoot:

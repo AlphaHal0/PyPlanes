@@ -2,6 +2,7 @@ from sprite import Sprite
 
 class Particle:
     def __init__(self, x: int = 0, y: int = 0, sprite: Sprite = Sprite(), duration: int = 60, scale: float = 1, adjust_pos: bool = True) -> None:
+        if scale != 1: sprite.set_size(size_multiplier=scale)
         self.sprite = sprite
         self.width, self.height = sprite.size
 

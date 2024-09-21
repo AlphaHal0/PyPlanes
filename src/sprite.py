@@ -6,7 +6,6 @@ class Sprite:
         self.base_image = image
         self.is_animated = isinstance(image, list)
         self.rotation = rotation
-        self.size = size
         self.flip_x = flip_x
         self.flip_y = flip_y
 
@@ -21,6 +20,7 @@ class Sprite:
             else:
                 size = (100, 100)
 
+        self.base_size = size
         if image: self.set_size(size, size_multiplier)
 
     def update(self):
@@ -80,10 +80,10 @@ class Sprite:
         self.rotation = angle
         if not no_update: self.update()
 
-    def scale(self, size: tuple, no_update: bool = False):
-        self.scale = size,
-        if not no_update: self.update()
-
-    def set_size(self, size: tuple, size_multiplier: float = 1, no_update: bool = False):
-        self.size = (size[0] * size_multiplier, size[1] * size_multiplier)
-        self.scale(self.size, no_update=no_update)
+    def set_size(self, size: tuple|None = None, size_multiplier: float = 1, no_update: bool = False):
+        if size is None:
+            self.size = (self.base_size[0] * size_multiplier, self.base_size[1] * size_multiplier)
+        else:
+            self.base_size = size    
+            self.size = (size[0] * size_multiplier, size[1] * size_multiplier)
+        self.update()
