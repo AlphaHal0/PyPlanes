@@ -92,6 +92,14 @@ while running:
                 duration=randint(10, 100),
                 scale=randint(1,5),
                 adjust_pos=False))
+            
+        # pitch
+        elif event.type == pygame.KEYDOWN and event.key == keybinds.PITCH_UP:
+            player.set_pitch(20)
+        elif event.type == pygame.KEYDOWN and event.key == keybinds.PITCH_DOWN:
+            player.set_pitch(-20)
+        elif event.type == pygame.KEYUP and (event.key == keybinds.PITCH_UP or event.key == keybinds.PITCH_DOWN):
+            player.set_pitch(0)
 
     if spam_fire:
         new_bullet = player.shoot()

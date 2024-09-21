@@ -24,11 +24,19 @@ class Aircraft(Entity):
         self.health = health
         self.max_bomb_cooldown = bomb_cooldown
         self.pitch = 0
+        self.target_pitch = 0
         super().__init__(sprite, x, y)
 
     def update_position(self) -> None:
         if self.shoot_cooldown: self.shoot_cooldown -= 1
         if self.bomb_cooldown: self.bomb_cooldown -= 1
+
+        if self.target_pitch != self.pitch:
+            self.sprite.rotate(self.pitch)
+            if self.pitch > self.target_pitch:
+                self.pitch -= 1
+            else:
+                self.pitch += 1
 
         if self.falling:
             self.velocity_y = max(2, self.velocity_y) # clamp the velocity so the aircraft is always falling
@@ -36,12 +44,7 @@ class Aircraft(Entity):
         super().update_position()
 
     def set_pitch(self, value: int = 0) -> int:
-        if value != self.pitch:
-            self.sprite.rotate(self.pitch)
-            if self.pitch > value:
-                self.pitch -= 1
-            else:
-                self.pitch += 1
+        self.target_pitch = value
         return self.pitch
 
     def apply_friction(self) -> None:
