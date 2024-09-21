@@ -30,14 +30,14 @@ if cfg.moth_music_is_main_music:
     pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
     pygame.mixer.music.play(-1)
 
-def spawn_enemy(image = im.enemy_image, moth: bool = False):
+def spawn_enemy(image: pygame.Surface = im.enemy_image, difficulty: float = 1, moth: bool = False):
     if (cfg.moth_chance and random() <= cfg.moth_chance) or moth:
         if cfg.moth_music and not pygame.mixer.music.get_busy():
             pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
             pygame.mixer.music.play(-1)
-        enemies.append(aircraft.Moth(cfg.initial_aircraft_y))
+        enemies.append(aircraft.Moth(cfg.initial_aircraft_y, int(difficulty)))
     else:
-        enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image)))
+        enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image), int(difficulty)))
 
 if not cfg.wave_mode:
     for i in range(enemy_count):
@@ -73,9 +73,9 @@ while running:
             if new_bomb is not None:
                 bullets.append(new_bomb)
         elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_ENEMY:
-            spawn_enemy(cfg.initial_aircraft_width * 5, cfg.initial_aircraft_height * 5)
+            spawn_enemy(difficulty=enemy_count)
         elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_MOTH:
-            spawn_enemy(moth=True)
+            spawn_enemy(moth=True, difficulty=enemy_count)
         elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_KILL_ALL:
             for enemy in enemies:
                 enemy.fall()
@@ -162,10 +162,10 @@ while running:
         if wave_warmup_time == 0:
             to_spawn = int(enemy_count)
             for i in range(to_spawn):
-                spawn_enemy()
+                spawn_enemy(difficulty=enemy_count)
 
     elif len(enemies) < int(enemy_count) and not cfg.wave_mode:
-        spawn_enemy()
+        spawn_enemy(difficulty=enemy_count)
 
     elif len(enemies) == 0 and cfg.wave_mode:
         score += 50 * to_spawn

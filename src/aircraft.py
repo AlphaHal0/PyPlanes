@@ -126,14 +126,14 @@ class Aircraft(Entity):
 
 # Create a new AI aircraft that inherits properties from Aircraft.
 class EnemyAircraft(Aircraft):
-    def __init__(self, y: int, sprite: Sprite):
+    def __init__(self, y: int, sprite: Sprite, difficulty: int = 1):
         # Call Aircraft()
         super().__init__(cfg.screen_width, y, sprite, True, 50)
 
-        ai_type = random.randint(1, 3)
+        ai_type = random.randint(1, min(3, difficulty))
         size = self.sprite.size
 
-        if ai_type == 1: self.ai = ai.Fly(size)
+        if ai_type == 1: self.ai = ai.Fly(size, difficulty)
         elif ai_type == 2: self.ai = ai.Turret(size)
         elif ai_type == 3: self.ai = ai.Dodger(size)
         else: self.ai = ai.BaseAI(size)
@@ -152,8 +152,8 @@ class EnemyAircraft(Aircraft):
         return super().draw(screen)
 
 class Moth(EnemyAircraft):
-    def __init__(self, y: int):
-        super().__init__(y, Sprite(images.moth_images, animation_time=random.randint(1, 10)))
+    def __init__(self, y: int, difficulty: int = 1):
+        super().__init__(y, Sprite(images.moth_images, animation_time=random.randint(1, 10)), difficulty)
 
     def destroy(self) -> None:
         if not cfg.moth_music_is_main_music:

@@ -3,8 +3,9 @@ from config import cfg
 
 class BaseAI: # The base AI with no special features.
     debug_color = 0x000000
-    def __init__(self, size: tuple):
+    def __init__(self, size: tuple, difficulty: int):
         self.speed = 100
+        self.difficulty = difficulty
         self.xmin = cfg.screen_width * 0.5
         self.xmax = cfg.screen_width - size[0] - 10
         self.ymin = 0
@@ -40,9 +41,9 @@ class Fly(BaseAI): # AI with basic random movements.
 
 class Turret(BaseAI): # Move to a random position and shoot.
     debug_color = 0x00FF00
-    def __init__(self, size: tuple):
+    def __init__(self, size: tuple, difficulty: int):
         self.iteration = 0
-        super().__init__(size)
+        super().__init__(size, difficulty)
 
     def tick(self, ctx: dict):
         if self.iteration == 0:
@@ -57,10 +58,10 @@ class Turret(BaseAI): # Move to a random position and shoot.
 
 class Dodger(BaseAI): # Avoid player bullets.
     debug_color = 0xFFFF00
-    def __init__(self, size: tuple):
-        self.max_shoot_time = cfg.shoot_cooldown * 4
+    def __init__(self, size: tuple, difficulty: int):
+        self.max_shoot_time = cfg.shoot_cooldown * max(1, 5 - difficulty//5)
         self.shoot_time = self.max_shoot_time
-        super().__init__(size)
+        super().__init__(size, difficulty)
 
     def tick(self, ctx: dict):
         c = 0
