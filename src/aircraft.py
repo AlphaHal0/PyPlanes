@@ -134,8 +134,8 @@ class EnemyAircraft(Aircraft):
         size = self.sprite.size
 
         if ai_type == 1: self.ai = ai.Fly(size, difficulty)
-        elif ai_type == 2: self.ai = ai.Turret(size)
-        elif ai_type == 3: self.ai = ai.Dodger(size)
+        elif ai_type == 2: self.ai = ai.Turret(size, difficulty)
+        elif ai_type == 3: self.ai = ai.Dodger(size, difficulty)
         else: self.ai = ai.BaseAI(size)
 
     def ai_tick(self, **ctx):
