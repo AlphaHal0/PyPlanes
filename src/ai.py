@@ -4,7 +4,6 @@ from config import cfg
 class BaseAI: # The base AI with no special features.
     debug_color = 0x000000
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
-    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         self.speed = 100
         self.fire_rate = fire_rate
         self.fire_rate = fire_rate
