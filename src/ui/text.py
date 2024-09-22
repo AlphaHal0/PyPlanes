@@ -19,14 +19,17 @@ class Text(UIElement):
         self.render = self.font.render(self.content, False, self.color)
     
     def set_color(self, color: pygame.Color):
+        if color == self.color: return
         self.color = color
         self.reload()
 
     def set_content(self, content: str):
+        if content == self.content: return
         self.content = content
         self.reload()
 
     def set_size(self, size: int):
+        if size == self.size: return
         self.font = pygame.font.Font(size=size)
         self.size = size
         self.reload()

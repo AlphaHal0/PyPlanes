@@ -37,26 +37,31 @@ class ConfigCategory:
     def __init__(self) -> None:
         pass
 
-class ConfigError(Exception):
+class ConfigLoadError(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
 class Config:
     def __init__(self, fp: str = "cfg/config.json"):
+        self.fp = fp
+        self.try_load()
+            
+    def try_load(self, only_once: bool = False):
         try: # try once
-            self.load(fp)
+            self.load()
         except:
+            if only_once: raise ConfigLoadError(e.args)
+            
             try: # remove and try again
-                if os.path.exists(fp): os.remove(fp)
-                self.load(fp)
+                if os.path.exists(self.fp): os.remove(self.fp)
+                self.load()
             except Exception as e: # something's wrong
-                print("Failed to load config")
-                raise ConfigError(e.args)
+                raise ConfigLoadError(e.args)
 
-    def load(self, fp: str):
-        copy_missing_configs(f"etc/defaults/{fp}", fp)
+    def load(self):
+        copy_missing_configs(f"etc/defaults/{self.fp}", self.fp)
 
-        with open(fp) as _infile:
+        with open(self.fp) as _infile:
             d = json.load(_infile)
         
         for category, contents in d.items():
@@ -68,8 +73,8 @@ class Config:
 
         self.d = d
 
-    def save(self, fp: str):
-        with open(fp, 'w') as _outfile:
+    def save(self):
+        with open(self.fp, 'w') as _outfile:
             json.dump(self.d, _outfile)
 
     def set_value(self, category: str, key: str, value = None):
@@ -88,6 +93,10 @@ class Config:
             return True
         else:
             return None
+        
+    def reset(self):
+        if os.path.exists(self.fp): os.remove(self.fp)
+        self.try_load(True)
 
 cfg = Config("cfg/config.json")
 

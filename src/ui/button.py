@@ -8,7 +8,7 @@ import images
 from typing import Callable
 
 class Button(UIElement):
-    def __init__(self, sprite: Sprite|None = Sprite(images.ui.button_image), x: int = 0, y: int = 0, content: str = "", font: pygame.font.Font = pygame.font.get_default_font(), base_color: pygame.color.Color = 0xD7FCD4, click_color: pygame.color.Color = 0xFFFFFF, hover_color: pygame.color.Color = 0xD8D8D8, on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, id: str = ""):
+    def __init__(self, sprite: Sprite|None = Sprite(images.ui.button_image), x: int = 0, y: int = 0, content: str = "", font: pygame.font.Font = pygame.font.get_default_font(), base_color: pygame.color.Color = "0xAAAAAA", click_color: pygame.color.Color = "0xFFFFFF", hover_color: pygame.color.Color = "0x00FFFF", on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, id: str = ""):
         super().__init__(id)
         self.sprite = sprite
         self.x, self.y = x, y
@@ -43,6 +43,8 @@ class Button(UIElement):
                 self.set_color(self.hover_color)
                 if self.on_hover:
                     self.on_hover[0](*self.on_hover[1:])
+        else:
+            self.set_color(self.base_color)
 
         if self.sprite is not None:
             self.sprite.draw(screen, self.x, self.y)
@@ -52,17 +54,30 @@ class Button(UIElement):
     def set_color(self, color: pygame.Color):
         self.text.set_color(color)
 
-class ConfigButton(Button):
-    def __init__(self, cfg: config.Config, category: str, key: str, sprite: Sprite | None = Sprite(images.ui.narrow_button_image), x: int = 0, y: int = 0, font: Font = pygame.font.get_default_font(), base_color: pygame.Color = 14154964, click_color: pygame.Color = 16777215, hover_color: pygame.Color = 14211288, id: str = ""):
-        super().__init__(sprite, x, y, None, font, base_color, click_color, hover_color, self.update_config_option, id=id)
+class ConfigOption(Button):
+    def __init__(self, cfg: config.Config, category: str, key: str, sprite: Sprite | None = Sprite(images.ui.narrow_button_image), **kwargs):
+        super().__init__(sprite, on_click=self.update_config_option, **kwargs)
         self.config = cfg
         self.category = category
         self.key = key
-        self.text.set_content(f"{self.key}: {self.config.d[self.category][self.key]}")
+        value = self.config.d[self.category][self.key]
+        self.text.set_content(f"{self.key}: {value}")
+
+        if isinstance(value, bool): self.type = 1
+        elif isinstance(value, int): self.type = 2
+        elif isinstance(value, float): self.type = 3
+        elif isinstance(value, str): self.type = 4
+        else: self.type = 0
 
     def update(self, screen, mouse_x, mouse_y, click: bool = False, release: bool = False, **kwargs):
         self.text.set_content(f"{self.key}: {self.config.d[self.category][self.key]}")
         return super().update(screen, mouse_x, mouse_y, click, release, **kwargs)
 
     def update_config_option(self):
-        self.config.toggle_value(self.category, self.key)
+        value = self.config.d[self.category][self.key]
+
+        match self.type:
+            case 1: self.config.toggle_value(self.category, self.key)
+            case 2: self.config.set_value(self.category, self.key, value + 1)
+            case 3: self.config.set_value(self.category, self.key, value + 0.01)
+            case 4: self.config.set_value(self.category, self.key, value + '?')

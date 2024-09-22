@@ -18,13 +18,13 @@ import aircraft
 from particle import Particle
 from sprite import Sprite
 import images as im
-from ui.button import Button, ConfigButton
+from ui.button import Button, ConfigOption
 from ui.menu import Menu
 from ui.text import Text
 
 def finish():
     pygame.quit()
-    cfg.save("cfg/config.json")
+    cfg.save()
     quit()
 
 def options():
@@ -32,15 +32,17 @@ def options():
     i = 0
     x = 0
     for category, contents in cfg.d.items():
-        elements.append(Text(category, y=i*50+20, x=x*450+20, color=0xFFFFFF, size=40))
+        elements.append(Text(category, y=i*50+20, x=x*450+20, color="0xFFFFFF", size=40))
         i += 1
         for key, value in contents.items():
-            elements.append(ConfigButton(cfg=cfg, category=category, key=key, y=i*50+20, x=x*450+20))
+            elements.append(ConfigOption(cfg=cfg, category=category, key=key, y=i*50+20, x=x*450+20))
             if i > 12:
                 i = 0
                 x += 1
             else:
                 i += 1
+
+    elements.append(Button(content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=720, x=1270))
 
     options_menu = Menu(
         Sprite(im.ui.menu_background_image),
