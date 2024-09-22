@@ -15,26 +15,42 @@ def copy_missing_configs(source: str, dest: str):
     
     has_any_changed = False
     
-    for key, value in infile.items():
+    for category, contents in infile.items():
         try:
-            outfile[key]
+            outfile[category]
         except KeyError:
-            outfile[key] = value
+            outfile[category] = contents
             has_any_changed = True
+            continue
+
+        for key, value in contents:
+            try:
+                outfile[category][key]
+            except KeyError:
+                outfile[category][key] = value
+                has_any_changed = True
     
     if has_any_changed:
         with open(dest, 'w') as _s: json.dump(outfile, _s)
 
-copy_missing_configs("etc/defaults/cfg/config.json", "cfg/config.json")
+class ConfigCategory:
+    def __init__(self) -> None:
+        pass
 
 class Config:
     def __init__(self, fp: str = "cfg/config.json"):
         with open(fp) as _infile:
             d = json.load(_infile)
 
-        for key, value in d.items():
-            setattr(self, key, value)
+        for category, contents in d.items():
+            setattr(self, category, ConfigCategory())
+            for key, value in contents.items():
+                setattr(category, key, value)
+                if key != "sprite_sizes" and key != "ui": # legacy support
+                    setattr(self, key, value)
 
+
+copy_missing_configs("etc/defaults/cfg/config.json", "cfg/config.json")
 cfg = Config()
 
 # Special config options

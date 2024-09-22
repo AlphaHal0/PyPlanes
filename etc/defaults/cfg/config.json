@@ -1,11 +1,34 @@
 {
-  "screen_width": 1800,
-  "screen_height": 800,
-  "disable_takeoff": false,
-  "scroll_speed_ratio": 0.01,
-  "floor_y_ratio": 0.12,
-  "initial_aircraft_x_ratio": 0.1,
-  "initial_aircraft_y_ratio": 0.45,
+  "display": {
+    "screen_width": 1800,
+    "screen_height": 800,
+    "floor_y_ratio": 0.12,
+    "initial_aircraft_x_ratio": 0.1,
+    "initial_aircraft_y_ratio": 0.45
+  },
+
+  "physics": {
+    "bullet_velocity": 20,
+    "weapon_relative_velocity_multiplier": 0.2,
+    "bomb_x_velocity_decay": 0.05,
+    "bomb_y_velocity_gain": 0.1,
+    "bomb_terminal_velocity": 20,
+    "initial_enemy_speed": 1
+  },
+  "gameplay": {
+    "shoot_cooldown": 30,
+    "player_shoot_cooldown": 30,
+    "spawn_cooldown": 1000,
+    "bomb_cooldown": 100,
+    "player_bomb_cooldown": 100,
+    "initial_enemy_aircraft": 1,
+    "enemy_count_increment": 0.4,
+    "initial_health": 100,
+    "wave_mode": true,
+    "disable_takeoff": false,
+    "scroll_speed_ratio": 0.01
+  },
+
   "sprite_sizes": {
     "bullet_image": 0.025,
     "background_image": [1, 1],
@@ -17,33 +40,28 @@
     "bomb_image": 0.025,
     "blueberry": 0.0625
   },
-  "title_font_size": 100,
-  "font_size": 100,
-  "bullet_velocity": 20,
-  "weapon_relative_velocity_multiplier": 0.2,
-  "bomb_x_velocity_decay": 0.05,
-  "bomb_y_velocity_gain": 0.1,
-  "bomb_terminal_velocity": 20,
-  "shoot_cooldown": 30,
-  "player_shoot_cooldown": 30,
-  "spawn_cooldown": 1000,
-  "bomb_cooldown": 100,
-  "player_bomb_cooldown": 100,
-  "initial_enemy_aircraft": 1,
-  "enemy_count_increment": 0.4,
-  "initial_health": 100,
-  "wave_mode": true,
-  "initial_enemy_speed": 1,
-  "moth_chance": 0.001,
-  "moth_music": true,
-  "moth_music_is_main_music": false,
-  "berry_bomb_chance": 0.005,
-  "show_fps": false,
-  "debug_invincible": false,
-  "show_target_traces": false,
-  "show_ai_type": false,
-  "disable_sprite_textures": false,
-  "show_sprite_sizes": false,
-  "mouse_visibility": false,
-  "big_mode": false
+
+  "ui": {
+    "title_font_size": 100,
+    "font_size": 100,
+    "button_size": [0.2, 0.1]
+  },
+
+  "eggs": {
+    "moth_chance": 0.001,
+    "moth_music": true,
+    "moth_music_is_main_music": false,
+    "berry_bomb_chance": 0.005
+  },
+
+  "debug": {
+    "show_fps": false,
+    "debug_invincible": false,
+    "show_target_traces": false,
+    "show_ai_type": false,
+    "disable_sprite_textures": false,
+    "show_sprite_sizes": false,
+    "mouse_visibility": false,
+    "big_mode": false
+  }
 }
