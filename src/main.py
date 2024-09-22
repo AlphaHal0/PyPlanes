@@ -285,6 +285,10 @@ def play():
                 bullet.draw(screen)
 
         else:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
+                    running = False
+                    
             if pregame_timer > 100:
                 scroll_speed = int(((300-pregame_timer)/200) * cfg.scroll_speed)
             else:
