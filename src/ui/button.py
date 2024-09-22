@@ -2,6 +2,7 @@ from pygame.font import Font
 from sprite import Sprite
 import pygame
 import config
+from keybind import keymap
 from ui.element import UIElement
 from ui.text import Text
 import images
@@ -58,22 +59,26 @@ class Button(UIElement):
         self.text.set_color(color)
 
 class ConfigOption(Button):
-    def __init__(self, cfg: config.Config, category: str, key: str, sprite: Sprite | None = Sprite(images.ui.narrow_button_image), font_size: int = config.cfg.ui.narrow_font_size, **kwargs):
+    def __init__(self, cfg: config.Config, category: str, key: str, sprite: Sprite | None = Sprite(images.ui.narrow_button_image), font_size: int = config.cfg.ui.narrow_font_size, is_keybind: bool = False, **kwargs):
         super().__init__(sprite, on_click=self.update_config_option, on_rclick=(self.update_config_option, True), font_size=font_size, **kwargs)
+
         self.config = cfg
         self.category = category
         self.key = key
         value = self.config.d[self.category][self.key]
-        self.text.set_content(f"{self.key}: {value}")
 
-        if isinstance(value, bool): self.type = 1
+        if is_keybind: self.type = 5
+        elif isinstance(value, bool): self.type = 1
         elif isinstance(value, int): self.type = 2
         elif isinstance(value, float): self.type = 3
         elif isinstance(value, str): self.type = 4
         else: self.type = 0
 
     def update(self, screen, mouse_x, mouse_y, click: bool = False, release: bool = False, **kwargs):
-        self.text.set_content(f"{self.key}: {self.config.d[self.category][self.key]}")
+        if self.type == 5: # keybind
+            self.text.set_content(f"{self.key}: {keymap.get(self.config.d[self.category][self.key])}")
+        else:
+            self.text.set_content(f"{self.key}: {self.config.d[self.category][self.key]}")
         return super().update(screen, mouse_x, mouse_y, click, release, **kwargs)
 
     def update_config_option(self, right: bool = False):
@@ -92,3 +97,14 @@ class ConfigOption(Button):
                 case 2: self.config.set_value(self.category, self.key, value + 1)
                 case 3: self.config.set_value(self.category, self.key, value + 0.01)
                 case 4: self.config.set_value(self.category, self.key, value + '*')
+                case 5:
+                    while True:
+                        event = pygame.event.wait()
+                        if event.type == pygame.KEYDOWN:
+                            if event.key == config.kb.other.quit: break
+                            self.config.set_value(self.category, self.key, event.key)
+                            break
+
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            self.config.set_value(self.category, self.key, event.button)
+                            break

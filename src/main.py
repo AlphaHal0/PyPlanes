@@ -3,7 +3,7 @@
 import pygame
 import keybinds
 import time
-from config import cfg
+from config import cfg, kb
 
 # Initialize Pygame
 pygame.init()
@@ -46,6 +46,37 @@ def options():
             
 
     elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=720, x=1370))
+
+    options_menu = Menu(
+        Sprite(im.ui.menu_background_image),
+        elements=elements,
+        on_quit=main
+    )
+
+    while True:
+        options_menu.tick(screen)
+        pygame.display.update()
+        pygame.time.Clock().tick(60)
+
+def keybinds():
+    elements = []
+    i = 0
+    x = 0
+    for category, contents in kb.d.items():
+        if i > 14:
+            i = 0
+            x += 1
+        elements.append(Text(category, y=i*50+20, x=x*450+20, color="0xFFFFFF", size=40))
+        i += 1
+        for key, value in contents.items():
+            if i > 14:
+                i = 0
+                x += 1
+            elements.append(ConfigOption(cfg=kb, category=category, key=key, y=i*50+20, x=x*450+20, is_keybind=True))
+            i += 1
+            
+
+    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=kb.reset, y=720, x=1370))
 
     options_menu = Menu(
         Sprite(im.ui.menu_background_image),
@@ -338,7 +369,8 @@ def main():
             Text("MAIN MENU", 640, 100),
             Button(x=640, y=250, content="PLAY", on_click=play),
             Button(x=640, y=400, content="OPTIONS", on_click=options),
-            Button(x=640, y=550, content="QUIT", on_click=finish),
+            Button(x=640, y=550, content="KEYBINDS", on_click=keybinds),
+            Button(x=640, y=700, content="QUIT", on_click=finish),
         ],
         on_quit=finish
     )

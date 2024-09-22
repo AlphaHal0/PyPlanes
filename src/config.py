@@ -51,7 +51,7 @@ class Config:
             self.load()
         except:
             if only_once: raise ConfigLoadError(e.args)
-            
+
             try: # remove and try again
                 if os.path.exists(self.fp): os.remove(self.fp)
                 self.load()
@@ -106,3 +106,5 @@ cfg.floor_y = cfg.screen_height - cfg.screen_height * cfg.floor_y_ratio
 cfg.scroll_speed = cfg.scroll_speed_ratio * cfg.screen_width
 cfg.initial_aircraft_x = cfg.initial_aircraft_x_ratio * cfg.screen_width
 cfg.initial_aircraft_y = cfg.initial_aircraft_y_ratio * cfg.screen_height
+
+kb = Config("cfg/keybinds.json")
