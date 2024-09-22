@@ -1,5 +1,7 @@
 # PyPlanes - A goofy python project
 
+Please visit our [Website](https://alphahal0.github.io/) for a cleaner, and more responsive UI on how to work our code.
+
 A 2D pixel art side scroller, involving ww2 aircraft.
 
 You are capable of shooting your enemies, dropping bombs, and even fighting the mystical moth
