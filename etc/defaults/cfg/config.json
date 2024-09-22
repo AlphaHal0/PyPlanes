@@ -43,7 +43,7 @@
 
   "ui": {
     "title_font_size": 100,
-    "font_size": 100,
+    "font_size": 30,
     "button_size": [0.3, 0.1],
     "narrow_button_size": [0.2, 0.05]
   },

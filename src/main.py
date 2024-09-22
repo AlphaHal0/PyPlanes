@@ -32,17 +32,20 @@ def options():
     i = 0
     x = 0
     for category, contents in cfg.d.items():
+        if i > 14:
+            i = 0
+            x += 1
         elements.append(Text(category, y=i*50+20, x=x*450+20, color="0xFFFFFF", size=40))
         i += 1
         for key, value in contents.items():
-            elements.append(ConfigOption(cfg=cfg, category=category, key=key, y=i*50+20, x=x*450+20))
-            if i > 12:
+            if i > 14:
                 i = 0
                 x += 1
-            else:
-                i += 1
+            elements.append(ConfigOption(cfg=cfg, category=category, key=key, y=i*50+20, x=x*450+20))
+            i += 1
+            
 
-    elements.append(Button(content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=720, x=1270))
+    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=720, x=1370))
 
     options_menu = Menu(
         Sprite(im.ui.menu_background_image),
