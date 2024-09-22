@@ -134,7 +134,7 @@ class ConfigOption(Button):
             elif self.type in (2,3,4): self.enter_text()
             elif self.type == 5:
                 while True:
-                    self.set_text("[Press any key]")
+                    self.set_text(f"{self.key}: _")
                     self.update(self.screen, mouse_x=0, mouse_y=0, no_set_text=True)
                     pygame.display.update()
                     event = pygame.event.wait()

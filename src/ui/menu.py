@@ -10,6 +10,7 @@ class Menu:
         self.background = background
         self.elements = elements
         self.on_quit = on_quit
+        self.run = True
 
     def tick(self, screen: pygame.Surface):
         self.background.draw(screen, 0, 0)
@@ -18,7 +19,8 @@ class Menu:
         rrelease = False
         for event in pygame.event.get():
             if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
-                self.on_quit()
+                self.run = False
+                if self.on_quit: self.on_quit()
 
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                 release = True
@@ -35,3 +37,9 @@ class Menu:
             element.update(screen=screen, mouse_x=mouse_pos[0], mouse_y=mouse_pos[1], click=click, release=release, rclick=rclick, rrelease=rrelease)
 
         pygame.display.update()
+
+    def loop(self, screen: pygame.Surface):
+        while self.run:
+            self.tick(screen)
+            pygame.display.update()
+            pygame.time.Clock().tick(60)
