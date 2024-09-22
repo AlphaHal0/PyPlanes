@@ -131,10 +131,10 @@ class EnemyAircraft(Aircraft):
         super().__init__(cfg.screen_width, y, sprite, True, 50)
 
         size = self.sprite.size
-        if ai_type == 1: self.ai = ai.Fly(size, difficulty)
-        elif ai_type == 2: self.ai = ai.Turret(size, difficulty)
-        elif ai_type == 3: self.ai = ai.Dodger(size, difficulty)
-        elif ai_type == 4: self.ai = ai.Offence(size, difficulty)
+        if ai_type == 1: self.ai = ai.Fly(size, difficulty, self.max_shoot_cooldown)
+        elif ai_type == 2: self.ai = ai.Turret(size, difficulty, self.max_shoot_cooldown)
+        elif ai_type == 3: self.ai = ai.Dodger(size, difficulty, self.max_shoot_cooldown)
+        elif ai_type == 4: self.ai = ai.Offence(size, difficulty, self.max_shoot_cooldown)
         else: self.ai = ai.BaseAI(size)
 
     def ai_tick(self, **ctx):

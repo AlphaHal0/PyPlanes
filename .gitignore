@@ -6,7 +6,6 @@
 /log
 /bkp
 /data
-
 __pycache__/
 *.pyc
 .env
