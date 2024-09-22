@@ -32,17 +32,17 @@ def options():
         if i > 14:
             i = 0
             x += 1
-        elements.append(Text(category, y=i*50+20, x=x*450+20, color="0xFFFFFF", size=40))
+        elements.append(Text(category, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20, color="0xFFFFFF", size=40))
         i += 1
         for key, value in contents.items():
             if i > 14:
                 i = 0
                 x += 1
-            elements.append(ConfigOption(cfg=cfg, category=category, key=key, y=i*50+20, x=x*450+20))
+            elements.append(ConfigOption(cfg=cfg, category=category, key=key, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20))
             i += 1
             
 
-    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=720, x=1370))
+    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=14*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
 
     options_menu = Menu(
         Sprite(im.ui.menu_background_image),
@@ -59,16 +59,16 @@ def keybinds():
         if i > 14:
             i = 0
             x += 1
-        elements.append(Text(category, y=i*50+20, x=x*450+20, color="0xFFFFFF", size=40))
+        elements.append(Text(category, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20, color="0xFFFFFF", size=40))
         i += 1
         for key, value in contents.items():
             if i > 14:
                 i = 0
                 x += 1
-            elements.append(ConfigOption(cfg=kb, category=category, key=key, y=i*50+20, x=x*450+20, is_keybind=True))
+            elements.append(ConfigOption(cfg=kb, category=category, key=key, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20, is_keybind=True))
             i += 1
 
-    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=kb.reset, y=720, x=1370))
+    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=kb.reset, y=14*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
 
     options_menu = Menu(
         Sprite(im.ui.menu_background_image),
