@@ -67,7 +67,7 @@ class Config:
         for category, contents in d.items():
             setattr(self, category, ConfigCategory())
             for key, value in contents.items():
-                setattr(self.__getattribute__(category), key, value)
+                setattr(getattr(self, category), key, value)
                 if category != "sprite_sizes" and category != "ui": # legacy support
                     setattr(self, key, value)
 

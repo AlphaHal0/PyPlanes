@@ -1,7 +1,6 @@
 # To Create ENV: py -m venv env
 # To Enter ENV: env/scripts/activate.ps1
 import pygame
-import keybinds
 import time
 from config import cfg, kb
 
@@ -21,10 +20,12 @@ import images as im
 from ui.button import Button, ConfigOption
 from ui.menu import Menu
 from ui.text import Text
+from keybind import is_pressed
 
 def finish():
     pygame.quit()
     cfg.save()
+    kb.save()
     quit()
 
 def options():
@@ -164,33 +165,33 @@ def play():
 
         if pregame_timer == 0:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == keybinds.QUIT):
+                if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
                     running = False
-                elif event.type == keybinds.SHOOT and event.button == 1:  # Left mouse button
+                elif is_pressed(event, kb.weapons.shoot):  # Left mouse button
                     new_bullet = player.shoot()
                     if new_bullet is not None:
                         bullets.append(new_bullet)
-                elif event.type == pygame.KEYDOWN and event.key == keybinds.SHOOT_2:
+                elif is_pressed(event, kb.weapons.shoot_2):
                     new_bullet = player.shoot()
                     if new_bullet is not None:
                         bullets.append(new_bullet)
-                elif event.type == pygame.KEYDOWN and event.key == keybinds.BOMB:
+                elif is_pressed(event, kb.weapons.bomb):
                     new_bomb = player.bomb()
                     if new_bomb is not None:
                         bullets.append(new_bomb)
-                elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_ENEMY:
+                elif is_pressed(event, kb.debug.spawn_enemy):
                     spawn_enemy(difficulty=int(enemy_count))
-                elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_MOTH:
+                elif is_pressed(event, kb.debug.spawn_moth):
                     spawn_enemy(moth=True, difficulty=int(enemy_count))
-                elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_KILL_ALL:
+                elif is_pressed(event, kb.debug.kill_all):
                     for enemy in enemies:
                         enemy.fall()
-                elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_RAPID_FIRE:
+                elif is_pressed(event, kb.debug.rapid_fire):
                     if spam_fire:
                         spam_fire = False
                     else:
                         spam_fire = True
-                elif event.type == pygame.KEYDOWN and event.key == keybinds.DEBUG_SPAWN_PARTICLE:
+                elif is_pressed(event, kb.debug.spawn_particle):
                     particles.append(Particle(
                         player.x, 
                         player.y, 
@@ -200,21 +201,17 @@ def play():
                         adjust_pos=False))
                     
                 # pitch
-                elif event.type == pygame.KEYDOWN and event.key == keybinds.PITCH_UP:
+                elif is_pressed(event, kb.movement.pitch_up):
                     player.set_pitch(20)
-                elif event.type == pygame.KEYDOWN and event.key == keybinds.PITCH_DOWN:
+                elif is_pressed(event, kb.movement.pitch_down):
                     player.set_pitch(-20)
-                elif event.type == pygame.KEYUP and (event.key == keybinds.PITCH_UP or event.key == keybinds.PITCH_DOWN):
+                elif is_pressed(event, kb.movement.pitch_down, True) or is_pressed(event, kb.movement.pitch_up, True):
                     player.set_pitch(0)
 
             if spam_fire:
                 new_bullet = player.shoot()
                 if new_bullet is not None:
                     bullets.append(new_bullet)
-
-            keys = pygame.key.get_pressed()
-            if keys[keybinds.RAPID_FIRE]:
-                bullets.append(player.shoot())
 
             pygame.event.set_grab(True)
 

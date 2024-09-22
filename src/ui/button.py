@@ -2,7 +2,7 @@ from pygame.font import Font
 from sprite import Sprite
 import pygame
 import config
-from keybind import keymap
+import keybind
 from ui.element import UIElement
 from ui.text import Text
 import images
@@ -76,7 +76,7 @@ class ConfigOption(Button):
 
     def update(self, screen, mouse_x, mouse_y, click: bool = False, release: bool = False, **kwargs):
         if self.type == 5: # keybind
-            self.text.set_content(f"{self.key}: {keymap.get(self.config.d[self.category][self.key])}")
+            self.text.set_content(f"{self.key}: {keybind.keymap.get(str(self.config.d[self.category][self.key]))}")
         else:
             self.text.set_content(f"{self.key}: {self.config.d[self.category][self.key]}")
         return super().update(screen, mouse_x, mouse_y, click, release, **kwargs)
@@ -106,5 +106,5 @@ class ConfigOption(Button):
                             break
 
                         if event.type == pygame.MOUSEBUTTONDOWN:
-                            self.config.set_value(self.category, self.key, event.button)
+                            self.config.set_value(self.category, self.key, event.button+1024)
                             break

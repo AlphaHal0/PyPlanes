@@ -2,7 +2,8 @@ import pygame
 from sprite import Sprite
 from ui.element import UIElement
 from typing import Callable
-import keybinds
+from keybind import is_pressed
+from config import kb
 
 class Menu:
     def __init__(self, background: Sprite, elements: list[UIElement], on_quit: Callable|None = None): 
@@ -16,7 +17,7 @@ class Menu:
         release = False
         rrelease = False
         for event in pygame.event.get():
-            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == keybinds.QUIT):
+            if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
                 self.on_quit()
 
             if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
