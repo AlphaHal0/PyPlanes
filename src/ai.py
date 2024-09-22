@@ -51,7 +51,6 @@ class Turret(BaseAI): # Move to a random position and shoot.
             self.target_y = random.randint(int(self.ymin), int(self.ymax))
             self.iteration = 100 + self.difficulty * self.fire_rate
         else:
-            print(self.iteration)
             if self.iteration > 100 and self.iteration-100 % self.fire_rate == 0:
                 self.shoot += 1
             self.iteration -= 1
