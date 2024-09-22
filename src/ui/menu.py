@@ -1,28 +1,32 @@
 import pygame
-from ui.button import Button
-from config import cfg
 from sprite import Sprite
 from ui.element import UIElement
-
-# Lambda function to get font
-get_font = lambda s: pygame.font.Font(s)
+from typing import Callable
+import keybinds
 
 class Menu:
-    def __init__(self, background: Sprite, elements: list[UIElement]): 
+    def __init__(self, background: Sprite, elements: list[UIElement], on_quit: Callable|None = None): 
         self.background = background
         self.elements = elements
+        self.on_quit = on_quit
 
     def tick(self, screen: pygame.Surface):
         self.background.draw(screen, 0, 0)
 
-        MENU_MOUSE_POS = pygame.mouse.get_pos()
+        click = False
+        release = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or (event.type == pygame.KEYDOWN and event.key == keybinds.QUIT):
+                self.on_quit()
 
-        MENU_TEXT = get_font(100).render("MAIN MENU", True, "#b68f40")
-        MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                click = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                release = True
 
-        screen.blit(MENU_TEXT, MENU_RECT)
+        mouse_pos = pygame.mouse.get_pos()
 
         for element in self.elements:
-            element.update()
+            element.update(screen=screen, mouse_x=mouse_pos[0], mouse_y=mouse_pos[1], click=click, release=release)
 
         pygame.display.update()

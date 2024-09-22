@@ -23,7 +23,7 @@ def copy_missing_configs(source: str, dest: str):
             has_any_changed = True
             continue
 
-        for key, value in contents:
+        for key, value in contents.items():
             try:
                 outfile[category][key]
             except KeyError:
@@ -37,21 +37,59 @@ class ConfigCategory:
     def __init__(self) -> None:
         pass
 
+class ConfigError(Exception):
+    def __init__(self, *args: object) -> None:
+        super().__init__(*args)
+
 class Config:
     def __init__(self, fp: str = "cfg/config.json"):
+        try: # try once
+            self.load(fp)
+        except:
+            try: # remove and try again
+                if os.path.exists(fp): os.remove(fp)
+                self.load(fp)
+            except Exception as e: # something's wrong
+                print("Failed to load config")
+                raise ConfigError(e.args)
+
+    def load(self, fp: str):
+        copy_missing_configs(f"etc/defaults/{fp}", fp)
+
         with open(fp) as _infile:
             d = json.load(_infile)
-
+        
         for category, contents in d.items():
             setattr(self, category, ConfigCategory())
             for key, value in contents.items():
-                setattr(category, key, value)
-                if key != "sprite_sizes" and key != "ui": # legacy support
+                setattr(self.__getattribute__(category), key, value)
+                if category != "sprite_sizes" and category != "ui": # legacy support
                     setattr(self, key, value)
 
+        self.d = d
 
-copy_missing_configs("etc/defaults/cfg/config.json", "cfg/config.json")
-cfg = Config()
+    def save(self, fp: str):
+        with open(fp, 'w') as _outfile:
+            json.dump(self.d, _outfile)
+
+    def set_value(self, category: str, key: str, value = None):
+        self.d[category][key] = value
+        setattr(self.__getattribute__(category), key, value)
+
+        if category != "sprite_sizes" and category != "ui": # legacy support
+            setattr(self, key, value)
+
+    def toggle_value(self, category: str, key: str) -> bool|None:
+        if self.d[category][key] == True:
+            self.set_value(category, key, False)
+            return False
+        elif self.d[category][key] == False:
+            self.set_value(category, key, True)
+            return True
+        else:
+            return None
+
+cfg = Config("cfg/config.json")
 
 # Special config options
 cfg.asset_folder = "./res"

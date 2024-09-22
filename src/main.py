@@ -18,34 +18,41 @@ import aircraft
 from particle import Particle
 from sprite import Sprite
 import images as im
-from ui.button import Button
+from ui.button import Button, ConfigButton
+from ui.menu import Menu
+from ui.text import Text
+
+def finish():
+    pygame.quit()
+    cfg.save("cfg/config.json")
+    quit()
 
 def options():
+    elements = []
+    i = 0
+    x = 0
+    for category, contents in cfg.d.items():
+        elements.append(Text(category, y=i*50+20, x=x*450+20, color=0xFFFFFF, size=40))
+        i += 1
+        for key, value in contents.items():
+            elements.append(ConfigButton(cfg=cfg, category=category, key=key, y=i*50+20, x=x*450+20))
+            if i > 12:
+                i = 0
+                x += 1
+            else:
+                i += 1
+
+    options_menu = Menu(
+        Sprite(im.ui.menu_background_image),
+        elements=elements,
+        on_quit=main
+    )
+
     while True:
-        options_mouse_pos = pygame.mouse.get_pos()
-
-        screen.fill("white")
-
-        options_text = get_font(45).render("This is the OPTIONS screen.", True, "Black")
-        options_rect = options_text.get_rect(center=(640, 260))
-        screen.blit(options_text, options_rect)
-
-        options_back = Button(image=None, pos=(640, 460), 
-                            text_input="BACK", font=get_font(75), base_color="Black", hovering_color="Green")
-
-        options_back.change_color(options_mouse_pos)
-        options_back.update(screen)
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                pygame.quit()
-                exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if options_back.check_for_input(options_mouse_pos):
-                    main_menu()
-
+        options_menu.tick(screen)
         pygame.display.update()
-        
+        pygame.time.Clock().tick(60)
+
 # Game loop
 def play():
     if cfg.moth_music_is_main_music:
@@ -316,22 +323,24 @@ def play():
         pygame.time.Clock().tick(60)
 
     # Quit Pygame
-    pygame.quit()
     print(f"Final score: {score}")
-    quit()
+    finish()
 
-def main_menu():
-    PLAY_BUTTON = Button(image=pygame.image.load(f"{cfg.asset_folder}/Play Rect.png"), pos=(640, 250), 
-                            text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-        OPTIONS_BUTTON = Button(image=pygame.image.load(f"{cfg.asset_folder}/Options Rect.png"), pos=(640, 400), 
-                            text_input="OPTIONS", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
-        QUIT_BUTTON = Button(image=pygame.image.load(f"{cfg.asset_folder}/Quit Rect.png"), pos=(640, 550), 
-                            text_input="QUIT", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+def main():
+    main_menu = Menu(
+        Sprite(im.ui.menu_background_image),
+        elements=[
+            Text("MAIN MENU", 640, 100),
+            Button(x=640, y=250, content="PLAY", on_click=play),
+            Button(x=640, y=400, content="OPTIONS", on_click=options),
+            Button(x=640, y=550, content="QUIT", on_click=finish),
+        ],
+        on_quit=finish
+    )
+
     while True:
-        pass
-        
-        
+        main_menu.tick(screen)
+        pygame.display.update()
+        pygame.time.Clock().tick(60)
 
-main_menu()
-
-
+main()
