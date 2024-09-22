@@ -44,14 +44,15 @@ class Turret(BaseAI): # Move to a random position and shoot.
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
         self.iteration = 0
+        self.max_iteration = 100 + self.difficulty * self.fire_rate
 
     def tick(self, ctx: dict):
         if self.iteration == 0:
             self.target_x = random.randint(int(self.xmin), int(self.xmax))
             self.target_y = random.randint(int(self.ymin), int(self.ymax))
-            self.iteration = 100 + self.difficulty * self.fire_rate
+            self.iteration = self.max_iteration
         else:
-            if self.iteration > 100 and self.iteration-100 % self.fire_rate == 0:
+            if self.iteration <= self.max_iteration - 100 and self.iteration % (self.fire_rate + 1) == 1:
                 self.shoot += 1
             self.iteration -= 1
         self.constrain()
