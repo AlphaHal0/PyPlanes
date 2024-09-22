@@ -8,15 +8,12 @@
     },
     "weapons": {
         "shoot": 1025,
-        "shoot_2": 120,
-        "rapid_fire": 1073742049,
         "bomb": 32
     },
     "debug": {
         "spawn_enemy": 108,
         "spawn_moth": 99,
         "spawn_particle": 112,
-        "kill_all": 109,
-        "rapid_fire": 110
+        "kill_all": 109
     }
 }

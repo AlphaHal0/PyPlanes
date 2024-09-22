@@ -134,7 +134,6 @@ def play():
     particles = []
     enemy_ai_danger_zones = []
     score = 0
-    spam_fire = False
     wave = 1
     wave_mode_text_x = cfg.screen_width
     wave_mode_text_y = cfg.screen_height // 2 - font.get_height() // 2
@@ -171,10 +170,6 @@ def play():
                     new_bullet = player.shoot()
                     if new_bullet is not None:
                         bullets.append(new_bullet)
-                elif is_pressed(event, kb.weapons.shoot_2):
-                    new_bullet = player.shoot()
-                    if new_bullet is not None:
-                        bullets.append(new_bullet)
                 elif is_pressed(event, kb.weapons.bomb):
                     new_bomb = player.bomb()
                     if new_bomb is not None:
@@ -186,11 +181,6 @@ def play():
                 elif is_pressed(event, kb.debug.kill_all):
                     for enemy in enemies:
                         enemy.fall()
-                elif is_pressed(event, kb.debug.rapid_fire):
-                    if spam_fire:
-                        spam_fire = False
-                    else:
-                        spam_fire = True
                 elif is_pressed(event, kb.debug.spawn_particle):
                     particles.append(Particle(
                         player.x, 
@@ -207,11 +197,6 @@ def play():
                     player.set_pitch(-20)
                 elif is_pressed(event, kb.movement.pitch_down, True) or is_pressed(event, kb.movement.pitch_up, True):
                     player.set_pitch(0)
-
-            if spam_fire:
-                new_bullet = player.shoot()
-                if new_bullet is not None:
-                    bullets.append(new_bullet)
 
             pygame.event.set_grab(True)
 
