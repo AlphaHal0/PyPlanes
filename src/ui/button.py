@@ -9,10 +9,11 @@ import images
 from typing import Callable
 
 class Button(UIElement):
-    def __init__(self, sprite: Sprite|None = Sprite(images.ui.button_image), x: int = 0, y: int = 0, content: str = "", font_size: int = config.cfg.ui.font_size, base_color: pygame.color.Color = "0xAAAAAA", click_color: pygame.color.Color = "0xFFFFFF", hover_color: pygame.color.Color = "0x00FFFF", on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, on_rclick: Callable|tuple|None = None,id: str = ""):
+    def __init__(self, sprite: Sprite|None = Sprite(images.ui.button_image), x: int = 0, y: int = 0, content: str = "", font_size: int = config.cfg.ui.font_size, center_font: bool = True, base_color: pygame.color.Color = "0xAAAAAA", click_color: pygame.color.Color = "0xFFFFFF", hover_color: pygame.color.Color = "0x00FFFF", on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, on_rclick: Callable|tuple|None = None,id: str = ""):
         super().__init__(id)
         self.sprite = sprite
         self.x, self.y = x, y
+        self.center_font = center_font
         self.base_color, self.click_color, self.hover_color = base_color, click_color, hover_color
 
         if isinstance(on_click, Callable): # on_click is either a function or a tuple containing a function and args
@@ -30,7 +31,11 @@ class Button(UIElement):
         else:
             self.on_rclick = on_rclick
 
-        self.text = Text(content, x, y, base_color, size=font_size)
+        if center_font:
+            self.text = Text(content, x + sprite.size[0] // 2, y + sprite.size[1] // 2, base_color, size=font_size, center=True)
+        else:
+            self.text = Text(content, x, y, base_color, size=font_size, center=False)
+
         if self.sprite is None:
             self.sprite = self.text
 
@@ -60,7 +65,7 @@ class Button(UIElement):
 
 class ConfigOption(Button):
     def __init__(self, cfg: config.Config, category: str, key: str, sprite: Sprite | None = Sprite(images.ui.narrow_button_image), font_size: int = config.cfg.ui.narrow_font_size, is_keybind: bool = False, **kwargs):
-        super().__init__(sprite, on_click=self.update_config_option, on_rclick=(self.update_config_option, True), font_size=font_size, **kwargs)
+        super().__init__(sprite, on_click=self.update_config_option, on_rclick=(self.update_config_option, True), font_size=font_size, center_font=False, **kwargs)
 
         self.config = cfg
         self.category = category

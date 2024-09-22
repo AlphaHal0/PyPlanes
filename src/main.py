@@ -288,7 +288,7 @@ def play():
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
                     running = False
-                    
+
             if pregame_timer > 100:
                 scroll_speed = int(((300-pregame_timer)/200) * cfg.scroll_speed)
             else:
@@ -349,14 +349,15 @@ def play():
     finish()
 
 def main():
+    button_pos = cfg.screen_width // 2 - cfg.ui.button_size[0] * cfg.screen_width // 2
     main_menu = Menu(
         Sprite(im.ui.menu_background_image),
         elements=[
-            Text("MAIN MENU", 640, 100),
-            Button(x=640, y=250, content="PLAY", on_click=play),
-            Button(x=640, y=400, content="OPTIONS", on_click=options),
-            Button(x=640, y=550, content="KEYBINDS", on_click=keybinds),
-            Button(x=640, y=700, content="QUIT", on_click=finish),
+            Text("MAIN MENU", cfg.screen_width // 2, 100, color="0xFFFFFF", center=True),
+            Button(x=button_pos, y=250, content="PLAY", on_click=play),
+            Button(x=button_pos, y=350, content="OPTIONS", on_click=options),
+            Button(x=button_pos, y=450, content="KEYBINDS", on_click=keybinds),
+            Button(x=button_pos, y=650, content="QUIT", on_click=finish),
         ],
         on_quit=finish
     )
