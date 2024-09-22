@@ -62,7 +62,7 @@ class Button(UIElement):
         if self.center_font:
             self.text = Text(content, self.x + self.sprite.size[0] // 2, self.y + self.sprite.size[1] // 2, self.base_color, size=self.font_size, center=True)
         else:
-            self.text = Text(content, self.x, self.y, self.base_color, size=self.font_size, center=False)
+            self.text = Text(content, self.x + 10, self.y + 10, self.base_color, size=self.font_size, center=False)
 
     def set_color(self, color: pygame.Color):
         self.text.set_color(color)
