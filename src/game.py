@@ -11,7 +11,7 @@ from keybind import is_pressed
 # Game loop
 def play(screen, font):
     if cfg.moth_music_is_main_music:
-        pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
+        pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
         pygame.mixer.music.play(-1)
 
     enemies = []
@@ -20,7 +20,7 @@ def play(screen, font):
     def spawn_enemy(image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False, type: int = 0):
         if (cfg.moth_chance and random() <= cfg.moth_chance) or moth:
             if cfg.moth_music and not pygame.mixer.music.get_busy():
-                pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
+                pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
                 pygame.mixer.music.play(-1)
             enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
         else:
