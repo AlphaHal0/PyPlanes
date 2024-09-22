@@ -45,7 +45,7 @@ def options():
             i += 1
             
 
-    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=720, x=1370))
+    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=720, x=1370))
 
     options_menu = Menu(
         Sprite(im.ui.menu_background_image),

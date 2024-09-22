@@ -3,7 +3,7 @@ import pygame
 from config import cfg
 
 class Text(UIElement):
-    def  __init__(self, content: str = "", x: int = 0, y: int = 0, color: pygame.Color = 0, id: str = "", size: int = 0):
+    def  __init__(self, content: str = "", x: int = 0, y: int = 0, color: pygame.Color = 0, size: int = 0, id: str = ""):
         if size == 0: size = cfg.ui.font_size
         self.content = content
         self.color = color
