@@ -14,6 +14,7 @@ class Button(UIElement):
         self.sprite = sprite
         self.x, self.y = x, y
         self.center_font = center_font
+        self.font_size = font_size
         self.base_color, self.click_color, self.hover_color = base_color, click_color, hover_color
 
         if isinstance(on_click, Callable): # on_click is either a function or a tuple containing a function and args
@@ -31,10 +32,7 @@ class Button(UIElement):
         else:
             self.on_rclick = on_rclick
 
-        if center_font:
-            self.text = Text(content, x + sprite.size[0] // 2, y + sprite.size[1] // 2, base_color, size=font_size, center=True)
-        else:
-            self.text = Text(content, x, y, base_color, size=font_size, center=False)
+        self.set_text(content)
 
         if self.sprite is None:
             self.sprite = self.text
@@ -60,6 +58,12 @@ class Button(UIElement):
 
         self.text.update(screen)
 
+    def set_text(self, content: str):
+        if self.center_font:
+            self.text = Text(content, self.x + self.sprite.size[0] // 2, self.y + self.sprite.size[1] // 2, self.base_color, size=self.font_size, center=True)
+        else:
+            self.text = Text(content, self.x, self.y, self.base_color, size=self.font_size, center=False)
+
     def set_color(self, color: pygame.Color):
         self.text.set_color(color)
 
@@ -79,12 +83,43 @@ class ConfigOption(Button):
         elif isinstance(value, str): self.type = 4
         else: self.type = 0
 
-    def update(self, screen, mouse_x, mouse_y, click: bool = False, release: bool = False, **kwargs):
-        if self.type == 5: # keybind
-            self.text.set_content(f"{self.key}: {keybind.keymap.get(str(self.config.d[self.category][self.key]))}")
-        else:
-            self.text.set_content(f"{self.key}: {self.config.d[self.category][self.key]}")
+    def update(self, screen, mouse_x, mouse_y, click: bool = False, release: bool = False, no_set_text: bool = False, **kwargs):
+        if not no_set_text:
+            self.screen = screen
+            if self.type == 5: # keybind
+                self.set_text(f"{self.key}: {keybind.keymap.get(str(self.config.d[self.category][self.key]))}")
+            else:
+                self.set_text(f"{self.key}: {self.config.d[self.category][self.key]}")
         return super().update(screen, mouse_x, mouse_y, click, release, **kwargs)
+    
+    def enter_text(self):
+        pygame.key.start_text_input()
+        new_text = ""
+        while True:
+            event = pygame.event.wait()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    try: new_text = new_text[:-1]
+                    except: pass
+
+                elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER) or keybind.is_pressed(event, config.kb.other.quit):
+                    try:
+                        match self.type:
+                            case 2: self.config.set_value(self.category, self.key, int(new_text))
+                            case 3: self.config.set_value(self.category, self.key, float(new_text))
+                            case 4: self.config.set_value(self.category, self.key, str(new_text))
+                    except: pass
+                    finally:
+                        pygame.key.stop_text_input() 
+                        break
+
+            elif event.type == pygame.TEXTINPUT:
+                new_text += event.text
+            
+            self.set_text(f"{self.key}: {new_text}_")
+            self.update(self.screen, mouse_x=0, mouse_y=0, no_set_text=True)
+            pygame.display.update()
+                
 
     def update_config_option(self, right: bool = False):
         value = self.config.d[self.category][self.key]
@@ -92,24 +127,22 @@ class ConfigOption(Button):
         if right: # right-click
             match self.type:
                 case 1: self.config.toggle_value(self.category, self.key)
-                case 2: self.config.set_value(self.category, self.key, value - 1)
-                case 3: self.config.set_value(self.category, self.key, value - 0.01)
-                case 4: self.config.set_value(self.category, self.key, value - '?')
+                case 4: self.config.set_value(self.category, self.key, "")
 
         else: # left-click
-            match self.type:
-                case 1: self.config.toggle_value(self.category, self.key)
-                case 2: self.config.set_value(self.category, self.key, value + 1)
-                case 3: self.config.set_value(self.category, self.key, value + 0.01)
-                case 4: self.config.set_value(self.category, self.key, value + '*')
-                case 5:
-                    while True:
-                        event = pygame.event.wait()
-                        if event.type == pygame.KEYDOWN:
-                            if event.key == config.kb.other.quit: break
-                            self.config.set_value(self.category, self.key, event.key)
-                            break
+            if self.type == 1: self.config.toggle_value(self.category, self.key)
+            elif self.type in (2,3,4): self.enter_text()
+            elif self.type == 5:
+                while True:
+                    self.set_text("[Press any key]")
+                    self.update(self.screen, mouse_x=0, mouse_y=0, no_set_text=True)
+                    pygame.display.update()
+                    event = pygame.event.wait()
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == config.kb.other.quit: break
+                        self.config.set_value(self.category, self.key, event.key)
+                        break
 
-                        if event.type == pygame.MOUSEBUTTONDOWN:
-                            self.config.set_value(self.category, self.key, event.button+1024)
-                            break
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        self.config.set_value(self.category, self.key, event.button+1024)
+                        break
