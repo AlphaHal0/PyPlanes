@@ -3,8 +3,9 @@ from config import cfg
 
 class BaseAI: # The base AI with no special features.
     debug_color = 0x000000
-    def __init__(self, size: tuple, difficulty: int):
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         self.speed = 100
+        self.fire_rate = fire_rate
         self.difficulty = difficulty
         self.xmin = cfg.screen_width * 0.5
         self.xmax = cfg.screen_width - size[0] - 10
@@ -30,7 +31,6 @@ class BaseAI: # The base AI with no special features.
 class Fly(BaseAI): # AI with basic random movements.
     debug_color = 0xFF0000
     def tick(self, ctx: dict):
-        
         self.target_x += random.randint(-self.speed, self.speed)
         self.target_y += random.randint(-self.speed, self.speed)
 
@@ -41,26 +41,27 @@ class Fly(BaseAI): # AI with basic random movements.
 
 class Turret(BaseAI): # Move to a random position and shoot.
     debug_color = 0x00FF00
-    def __init__(self, size: tuple, difficulty: int):
-        super().__init__(size, difficulty)
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
         self.iteration = 0
 
     def tick(self, ctx: dict):
         if self.iteration == 0:
             self.target_x = random.randint(int(self.xmin), int(self.xmax))
             self.target_y = random.randint(int(self.ymin), int(self.ymax))
-            self.iteration = 100
+            self.iteration = 100 + self.difficulty * self.fire_rate
         else:
-            if self.iteration <= 50 and self.iteration % 10 == 0:
+            print(self.iteration)
+            if self.iteration > 100 and self.iteration-100 % self.fire_rate == 0:
                 self.shoot += 1
             self.iteration -= 1
         self.constrain()
 
 class Dodger(BaseAI): # Avoid player bullets.
     debug_color = 0xFFFF00
-    def __init__(self, size: tuple, difficulty: int):
-        super().__init__(size, difficulty)
-        self.max_shoot_time = cfg.shoot_cooldown * max(1, 5 - difficulty//5)
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
+        self.max_shoot_time = fire_rate * max(1, 5 - difficulty//5)
         self.shoot_time = self.max_shoot_time
 
     def tick(self, ctx: dict):
@@ -84,8 +85,8 @@ class Dodger(BaseAI): # Avoid player bullets.
     
 class Offence(BaseAI): # Follow the player.
     debug_color = 0x0000FF
-    def __init__(self, size: tuple, difficulty: int):
-        super().__init__(size, difficulty)
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
         self.max_shoot_time = cfg.shoot_cooldown * max(1, 5 - difficulty//5)
         self.shoot_time = self.max_shoot_time
         self.target_x = random.randint(int(self.xmin), int(self.xmax))

@@ -99,14 +99,15 @@ def play():
     enemies = []
     enemy_count = cfg.initial_enemy_aircraft
 
-    def spawn_enemy(image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False):
+    def spawn_enemy(image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False, type: int = 0):
         if (cfg.moth_chance and random() <= cfg.moth_chance) or moth:
             if cfg.moth_music and not pygame.mixer.music.get_busy():
                 pygame.mixer.music.load(f"{cfg.asset_folder}/easteregg/really_good_soundtrack.mp3", "music_moth")
                 pygame.mixer.music.play(-1)
             enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
         else:
-            type = randint(1, min(4, difficulty))
+            if type == 0: type = randint(1, min(4, difficulty))
+
             if image is None:
                 match type:
                     case 1: image = im.enemy_1_image
@@ -175,7 +176,17 @@ def play():
                     if new_bomb is not None:
                         bullets.append(new_bomb)
                 elif is_pressed(event, kb.debug.spawn_enemy):
-                    spawn_enemy(difficulty=int(enemy_count))
+                    while True:
+                        event = pygame.event.wait()
+                        if event.type == pygame.KEYDOWN:
+                            match event.key:
+                                case kb.debug.spawn_enemy_ai_1: spawn_enemy(difficulty=int(enemy_count), type=1)
+                                case kb.debug.spawn_enemy_ai_2: spawn_enemy(difficulty=int(enemy_count), type=2)
+                                case kb.debug.spawn_enemy_ai_3: spawn_enemy(difficulty=int(enemy_count), type=3)
+                                case kb.debug.spawn_enemy_ai_4: spawn_enemy(difficulty=int(enemy_count), type=4)
+
+                            break
+                            
                 elif is_pressed(event, kb.debug.spawn_moth):
                     spawn_enemy(moth=True, difficulty=int(enemy_count))
                 elif is_pressed(event, kb.debug.kill_all):
