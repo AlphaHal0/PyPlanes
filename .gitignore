@@ -5,6 +5,7 @@
 /tmp
 /log
 /bkp
+/mod
 /data
 __pycache__/
 *.pyc

@@ -101,7 +101,6 @@ class Config:
 cfg = Config("cfg/config.json")
 
 # Special config options
-cfg.asset_folder = "./res"
 cfg.floor_y = cfg.screen_height - cfg.screen_height * cfg.floor_y_ratio
 cfg.scroll_speed = cfg.scroll_speed_ratio * cfg.screen_width
 cfg.initial_aircraft_x = cfg.initial_aircraft_x_ratio * cfg.screen_width

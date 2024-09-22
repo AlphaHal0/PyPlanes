@@ -6,6 +6,7 @@ class BaseAI: # The base AI with no special features.
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         self.speed = 100
         self.fire_rate = fire_rate
+        self.fire_rate = fire_rate
         self.difficulty = difficulty
         self.xmin = cfg.screen_width * 0.5
         self.xmax = cfg.screen_width - size[0] - 10
@@ -43,21 +44,27 @@ class Turret(BaseAI): # Move to a random position and shoot.
     debug_color = 0x00FF00
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
         self.iteration = 0
+        self.max_iteration = 100 + self.difficulty * self.fire_rate
 
     def tick(self, ctx: dict):
         if self.iteration == 0:
             self.target_x = random.randint(int(self.xmin), int(self.xmax))
             self.target_y = random.randint(int(self.ymin), int(self.ymax))
-            self.iteration = 100 + self.difficulty * self.fire_rate
+            self.iteration = self.max_iteration
         else:
-            if self.iteration > 100 and self.iteration-100 % self.fire_rate == 0:
+            if self.iteration <= self.max_iteration - 100 and self.iteration % (self.fire_rate + 1) == 1:
                 self.shoot += 1
             self.iteration -= 1
         self.constrain()
 
 class Dodger(BaseAI): # Avoid player bullets.
     debug_color = 0xFFFF00
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
+        self.max_shoot_time = fire_rate * max(1, 5 - difficulty//5)
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
         self.max_shoot_time = fire_rate * max(1, 5 - difficulty//5)
@@ -84,6 +91,8 @@ class Dodger(BaseAI): # Avoid player bullets.
     
 class Offence(BaseAI): # Follow the player.
     debug_color = 0x0000FF
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
         self.max_shoot_time = cfg.shoot_cooldown * max(1, 5 - difficulty//5)

@@ -5,7 +5,10 @@ sz = cfg.sprite_sizes
 ui_sz = cfg.ui
 
 def load_image(file: str):
-    return pygame.image.load(f"{cfg.asset_folder}/{file}").convert_alpha()
+    try:
+        return pygame.image.load(f"./mod/res/img/{file}").convert_alpha()
+    except FileNotFoundError:
+        return pygame.image.load(f"./res/img/{file}").convert_alpha()
 
 def scale_image(surface: pygame.Surface, size: list|float, relative: bool = True):
     if relative:
