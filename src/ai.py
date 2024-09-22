@@ -4,7 +4,9 @@ from config import cfg
 class BaseAI: # The base AI with no special features.
     debug_color = 0x000000
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         self.speed = 100
+        self.fire_rate = fire_rate
         self.fire_rate = fire_rate
         self.difficulty = difficulty
         self.xmin = cfg.screen_width * 0.5
@@ -43,6 +45,8 @@ class Turret(BaseAI): # Move to a random position and shoot.
     debug_color = 0x00FF00
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
         self.iteration = 0
         self.max_iteration = 100 + self.difficulty * self.fire_rate
 
@@ -59,6 +63,9 @@ class Turret(BaseAI): # Move to a random position and shoot.
 
 class Dodger(BaseAI): # Avoid player bullets.
     debug_color = 0xFFFF00
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
+        self.max_shoot_time = fire_rate * max(1, 5 - difficulty//5)
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
         self.max_shoot_time = fire_rate * max(1, 5 - difficulty//5)
@@ -85,6 +92,8 @@ class Dodger(BaseAI): # Avoid player bullets.
     
 class Offence(BaseAI): # Follow the player.
     debug_color = 0x0000FF
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
         self.max_shoot_time = cfg.shoot_cooldown * max(1, 5 - difficulty//5)
