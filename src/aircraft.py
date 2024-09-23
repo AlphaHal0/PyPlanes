@@ -44,7 +44,8 @@ class Aircraft(Entity):
         super().update_position()
 
     def set_pitch(self, value: int = 0) -> int:
-        self.target_pitch = value
+        if not self.falling:
+            self.target_pitch = value
         return self.pitch
 
     def apply_friction(self) -> None:
@@ -58,7 +59,13 @@ class Aircraft(Entity):
         if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
         if not self.falling:
             self.falling = True
-            self.sprite.rotate(10 if self.is_enemy else -10)
+            
+            if self.is_enemy:
+                self.pitch = -10
+            else:
+                self.pitch = 10
+                
+            self.max_shoot_cooldown = cfg.gameplay.shoot_cooldown_crashing
         else: return False
 
     def display_particle(self, sprite: Sprite) -> particle.Particle | None:

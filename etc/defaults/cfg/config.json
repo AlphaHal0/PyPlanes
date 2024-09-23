@@ -18,6 +18,7 @@
   "gameplay": {
     "shoot_cooldown": 30,
     "player_shoot_cooldown": 30,
+    "shoot_cooldown_crashing": 50,
     "spawn_cooldown": 1000,
     "bomb_cooldown": 100,
     "player_bomb_cooldown": 100,
