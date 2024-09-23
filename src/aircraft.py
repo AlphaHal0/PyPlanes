@@ -7,11 +7,11 @@ import weapon
 from entity import Entity
 from sprite import Sprite
 import images
+import math
 
 class Aircraft(Entity):
     def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = cfg.shoot_cooldown, spawn_cooldown: int = cfg.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.bomb_cooldown):
-        self.acceleration = 0.8
-        self.friction = 0.92
+        self.acceleration = cfg.physics.aircraft_acceleration
         self.shoot_cooldown = 0
         self.bomb_cooldown = 0
         self.max_shoot_cooldown = shoot_cooldown
@@ -31,15 +31,15 @@ class Aircraft(Entity):
         if self.shoot_cooldown: self.shoot_cooldown -= 1
         if self.bomb_cooldown: self.bomb_cooldown -= 1
 
-        if self.target_pitch != self.pitch:
+        if self.falling:
+            self.velocity_y = max(2, self.velocity_y) # clamp the velocity so the aircraft is always falling
+
+        elif self.target_pitch != self.pitch:
             self.sprite.rotate(self.pitch)
             if self.pitch > self.target_pitch:
                 self.pitch -= 1
             else:
                 self.pitch += 1
-
-        if self.falling:
-            self.velocity_y = max(2, self.velocity_y) # clamp the velocity so the aircraft is always falling
 
         super().update_position()
 
@@ -48,10 +48,6 @@ class Aircraft(Entity):
             self.target_pitch = value
         return self.pitch
 
-    def apply_friction(self) -> None:
-        self.velocity_x *= self.friction
-        self.velocity_y *= self.friction
-
     def destroy(self) -> None:
         self.alive = False
 
@@ -59,12 +55,8 @@ class Aircraft(Entity):
         if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
         if not self.falling:
             self.falling = True
-            
-            if self.is_enemy:
-                self.pitch = -10
-            else:
-                self.pitch = 10
-                
+            self.pitch = 10
+            self.sprite.rotate(self.pitch)
             self.max_shoot_cooldown = cfg.gameplay.shoot_cooldown_crashing
         else: return False
 
@@ -82,14 +74,14 @@ class Aircraft(Entity):
     def apply_acceleration(self, target_x: int, target_y: int, trackable_distance: int = 50) -> None:
         dx = target_x - self.x
         dy = target_y - self.y
-        distance = max(1, (dx**2 + dy**2)**0.5)
+        distance = self.distance_to(target_x, target_y)
 
         if distance > trackable_distance:
-            normalized_dx = dx / distance
-            normalized_dy = dy / distance
+            self.velocity_x += dx / distance * self.acceleration
+            self.velocity_y += dy / distance * self.acceleration
 
-            self.velocity_x += normalized_dx * self.acceleration
-            self.velocity_y += normalized_dy * self.acceleration
+        self.velocity_x *= cfg.physics.aircraft_drag
+        self.velocity_y *= cfg.physics.aircraft_drag
 
         if self.x < 0:
             self.x = 0
@@ -150,7 +142,6 @@ class EnemyAircraft(Aircraft):
         self.apply_acceleration(self.ai.target_x, self.ai.target_y, trackable_distance=50)
 
         self.update_position()
-        self.apply_friction()
 
     def draw(self, screen: pygame.Surface) -> None:
         if cfg.show_target_traces:

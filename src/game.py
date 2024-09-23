@@ -133,7 +133,6 @@ def play(screen, font):
             target_x, target_y = pygame.mouse.get_pos()
             player.apply_acceleration(target_x, target_y, trackable_distance=50)
             player.update_position()
-            player.apply_friction()
 
             if player.ground_collision() and not cfg.debug_invincible:
                 print("Player hit the floor. Game over.")
@@ -223,7 +222,6 @@ def play(screen, font):
             else:
                 player.apply_acceleration(cfg.initial_aircraft_x, cfg.initial_aircraft_y)
                 player.update_position()
-                player.apply_friction()
 
             pregame_timer -= 1
 
