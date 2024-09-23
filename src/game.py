@@ -41,7 +41,7 @@ def play(screen, font):
     scroll_x = 0
     player = aircraft.Aircraft(
         cfg.initial_aircraft_x, 
-        cfg.initial_aircraft_y if cfg.disable_takeoff else cfg.floor_y, 
+        cfg.initial_aircraft_y if cfg.disable_takeoff else cfg.floor_y - im.aircraft_image.get_height(), 
         Sprite(im.aircraft_image), 
         shoot_cooldown=cfg.player_shoot_cooldown, 
         bomb_cooldown=cfg.player_bomb_cooldown, 
