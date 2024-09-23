@@ -5,6 +5,8 @@ from typing import Callable
 from keybind import is_pressed
 from config import kb
 
+# TODO: Add auto grid placement
+
 class Menu:
     def __init__(self, background: Sprite, elements: list[UIElement], on_quit: Callable|None = None): 
         self.background = background

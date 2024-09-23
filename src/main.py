@@ -67,15 +67,18 @@ def keybinds():
 def start_game(): play(screen, font)
 
 def main():
+    # TODO: Config class for UI positioning
+    #       Maybe add auto grid placement handled by ui.Menu?
+ 
     button_pos = cfg.screen_width // 2 - cfg.ui.button_size[0] * cfg.screen_width // 2
     main_menu = Menu(
         Sprite(im.ui.menu_background_image),
         elements=[
-            Text("MAIN MENU", cfg.screen_width // 2, 100, color="0xFFFFFF", center=True),
-            Button(x=button_pos, y=250, content="PLAY", on_click=start_game),
-            Button(x=button_pos, y=350, content="OPTIONS", on_click=options),
-            Button(x=button_pos, y=450, content="KEYBINDS", on_click=keybinds),
-            Button(x=button_pos, y=650, content="QUIT", on_click=finish),
+            Text("MAIN MENU", cfg.screen_width // 2, cfg.screen_height // 8 + 50, color="0xFFFFFF", center=True),
+            Button(x=button_pos, y=2 * cfg.screen_height // 8 + 50, content="PLAY", on_click=start_game),
+            Button(x=button_pos, y=3 * cfg.screen_height // 8 + 50, content="OPTIONS", on_click=options),
+            Button(x=button_pos, y=4 * cfg.screen_height // 8 + 50, content="KEYBINDS", on_click=keybinds),
+            Button(x=button_pos, y=6 * cfg.screen_height // 8 + 50, content="QUIT", on_click=finish),
         ],
         on_quit=finish
     )
