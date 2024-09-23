@@ -47,4 +47,4 @@ class Entity:
         return math.sqrt(dx+dy)
         
     def ground_collision(self) -> bool:
-        return self.y + self.height > cfg.floor_y
+        return self.y + self.height >= cfg.floor_y

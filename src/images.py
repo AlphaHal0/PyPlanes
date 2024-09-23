@@ -32,6 +32,7 @@ class ui:
     menu_background_image = scale_image(load_image(f"ui/background.png"), sz.background_image)
     button_image = scale_image(load_image(f"ui/button.png"), ui_sz.button_size)
     narrow_button_image = scale_image(load_image(f"ui/button.png"), ui_sz.narrow_button_size)
+    small_button_image = scale_image(load_image(f"ui/button.png"), ui_sz.small_button_size)
 
 aircraft_image = scale_image(load_image("planes/player/spitfire.png"), sz.aircraft_image)
 

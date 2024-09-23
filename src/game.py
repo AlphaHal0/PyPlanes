@@ -134,12 +134,16 @@ def play(screen, font):
             player.apply_acceleration(target_x, target_y, trackable_distance=50)
             player.update_position()
 
-            if player.ground_collision() and not cfg.debug_invincible:
-                print("Player hit the floor. Game over.")
-                running = False
+            if player.ground_collision():
+                player.health -= cfg.gameplay.ground_health_decay
+                if not cfg.debug_invincible and player.health <= 0:
+                    print("Player hit the floor. Game over.")
+                    running = False
+                particle = player.display_particle(Sprite(im.small_explosions, animation_time=30, size_multiplier=2), 100)
+                if particle: particles.append(particle)
 
             if player.falling:
-                particle = player.display_particle(Sprite(im.small_explosions))
+                particle = player.display_particle(Sprite(im.small_explosions, animation_time=5))
                 if particle: particles.append(particle)
 
             enemies = [enemy for enemy in enemies if enemy.alive]
@@ -148,14 +152,14 @@ def play(screen, font):
                 enemy.draw(screen)
                 if enemy.ground_collision():
                     enemy.destroy()
-                    particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.large_explosions), duration=40, scale=3, adjust_pos=False))
+                    particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True))
                     score += 20 if cfg.wave_mode else 70
                     enemy_count += cfg.enemy_count_increment
                 if enemy.ai.shoot:
                     bullets.append(enemy.shoot())
                     enemy.ai.shoot -= 1
                 if enemy.falling:
-                    particle = enemy.display_particle(Sprite(im.small_explosions))
+                    particle = enemy.display_particle(Sprite(im.small_explosions, animation_time=5))
                     if particle: particles.append(particle)
 
                 if cfg.show_ai_type:

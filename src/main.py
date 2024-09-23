@@ -24,58 +24,45 @@ def finish():
     kb.save()
     quit()
 
-def options():
-    elements = []
-    i = 0
-    x = 0
-    for category, contents in cfg.d.items():
-        if i > 14:
-            i = 0
-            x += 1
-        elements.append(Text(category, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20, color="0xFFFFFF", size=40))
-        i += 1
-        for key, value in contents.items():
-            if i > 14:
-                i = 0
-                x += 1
-            elements.append(ConfigOption(cfg=cfg, category=category, key=key, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20))
-            i += 1
-            
+options_menu = None
 
-    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=14*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
+def options(con = cfg):
+    categories = list(con.d.keys())
+    def refresh(c=0):
+        global options_menu
 
-    options_menu = Menu(
-        Sprite(im.ui.menu_background_image),
-        elements=elements
-    )
+        if options_menu: options_menu.run = False
+        elements = []
+        if len(con.d) < 1:
+            elements.append(Text("This configuration has no options.", y=20, x=20, color="0xFFFFFF", size=40))
+        else:
+            category = categories[c]
+            elements.append(Text(f"Page {c+1}/{len(con.d)}", y=20, x=20, color="0xFFFFFF", size=40))
+            elements.append(Text(category, y=(cfg.screen_height//16)+20, x=20, color="0xFFFFFF", size=40))
+            i = 2
+            x = 0
+            for key, value in con.d[category].items():
+                if i > 14:
+                    i = 0
+                    x += 1
+                elements.append(ConfigOption(cfg=con, category=category, key=key, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20))
+                i += 1
+                
+        if c > 0: elements.append(Button(sprite=Sprite(im.ui.small_button_image), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, c-1), y=13*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
+        if c < len(con.d)-1: elements.append(Button(sprite=Sprite(im.ui.small_button_image), font_size=cfg.ui.narrow_font_size, content="-->", base_color="0xFFFF00", on_click=(refresh, c+1), y=13*(cfg.screen_height//16)+20, x=int(3.47*(cfg.screen_width//4))+20))
+        elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=14*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
 
-    options_menu.loop(screen)
+        options_menu = Menu(
+            Sprite(im.ui.menu_background_image),
+            elements=elements
+        )
+
+        options_menu.loop(screen)
+
+    refresh()
 
 def keybinds():
-    elements = []
-    i = 0
-    x = 0
-    for category, contents in kb.d.items():
-        if i > 14:
-            i = 0
-            x += 1
-        elements.append(Text(category, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20, color="0xFFFFFF", size=40))
-        i += 1
-        for key, value in contents.items():
-            if i > 14:
-                i = 0
-                x += 1
-            elements.append(ConfigOption(cfg=kb, category=category, key=key, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20, is_keybind=True))
-            i += 1
-
-    elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=kb.reset, y=14*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
-
-    options_menu = Menu(
-        Sprite(im.ui.menu_background_image),
-        elements=elements
-    )
-    
-    options_menu.loop(screen)
+    options(kb)
 
 def start_game(): play(screen, font)
 

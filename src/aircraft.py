@@ -61,15 +61,15 @@ class Aircraft(Entity):
             self.max_shoot_cooldown = cfg.gameplay.shoot_cooldown_crashing
         else: return False
 
-    def display_particle(self, sprite: Sprite) -> particle.Particle | None:
+    def display_particle(self, sprite: Sprite, delay: int = 400) -> particle.Particle | None:
         current_time = pygame.time.get_ticks()
-        if current_time - self.last_particle_time > 400:
+        if current_time - self.last_particle_time > delay:
             self.last_particle_time = current_time
-            return particle.Particle(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), sprite=sprite, duration=10)
+            return particle.Particle(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), sprite=sprite, move_with_screen=not self.is_enemy)
         else: return None
 
     def check_health(self) -> bool:
-        if self.health == 0:
+        if self.health <= 0:
             return self.fall()
             
     def apply_acceleration(self, target_x: int, target_y: int, trackable_distance: int = 50) -> None:

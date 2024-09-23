@@ -10,6 +10,7 @@ class Menu:
         self.background = background
         self.elements = elements
         self.on_quit = on_quit
+        self.any_listening = False
         self.run = True
 
     def tick(self, screen: pygame.Surface):
@@ -54,3 +55,6 @@ class Menu:
             self.tick(screen)
             pygame.display.update()
             pygame.time.Clock().tick(60)
+
+    def __str__(self) -> str:
+        return f"Menu running={self.run} listening={self.any_listening} element count={len(self.elements)}"

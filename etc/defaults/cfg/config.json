@@ -13,7 +13,10 @@
     "bomb_x_velocity_decay": 0.05,
     "bomb_y_velocity_gain": 0.1,
     "bomb_terminal_velocity": 20,
-    "initial_enemy_speed": 1
+    "initial_enemy_speed": 1,
+    "aircraft_drag": 0.92,
+    "aircraft_acceleration": 1.0,
+    "aircraft_terminal_velocity": 20
   },
   "gameplay": {
     "shoot_cooldown": 30,
@@ -27,7 +30,8 @@
     "initial_health": 100,
     "wave_mode": true,
     "disable_takeoff": false,
-    "scroll_speed_ratio": 0.01
+    "scroll_speed_ratio": 0.01,
+    "ground_health_decay": 2
   },
 
   "sprite_sizes": {
@@ -47,7 +51,8 @@
     "font_size": 70,
     "narrow_font_size": 30,
     "button_size": [0.3, 0.1],
-    "narrow_button_size": [0.2, 0.05]
+    "narrow_button_size": [0.2, 0.05],
+    "small_button_size": [0.08, 0.05]
   },
 
   "eggs": {
