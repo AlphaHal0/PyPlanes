@@ -10,16 +10,16 @@ from keybind import is_pressed, is_held
 
 # Game loop
 def play(screen, font):
-    if cfg.moth_music_is_main_music:
+    if cfg.easter_eggs.moth_music_is_main_music:
         pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
         pygame.mixer.music.play(-1)
 
     enemies = []
-    enemy_count = cfg.initial_enemy_aircraft
+    enemy_count = cfg.gameplay.initial_enemy_aircraft
 
     def spawn_enemy(image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False, type: int = 0):
-        if (cfg.moth_chance and random() <= cfg.moth_chance) or moth:
-            if cfg.moth_music and not pygame.mixer.music.get_busy():
+        if (cfg.easter_eggs.moth_chance and random() <= cfg.easter_eggs.moth_chance) or moth:
+            if cfg.easter_eggs.moth_music and not pygame.mixer.music.get_busy():
                 pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
                 pygame.mixer.music.play(-1)
             enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
@@ -34,20 +34,20 @@ def play(screen, font):
                     case 4: image = im.enemy_4_image
             enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image), difficulty, ai_type=type))
 
-    if not cfg.wave_mode:
+    if not cfg.gameplay.wave_mode:
         for i in range(enemy_count):
             spawn_enemy()
 
     scroll_x = 0
     player = aircraft.Aircraft(
         cfg.initial_aircraft_x, 
-        cfg.initial_aircraft_y if cfg.disable_takeoff else cfg.floor_y - im.aircraft_image.get_height(), 
+        cfg.initial_aircraft_y if cfg.gameplay.disable_takeoff else cfg.floor_y - im.aircraft_image.get_height(), 
         Sprite(im.aircraft_image), 
-        shoot_cooldown=cfg.player_shoot_cooldown, 
-        bomb_cooldown=cfg.player_bomb_cooldown, 
-        health=cfg.initial_health)
+        shoot_cooldown=cfg.gameplay.player_shoot_cooldown, 
+        bomb_cooldown=cfg.gameplay.player_bomb_cooldown, 
+        health=cfg.gameplay.initial_health)
     enemies = []
-    enemy_count = cfg.initial_enemy_aircraft
+    enemy_count = cfg.gameplay.initial_enemy_aircraft
     scroll_x = 0
     bullets = []
     particles = []
@@ -59,13 +59,13 @@ def play(screen, font):
     running = True
     framestart = time.time()
 
-    if cfg.disable_takeoff:
-        wave_warmup_time = 120 if cfg.wave_mode else 0
+    if cfg.gameplay.disable_takeoff:
+        wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
         wave_mode_text_opacity = 255
         scroll_speed = cfg.scroll_speed
         pregame_timer = 0
         wave_mode_text_opacity = 255
-        pygame.mouse.set_visible(cfg.mouse_visibility)
+        pygame.mouse.set_visible(cfg.debug.mouse_visibility)
     else:
         wave_warmup_time = 0
         pregame_timer = 300
@@ -158,8 +158,8 @@ def play(screen, font):
                 if enemy.ground_collision():
                     enemy.destroy()
                     particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True))
-                    score += 20 if cfg.wave_mode else 70
-                    enemy_count += cfg.enemy_count_increment
+                    score += 20 if cfg.gameplay.wave_mode else 70
+                    enemy_count += cfg.gameplay.enemy_count_increment
                 if enemy.ai.shoot:
                     bullets.append(enemy.shoot())
                     enemy.ai.shoot -= 1
@@ -167,12 +167,11 @@ def play(screen, font):
                     particle = enemy.display_particle(Sprite(im.small_explosions, animation_time=5))
                     if particle: particles.append(particle)
 
-                if cfg.show_ai_type:
+                if cfg.debug.show_ai_type:
                     ai_marker = pygame.Surface((10,10))
                     ai_marker.fill(enemy.ai.debug_color)
                     screen.blit(ai_marker, (enemy.x+enemy.sprite.size[0], enemy.y))
 
-            # Spawn all enemies in one go if cfg.wave_mode is True, otherwise spawn one enemy to keep up with the count.
             if wave_warmup_time:
                 wave_warmup_time -= 1
                 if wave_warmup_time == 0:
@@ -180,10 +179,11 @@ def play(screen, font):
                     for i in range(to_spawn):
                         spawn_enemy(difficulty=int(enemy_count))
 
-            elif len(enemies) < int(enemy_count) and not cfg.wave_mode:
+            # Spawn all enemies in one go if cfg.gameplay.wave_mode is True, otherwise spawn one enemy to keep up with the count.
+            elif len(enemies) < int(enemy_count) and not cfg.gameplay.wave_mode:
                 spawn_enemy(difficulty=int(enemy_count))
 
-            elif len(enemies) == 0 and cfg.wave_mode:
+            elif len(enemies) == 0 and cfg.gameplay.wave_mode:
                 score += 50 * to_spawn
                 print(f"Wave {wave} complete!")
                 wave += 1
@@ -235,10 +235,10 @@ def play(screen, font):
             pregame_timer -= 1
 
             if pregame_timer == 0:
-                wave_warmup_time = 120 if cfg.wave_mode else 0
+                wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
                 wave_mode_text_opacity = 255
                 scroll_speed = cfg.scroll_speed
-                pygame.mouse.set_visible(cfg.mouse_visibility)
+                pygame.mouse.set_visible(cfg.debug.mouse_visibility)
 
 
         particles = [particle for particle in particles if particle.alive]
@@ -250,7 +250,7 @@ def play(screen, font):
 
         health_bar = pygame.Surface((150,10))
         health_bar.fill(0xFF0000)
-        health_bar.fill(0x00FF00, rect=(0,0,(player.health/cfg.initial_health)*150,10)),
+        health_bar.fill(0x00FF00, rect=(0,0,(player.health/cfg.gameplay.initial_health)*150,10)),
 
         # Draw health bar
         screen.blit(
@@ -260,7 +260,7 @@ def play(screen, font):
         )
         
         scoredisplay = f"Score {score} | Difficulty {round(enemy_count, 1)}"
-        if cfg.wave_mode: 
+        if cfg.gameplay.wave_mode: 
             scoredisplay += f"| Wave {wave}"
             if wave_mode_text_opacity > 0:
                 wavemodedisplay = font.render(f"Wave {wave}", False, 0)
@@ -270,7 +270,7 @@ def play(screen, font):
                 if wave_warmup_time <= 0:
                     wave_mode_text_opacity -= 2
 
-        if cfg.show_fps: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
+        if cfg.debug.show_fps: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
         scoredisplay_render = font.render(scoredisplay, False, 0)
 
         screen.blit(scoredisplay_render, (0, 0))

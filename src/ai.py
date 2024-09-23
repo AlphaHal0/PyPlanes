@@ -95,7 +95,7 @@ class Offence(BaseAI): # Follow the player.
         super().__init__(size, difficulty, fire_rate)
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
-        self.max_shoot_time = cfg.shoot_cooldown * max(1, 5 - difficulty//5)
+        self.max_shoot_time = cfg.gameplay.enemy_shoot_cooldown * max(1, 5 - difficulty//5)
         self.shoot_time = self.max_shoot_time
         self.target_x = random.randint(int(self.xmin), int(self.xmax))
 

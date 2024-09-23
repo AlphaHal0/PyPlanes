@@ -10,7 +10,7 @@ import images
 import math
 
 class Aircraft(Entity):
-    def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = cfg.shoot_cooldown, spawn_cooldown: int = cfg.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.bomb_cooldown):
+    def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown):
         self.acceleration = cfg.physics.aircraft_acceleration
         self.terminal_velocity = cfg.physics.aircraft_terminal_velocity
         self.shoot_cooldown = 0
@@ -58,7 +58,7 @@ class Aircraft(Entity):
             self.falling = True
             self.pitch = 10 if self.is_enemy else -10
             self.sprite.rotate(self.pitch)
-            self.max_shoot_cooldown = cfg.gameplay.shoot_cooldown_crashing
+            self.max_shoot_cooldown *= cfg.gameplay.crashing_shoot_multiplier
         else: return False
 
     def display_particle(self, sprite: Sprite, delay: int = 400) -> particle.Particle | None:
@@ -106,7 +106,7 @@ class Aircraft(Entity):
                 (self.x if self.is_enemy else self.x + self.width),
                 self.y + self.height / 2,
                 self.is_enemy,
-                velocity_x=cfg.bullet_velocity+(self.velocity_x*cfg.weapon_velocity_multiplier),
+                velocity_x=cfg.physics.bullet_velocity+(self.velocity_x*cfg.physics.weapon_velocity_multiplier),
                 rotation=self.pitch)
         else:
             return None
@@ -146,7 +146,7 @@ class EnemyAircraft(Aircraft):
         self.update_position()
 
     def draw(self, screen: pygame.Surface) -> None:
-        if cfg.show_target_traces:
+        if cfg.debug.show_target_traces:
             pygame.draw.line(screen, (255, 0, 0), (self.x, self.y), (self.ai.target_x, self.ai.target_y), 5)
         return super().draw(screen)
 
@@ -155,6 +155,6 @@ class Moth(EnemyAircraft):
         super().__init__(y, Sprite(images.moth_images, animation_time=random.randint(1, 10)), difficulty)
 
     def destroy(self) -> None:
-        if not cfg.moth_music_is_main_music:
+        if not cfg.easter_eggs.moth_music_is_main_music:
             pygame.mixer.music.fadeout(1000)
         super().destroy()

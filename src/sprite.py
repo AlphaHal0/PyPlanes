@@ -51,10 +51,10 @@ class Sprite:
             )
 
     def draw(self, screen: pygame.Surface, x: int, y: int, loop: bool = True) -> bool:
-        if cfg.show_sprite_sizes:
+        if cfg.debug.show_sprite_sizes:
             pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))
 
-        if cfg.disable_sprite_textures: return False
+        if cfg.debug.disable_sprite_textures: return False
 
         if self.image is None:
             pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))

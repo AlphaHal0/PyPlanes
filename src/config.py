@@ -68,8 +68,6 @@ class Config:
             setattr(self, category, ConfigCategory())
             for key, value in contents.items():
                 setattr(getattr(self, category), key, value)
-                if category != "sprite_sizes" and category != "ui": # legacy support
-                    setattr(self, key, value)
 
         self.d = d
 
@@ -80,9 +78,6 @@ class Config:
     def set_value(self, category: str, key: str, value = None):
         self.d[category][key] = value
         setattr(self.__getattribute__(category), key, value)
-
-        if category != "sprite_sizes" and category != "ui": # legacy support
-            setattr(self, key, value)
 
     def toggle_value(self, category: str, key: str) -> bool|None:
         if self.d[category][key] == True:
@@ -101,9 +96,11 @@ class Config:
 cfg = Config("cfg/config.json")
 
 # Special config options
-cfg.floor_y = cfg.screen_height - cfg.screen_height * cfg.floor_y_ratio
-cfg.scroll_speed = cfg.scroll_speed_ratio * cfg.screen_width
-cfg.initial_aircraft_x = cfg.initial_aircraft_x_ratio * cfg.screen_width
-cfg.initial_aircraft_y = cfg.initial_aircraft_y_ratio * cfg.screen_height
+cfg.screen_height = cfg.display.screen_height
+cfg.screen_width = cfg.display.screen_width
+cfg.floor_y = cfg.screen_height - cfg.screen_height * cfg.display.floor_y_ratio
+cfg.scroll_speed = cfg.display.scroll_speed_ratio * cfg.screen_width
+cfg.initial_aircraft_x = cfg.display.initial_aircraft_x_ratio * cfg.screen_width
+cfg.initial_aircraft_y = cfg.display.initial_aircraft_y_ratio * cfg.screen_height
 
 kb = Config("cfg/keybinds.json")

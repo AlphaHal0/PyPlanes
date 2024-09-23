@@ -2,6 +2,7 @@ from pygame.font import Font
 from sprite import Sprite
 import pygame
 import config
+from config import cfg
 import keybind
 from ui.element import UIElement
 from ui.text import Text
@@ -9,7 +10,7 @@ import images
 from typing import Callable
 
 class Button(UIElement):
-    def __init__(self, sprite: Sprite|None = Sprite(images.ui.button_image), x: int = 0, y: int = 0, content: str = "", font_size: int = config.cfg.ui.font_size, center_font: bool = True, base_color: pygame.color.Color = "0xAAAAAA", click_color: pygame.color.Color = "0xFFFFFF", hover_color: pygame.color.Color = "0x00FFFF", on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, on_rclick: Callable|tuple|None = None,id: str = ""):
+    def __init__(self, sprite: Sprite|None = Sprite(images.ui.button_image), x: int = 0, y: int = 0, content: str = "", font_size: int = cfg.ui.font_size, center_font: bool = True, base_color: pygame.color.Color = "0xAAAAAA", click_color: pygame.color.Color = "0xFFFFFF", hover_color: pygame.color.Color = "0x00FFFF", on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, on_rclick: Callable|tuple|None = None,id: str = ""):
         super().__init__(id)
         self.sprite = sprite
         self.x, self.y = x, y
@@ -68,7 +69,7 @@ class Button(UIElement):
         self.text.set_color(color)
 
 class ConfigOption(Button):
-    def __init__(self, cfg: config.Config, category: str, key: str, sprite: Sprite | None = Sprite(images.ui.narrow_button_image), font_size: int = config.cfg.ui.narrow_font_size, is_keybind: bool = False, **kwargs):
+    def __init__(self, cfg: config.Config, category: str, key: str, sprite: Sprite | None = Sprite(images.ui.narrow_button_image), font_size: int = cfg.ui.narrow_font_size, is_keybind: bool = False, **kwargs):
         super().__init__(sprite, on_click=self.update_config_option, on_rclick=(self.update_config_option, True), font_size=font_size, center_font=False, **kwargs)
 
         self.config = cfg
@@ -126,13 +127,12 @@ class ConfigOption(Button):
                     self.listen_for_events = False
                     return
                 self.config.set_value(self.category, self.key, event.key)
-                print(event.key)
+                print(f"Set keymap to ID {event.key}")
                 self.listen_for_events = False
                 return
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.config.set_value(self.category, self.key, event.button+1024)
-                print(event.button+1024)
                 self.listen_for_events = False
                 return
                 

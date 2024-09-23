@@ -1,10 +1,17 @@
 {
-  "display": {
-    "screen_width": 1800,
-    "screen_height": 800,
-    "floor_y_ratio": 0.13,
-    "initial_aircraft_x_ratio": 0.1,
-    "initial_aircraft_y_ratio": 0.45
+  "gameplay": {
+    "player_shoot_cooldown": 30,
+    "enemy_shoot_cooldown": 30,
+    "crashing_shoot_multiplier": 0.5,
+    "spawn_cooldown": 1000,
+    "player_bomb_cooldown": 100,
+    "enemy_bomb_cooldown": 100,
+    "initial_enemy_aircraft": 1,
+    "enemy_count_increment": 0.4,
+    "initial_health": 100,
+    "wave_mode": true,
+    "disable_takeoff": false,
+    "ground_health_decay": 2
   },
 
   "physics": {
@@ -18,20 +25,23 @@
     "aircraft_acceleration": 1.0,
     "aircraft_terminal_velocity": 20
   },
-  "gameplay": {
-    "shoot_cooldown": 30,
-    "player_shoot_cooldown": 30,
-    "shoot_cooldown_crashing": 50,
-    "spawn_cooldown": 1000,
-    "bomb_cooldown": 100,
-    "player_bomb_cooldown": 100,
-    "initial_enemy_aircraft": 1,
-    "enemy_count_increment": 0.4,
-    "initial_health": 100,
-    "wave_mode": true,
-    "disable_takeoff": false,
-    "scroll_speed_ratio": 0.01,
-    "ground_health_decay": 2
+
+  "display": {
+    "screen_width": 1800,
+    "screen_height": 800,
+    "floor_y_ratio": 0.13,
+    "initial_aircraft_x_ratio": 0.1,
+    "initial_aircraft_y_ratio": 0.45,
+    "scroll_speed_ratio": 0.01
+  },
+
+  "ui": {
+    "title_font_size": 100,
+    "font_size": 70,
+    "narrow_font_size": 30,
+    "button_size": [0.3, 0.1],
+    "narrow_button_size": [0.2, 0.05],
+    "small_button_size": [0.08, 0.05]
   },
 
   "sprite_sizes": {
@@ -46,16 +56,7 @@
     "blueberry": 0.0625
   },
 
-  "ui": {
-    "title_font_size": 100,
-    "font_size": 70,
-    "narrow_font_size": 30,
-    "button_size": [0.3, 0.1],
-    "narrow_button_size": [0.2, 0.05],
-    "small_button_size": [0.08, 0.05]
-  },
-
-  "eggs": {
+  "easter_eggs": {
     "moth_chance": 0.001,
     "moth_music": true,
     "moth_music_is_main_music": false,

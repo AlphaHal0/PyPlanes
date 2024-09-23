@@ -36,19 +36,19 @@ class Weapon(Entity):
             return Particle(self.x, self.y, sprite=Sprite(images.small_explosions), duration=10)
 
 class Bullet(Weapon):
-    def __init__(self, x: int, y: int, is_enemy: bool = False, velocity_x: int = cfg.bullet_velocity, velocity_y: int = 0, rotation: int = 0):
+    def __init__(self, x: int, y: int, is_enemy: bool = False, velocity_x: int = cfg.physics.bullet_velocity, velocity_y: int = 0, rotation: int = 0):
         super().__init__(x, y, Sprite(images.bullet_image), is_enemy, 0, -velocity_x if is_enemy else velocity_x, velocity_y, rotation)
 
 class Bomb(Weapon):
     def __init__(self, x: int, y: int, is_enemy: bool = False, velocity_x: int = 5, velocity_y: int = 0, drag_multiplier: float = 0.1, explosion_power: int = 0, rotation: int = 0):
-        if random() <= cfg.berry_bomb_chance:
+        if random() <= cfg.easter_eggs.berry_bomb_chance:
             sprite = Sprite(images.blueberry)
         else:
             sprite = Sprite(images.bomb_image)
-        super().__init__(x, y, sprite, is_enemy, explosion_power, velocity_x, velocity_y + cfg.bomb_y_velocity_gain, rotation)
+        super().__init__(x, y, sprite, is_enemy, explosion_power, velocity_x, velocity_y + cfg.physics.bomb_y_velocity_gain, rotation)
         self.drag_multiplier = drag_multiplier
         
     def update_position(self):
         super().update_position()
-        self.velocity_x -= cfg.bomb_x_velocity_decay // (1 + self.velocity_x * self.drag_multiplier)
-        self.velocity_y += cfg.bomb_y_velocity_gain * (1 + self.velocity_y / cfg.bomb_terminal_velocity)
+        self.velocity_x -= cfg.physics.bomb_x_velocity_decay // (1 + self.velocity_x * self.drag_multiplier)
+        self.velocity_y += cfg.physics.bomb_y_velocity_gain * (1 + self.velocity_y / cfg.physics.bomb_terminal_velocity)
