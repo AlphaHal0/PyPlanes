@@ -9,7 +9,7 @@
 
   "physics": {
     "bullet_velocity": 20,
-    "weapon_relative_velocity_multiplier": 0.2,
+    "weapon_velocity_multiplier": 0.2,
     "bomb_x_velocity_decay": 0.05,
     "bomb_y_velocity_gain": 0.1,
     "bomb_terminal_velocity": 20,
