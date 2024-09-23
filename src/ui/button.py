@@ -90,7 +90,7 @@ class ConfigOption(Button):
         elif not no_set_text:
             self.screen = screen
             if self.type == 5: # keybind
-                self.set_text(f"{self.key_name}: {keybind.keymap.get(str(self.config.d[self.category][self.key]))}")
+                self.set_text(f"{self.key_name}: {keybind.keymap.get(str(self.config.d[self.category][self.key]), "unknown")}")
             else:
                 self.set_text(f"{self.key_name}: {self.config.d[self.category][self.key]}")
         return super().update(screen, mouse_x, mouse_y, click, release, **kwargs)
@@ -126,11 +126,13 @@ class ConfigOption(Button):
                     self.listen_for_events = False
                     return
                 self.config.set_value(self.category, self.key, event.key)
+                print(event.key)
                 self.listen_for_events = False
                 return
 
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.config.set_value(self.category, self.key, event.button+1024)
+                print(event.button+1024)
                 self.listen_for_events = False
                 return
                 
@@ -142,6 +144,7 @@ class ConfigOption(Button):
             match self.type:
                 case 1: self.config.toggle_value(self.category, self.key)
                 case 4: self.config.set_value(self.category, self.key, "")
+                case 5: self.config.set_value(self.category, self.key, 0)
 
         else: # left-click
             if self.type == 1: self.config.toggle_value(self.category, self.key)

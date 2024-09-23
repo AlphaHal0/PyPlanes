@@ -50,7 +50,7 @@ def options(con = cfg, is_keybind: bool = False):
                 
         if c > 0: elements.append(Button(sprite=Sprite(im.ui.small_button_image), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, c-1), y=13*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
         if c < len(con.d)-1: elements.append(Button(sprite=Sprite(im.ui.small_button_image), font_size=cfg.ui.narrow_font_size, content="-->", base_color="0xFFFF00", on_click=(refresh, c+1), y=13*(cfg.screen_height//16)+20, x=int(3.47*(cfg.screen_width//4))+20))
-        elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=cfg.reset, y=14*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
+        elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=con.reset, y=14*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
 
         options_menu = Menu(
             Sprite(im.ui.menu_background_image),

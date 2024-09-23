@@ -1,7 +1,4 @@
 {
-    "other": {
-        "quit": 27
-    },
     "movement": {
         "pitch_up": 119,
         "pitch_down": 115
@@ -10,6 +7,9 @@
         "shoot": 1025,
         "shoot_hold": 1073742049,
         "bomb": 32
+    },
+    "other": {
+        "quit": 27
     },
     "debug": {
         "spawn_enemy": 108,
