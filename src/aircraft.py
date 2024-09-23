@@ -10,6 +10,7 @@ import images
 import math
 
 class Aircraft(Entity):
+    """An Entity with aircraft mechanics"""
     def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown):
         self.acceleration = cfg.physics.aircraft_acceleration
         self.terminal_velocity = cfg.physics.aircraft_terminal_velocity
@@ -28,7 +29,8 @@ class Aircraft(Entity):
         self.target_pitch = 0
         super().__init__(sprite, x, y)
 
-    def update_position(self) -> None:
+    def update(self) -> None:
+        """Tick"""
         if self.shoot_cooldown: self.shoot_cooldown -= 1
         if self.bomb_cooldown: self.bomb_cooldown -= 1
 
@@ -42,17 +44,17 @@ class Aircraft(Entity):
             else:
                 self.pitch += 1
 
-        super().update_position()
+        super().update()
 
     def set_pitch(self, value: int = 0) -> int:
+        """Sets pitch. Will not work if aircraft is falling."""
         if not self.falling:
             self.target_pitch = value
         return self.pitch
 
-    def destroy(self) -> None:
-        self.alive = False
-
     def fall(self) -> bool:
+        """Marks the aircraft as 'falling' - its movement and rotation is limited to downwards.
+        Returns False if already falling, else True"""
         if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
         if not self.falling:
             self.falling = True
@@ -62,6 +64,8 @@ class Aircraft(Entity):
         else: return False
 
     def display_particle(self, sprite: Sprite, delay: int = 400) -> particle.Particle | None:
+        """Returns a Particle with the Sprite if this function has been run longer ago than the delay param.
+        The Particle will move with the screen if this Aircraft is not an enemy"""
         current_time = pygame.time.get_ticks()
         if current_time - self.last_particle_time > delay:
             self.last_particle_time = current_time
@@ -69,10 +73,13 @@ class Aircraft(Entity):
         else: return None
 
     def check_health(self) -> bool:
+        """Check if the Aircraft's health is less than or equal to 0.
+        If so, runs and returns the result from self.fall()"""
         if self.health <= 0:
             return self.fall()
             
     def apply_acceleration(self, target_x: int, target_y: int, trackable_distance: int = 50) -> None:
+        """Accelerates towards the target pos if the distance is greater than trackable_distance"""
         dx = target_x - self.x
         dy = target_y - self.y
         distance = self.distance_to(target_x, target_y)
@@ -100,6 +107,7 @@ class Aircraft(Entity):
         self.velocity_y *= cfg.physics.aircraft_drag
     
     def shoot(self) -> weapon.Bullet | None:
+        """Returns a shot weapon.Bullet if not on cooldown, otherwise None"""
         if self.shoot_cooldown <= 0:
             self.shoot_cooldown = self.max_shoot_cooldown
             return weapon.Bullet(
@@ -112,6 +120,7 @@ class Aircraft(Entity):
             return None
     
     def bomb(self) -> weapon.Bomb | None:
+        """Returns a shot weapon.Bomb if not on cooldown, otherwise None"""
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
             return weapon.Bomb(
@@ -128,8 +137,8 @@ class Aircraft(Entity):
 # Create a new AI aircraft that inherits properties from Aircraft.
 class EnemyAircraft(Aircraft):
     def __init__(self, y: int, sprite: Sprite, difficulty: int = 1, ai_type: int = 1):
-        # Call Aircraft()
-        super().__init__(cfg.screen_width, y, sprite, True, 50)
+        """An Aircraft with enemy AI"""
+        super().__init__(x=cfg.screen_width, y=y, sprite=sprite, is_enemy=True, shoot_cooldown=50)
 
         size = self.sprite.size
         if ai_type == 1: self.ai = ai.Fly(size, difficulty, self.max_shoot_cooldown)
@@ -139,11 +148,10 @@ class EnemyAircraft(Aircraft):
         else: self.ai = ai.BaseAI(size)
 
     def ai_tick(self, **ctx):
+        """Ticks the EnemyAircraft's AI and runs self.update()"""
         self.ai.tick(ctx)
-
         self.apply_acceleration(self.ai.target_x, self.ai.target_y, trackable_distance=50)
-
-        self.update_position()
+        self.update()
 
     def draw(self, screen: pygame.Surface) -> None:
         if cfg.debug.show_target_traces:
@@ -152,6 +160,7 @@ class EnemyAircraft(Aircraft):
 
 class Moth(EnemyAircraft):
     def __init__(self, y: int, difficulty: int = 1):
+        """An EnemyAircraft that is a moth."""
         super().__init__(y, Sprite(images.moth_images, animation_time=random.randint(1, 10)), difficulty)
 
     def destroy(self) -> None:

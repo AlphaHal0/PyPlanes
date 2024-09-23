@@ -4,13 +4,20 @@ import pygame
 sz = cfg.sprite_sizes
 ui_sz = cfg.ui
 
-def load_image(file: str):
+def load_image(file: str) -> pygame.Surface:
+    """Loads an image from file and returns a pygame.Surface.
+    Checks `./mod/res/img/{file}` first, then `./res/img/{file}`.
+    """
     try:
         return pygame.image.load(f"./mod/res/img/{file}").convert_alpha()
     except FileNotFoundError:
         return pygame.image.load(f"./res/img/{file}").convert_alpha()
 
-def scale_image(surface: pygame.Surface, size: list|float, relative: bool = True):
+def scale_image(surface: pygame.Surface, size: list|float, relative: bool = True) -> pygame.Surface:
+    """Returns a scaled pygame.Surface by size.
+    If relative is True, the surface is scaled as a fraction of the screen size.
+    e.g. 0.1 returns a Surface that is 0.1 times the screen height
+    and [0.1, 0.2] returns a Surface that is 0.1x height and 0.2x width."""
     if relative:
         if isinstance(size, list):
             return pygame.transform.scale(surface, (size[0] * cfg.screen_width, size[1] * cfg.screen_height))
@@ -21,6 +28,7 @@ def scale_image(surface: pygame.Surface, size: list|float, relative: bool = True
         return pygame.transform.scale(surface, size)
 
 def flip_image(surface: pygame.Surface, flip_x: bool = True, flip_y: bool = False):
+    """Flips a pygame.Surface"""
     return pygame.transform.flip(surface, flip_x, flip_y)
 
 bullet_image = load_image("weapons/bullets/Shot1.png")
@@ -29,6 +37,7 @@ bullet_image = scale_image(bullet_image, sz.bullet_image)
 background_image = scale_image(load_image("sky/side-scroll.jpg"), sz.background_image)
 
 class ui:
+    """UI image class"""
     menu_background_image = scale_image(load_image(f"ui/background.png"), sz.background_image)
     button_image = scale_image(load_image(f"ui/button.png"), ui_sz.button_size)
     narrow_button_image = scale_image(load_image(f"ui/button.png"), ui_sz.narrow_button_size)

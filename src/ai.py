@@ -1,7 +1,8 @@
 import random
 from config import cfg
 
-class BaseAI: # The base AI with no special features.
+class BaseAI: 
+    """The base AI with no special features."""
     debug_color = 0x000000
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         self.speed = 100
@@ -29,9 +30,10 @@ class BaseAI: # The base AI with no special features.
 
     def tick(self, ctx: dict): pass
 
-class Fly(BaseAI): # AI with basic random movements.
+class Fly(BaseAI): 
+    """AI with basic random movements."""
     debug_color = 0xFF0000
-    def tick(self, ctx: dict):
+    def tick(self, ctx: dict): # What is ctx? Why is it not used? Why is it still defined? UwU
         self.target_x += random.randint(-self.speed, self.speed)
         self.target_y += random.randint(-self.speed, self.speed)
 
@@ -40,7 +42,8 @@ class Fly(BaseAI): # AI with basic random movements.
 
         self.constrain()
 
-class Turret(BaseAI): # Move to a random position and shoot.
+class Turret(BaseAI): 
+    """Move to a random position and shoot."""
     debug_color = 0x00FF00
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
@@ -60,7 +63,8 @@ class Turret(BaseAI): # Move to a random position and shoot.
             self.iteration -= 1
         self.constrain()
 
-class Dodger(BaseAI): # Avoid player bullets.
+class Dodger(BaseAI): 
+    """Avoid player bullets."""
     debug_color = 0xFFFF00
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
@@ -72,7 +76,7 @@ class Dodger(BaseAI): # Avoid player bullets.
 
     def tick(self, ctx: dict):
         c = 0
-        while self.check_is_obstructed(ctx["danger_zones"]) and c < 10: # limit to 10 attempts
+        while self.check_is_obstructed(ctx["danger_zones"]) and c < 10: # limit to 10 attempts because UwU
             self.target_y = random.randint(int(self.ymin), int(self.ymax))
             self.target_x = random.randint(int(self.xmin), int(self.xmax))
             c += 1
@@ -89,7 +93,8 @@ class Dodger(BaseAI): # Avoid player bullets.
                 return True
         return False
     
-class Offence(BaseAI): # Follow the player.
+class Offence(BaseAI): 
+    """Follow the player."""
     debug_color = 0x0000FF
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)

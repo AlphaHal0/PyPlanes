@@ -4,6 +4,9 @@ import os
 if not os.path.exists("./cfg"): os.mkdir("./cfg")
 
 def copy_missing_configs(source: str, dest: str):
+    """Copies options from one file to another.
+    If dest is missing, copies source to dest.
+    Otherwise, reads through all config objects in source and copies over any objects that are not currently in dest."""
     with open(source, 'r') as _s: infile = json.load(_s)
     
     try: 
@@ -34,19 +37,26 @@ def copy_missing_configs(source: str, dest: str):
         with open(dest, 'w') as _s: json.dump(outfile, _s)
 
 class ConfigCategory:
+    """A class that handles a config category.
+    Config initialises this class and manually sets attributes for it."""
     def __init__(self) -> None:
         pass
 
 class ConfigLoadError(Exception):
+    """Class to manage config load errors"""
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
 
 class Config:
+    """A class to manage a config from a json file.
+    This file must be seperated into categories which each contain their own values."""
     def __init__(self, fp: str = "cfg/config.json"):
         self.fp = fp
         self.try_load()
             
-    def try_load(self, only_once: bool = False):
+    def try_load(self, only_once: bool = False) -> None:
+        """Tries to load the config from self.fp. If it fails (and only_once is false) it resets the file and tries to load again.
+        If that fails, raises ConfigLoadError"""
         try: # try once
             self.load()
         except:
@@ -59,6 +69,8 @@ class Config:
                 raise ConfigLoadError(e.args)
 
     def load(self):
+        """Loads contents from self.fp into the Config's attributes.
+        Categories are seperated, e.g. {\"cat\":{\"myvalue:\":123}} becomes self.cat.myvalue = 123"""
         copy_missing_configs(f"etc/defaults/{self.fp}", self.fp)
 
         with open(self.fp) as _infile:
@@ -72,14 +84,18 @@ class Config:
         self.d = d
 
     def save(self):
+        """Saves contents into self.fp"""
         with open(self.fp, 'w') as _outfile:
             json.dump(self.d, _outfile)
 
     def set_value(self, category: str, key: str, value = None):
+        """Sets a value in this Config"""
         self.d[category][key] = value
         setattr(self.__getattribute__(category), key, value)
 
     def toggle_value(self, category: str, key: str) -> bool|None:
+        """If this config item is a bool, toggle it and return the new value.
+        Otherwise, return None"""
         if self.d[category][key] == True:
             self.set_value(category, key, False)
             return False
@@ -90,6 +106,7 @@ class Config:
             return None
         
     def reset(self):
+        """Removes the file at self.fp and tries to load it from defaults"""
         if os.path.exists(self.fp): os.remove(self.fp)
         self.try_load(True)
 

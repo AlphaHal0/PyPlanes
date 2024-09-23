@@ -60,6 +60,7 @@ def play(screen, font):
     framestart = time.time()
 
     if cfg.gameplay.disable_takeoff:
+        # Set initial values for when not taking off
         wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
         wave_mode_text_opacity = 255
         scroll_speed = cfg.scroll_speed
@@ -67,6 +68,7 @@ def play(screen, font):
         wave_mode_text_opacity = 255
         pygame.mouse.set_visible(cfg.debug.mouse_visibility)
     else:
+        # Set initial values for taking off
         wave_warmup_time = 0
         pregame_timer = 300
         scroll_speed = 0
@@ -85,7 +87,7 @@ def play(screen, font):
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
                     running = False
-                elif is_pressed(event, kb.weapons.shoot):  # Left mouse button
+                elif is_pressed(event, kb.weapons.shoot):
                     new_bullet = player.shoot()
                     if new_bullet is not None:
                         bullets.append(new_bullet)
@@ -137,7 +139,7 @@ def play(screen, font):
             # Update aircraft position and check for collisions
             target_x, target_y = pygame.mouse.get_pos()
             player.apply_acceleration(target_x, target_y, trackable_distance=50)
-            player.update_position()
+            player.update()
 
             if player.ground_collision():
                 player.health -= cfg.gameplay.ground_health_decay
@@ -195,7 +197,7 @@ def play(screen, font):
             bullets = [bullet for bullet in bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= cfg.screen_width]
             enemy_ai_danger_zones = []
             for bullet in bullets:
-                bullet.update_position()
+                bullet.update()
 
                 if bullet.is_enemy:
                     if bullet.is_colliding(player.rect):
@@ -230,7 +232,7 @@ def play(screen, font):
                 scroll_speed = int(((300-pregame_timer)/200) * cfg.scroll_speed)
             else:
                 player.apply_acceleration(cfg.initial_aircraft_x, cfg.initial_aircraft_y)
-                player.update_position()
+                player.update()
 
             pregame_timer -= 1
 

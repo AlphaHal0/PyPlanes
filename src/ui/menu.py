@@ -5,9 +5,9 @@ from typing import Callable
 from keybind import is_pressed
 from config import kb
 
-# TODO: Add auto grid placement
-
 class Menu:
+    """A class for a menu with a background and a list of elements"""
+    # TODO: Add auto grid placement
     def __init__(self, background: Sprite, elements: list[UIElement], on_quit: Callable|None = None): 
         self.background = background
         self.elements = elements
@@ -16,8 +16,10 @@ class Menu:
         self.run = True
 
     def tick(self, screen: pygame.Surface):
+        """Draw on screen and update contained elements."""
         self.background.draw(screen, 0, 0)
 
+        # Check if any elements of this Menu are waiting for an input
         any_listening = False
         for element in self.elements:
             if element.listen_for_events:
@@ -53,6 +55,8 @@ class Menu:
         pygame.display.update()
 
     def loop(self, screen: pygame.Surface):
+        """Starts an infinite loop where this will be updated and the screen will refresh every tick.
+        Stops when the Quit button is pressed."""
         while self.run:
             self.tick(screen)
             pygame.display.update()

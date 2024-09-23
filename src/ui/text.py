@@ -3,6 +3,7 @@ import pygame
 from config import cfg
 
 class Text(UIElement):
+    """Class to represent a rendered font"""
     def  __init__(self, content: str = "", x: int = 0, y: int = 0, color: pygame.Color = 0, size: int = 0, center: bool = False, width: int = 0, height: int = 0, id: str = ""):
         if size == 0: size = cfg.ui.font_size
         self.content = content
@@ -24,6 +25,7 @@ class Text(UIElement):
         super().__init__(id)
 
     def update(self, screen: pygame.Surface, **kwargs):
+        """Draw on screen"""
         if cfg.debug.show_sprite_sizes:
             pygame.draw.rect(screen, (0, 255, 255), ((self.x_adg, self.y_adg), (self.width, self.height)))
             pygame.draw.circle(screen, (0, 0, 255), (self.x, self.y), 5)
@@ -31,6 +33,7 @@ class Text(UIElement):
         return super().update(**kwargs)
 
     def reload(self):
+        """Re-render font"""
         self.render = self.font.render(self.content, False, self.color)
         if self.width == 0 or self.height == 0:
             self.rect = self.render.get_rect()
@@ -41,16 +44,19 @@ class Text(UIElement):
             self.y_adg = self.y - self.rect.height // 2
     
     def set_color(self, color: pygame.Color):
+        """Set font colour"""
         if color == self.color: return
         self.color = color
         self.reload()
 
     def set_content(self, content: str):
+        """Set font content"""
         if content == self.content: return
         self.content = content
         self.reload()
 
     def set_size(self, size: int):
+        """Set font size"""
         if size == self.size: return
         self.font = pygame.font.Font(size=size)
         self.size = size

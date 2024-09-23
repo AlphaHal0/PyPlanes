@@ -2,7 +2,9 @@ from sprite import Sprite
 from config import cfg
 
 class Particle:
+    """A particle that contains a Sprite with a position."""
     def __init__(self, x: int = 0, y: int = 0, sprite: Sprite = Sprite(), duration: int = 0, scale: float = 1, adjust_pos: bool = True, move_with_screen: bool = False) -> None:
+        """If adjust_pos is True, moves the centre of the particle to x,y"""
         if scale != 1: sprite.set_size(size_multiplier=scale)
         self.sprite = sprite
         self.width, self.height = sprite.size
@@ -20,5 +22,7 @@ class Particle:
         self.alive = True
 
     def draw(self, screen, scroll_speed: int = cfg.scroll_speed):
+        """Draws this sprite onto screen.
+        If self.move_with_screen is set, move x pos by scroll_speed."""
         if self.move_with_screen: self.x -= scroll_speed
         self.alive = self.sprite.draw(screen, self.x, self.y, False)

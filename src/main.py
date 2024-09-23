@@ -19,6 +19,7 @@ import images as im
 from game import play
 
 def finish():
+    """Exit game and save config"""
     pygame.quit()
     cfg.save()
     kb.save()
@@ -27,6 +28,9 @@ def finish():
 options_menu = None
 
 def options(con = cfg, is_keybind: bool = False):
+    """Options menu handler.
+    Creates and manages a ui.menu.Menu for the con arg.
+    If is_keybind, buttons will be set to manage keybinds"""
     categories = list(con.d.keys())
     def refresh(c=0):
         global options_menu
@@ -67,6 +71,7 @@ def keybinds():
 def start_game(): play(screen, font)
 
 def main():
+    """Main loop"""
     # TODO: Config class for UI positioning
     #       Maybe add auto grid placement handled by ui.Menu?
  
