@@ -6,7 +6,7 @@ import aircraft
 from particle import Particle
 from sprite import Sprite
 import images as im
-from keybind import is_pressed
+from keybind import is_pressed, is_held
 
 # Game loop
 def play(screen, font):
@@ -128,6 +128,11 @@ def play(screen, font):
                     player.set_pitch(0)
 
             pygame.event.set_grab(True)
+
+            if is_held(kb.weapons.shoot_hold):
+                new_bullet = player.shoot()
+                if new_bullet is not None:
+                    bullets.append(new_bullet)
 
             # Update aircraft position and check for collisions
             target_x, target_y = pygame.mouse.get_pos()

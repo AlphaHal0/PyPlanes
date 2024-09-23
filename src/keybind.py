@@ -18,3 +18,9 @@ def is_pressed(event: pygame.event.Event, keycode: int, button_up: bool = False)
         return keycode == event.key
     
     return False
+
+def is_held(keycode: int) -> bool:
+    if 1024 < keycode < 1030: # is mouse button
+        return pygame.mouse.get_pressed()[keycode-1025]
+    else:
+        return pygame.key.get_pressed()[keycode]
