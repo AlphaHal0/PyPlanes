@@ -136,7 +136,7 @@ def play(screen, font):
 
             if player.ground_collision():
                 player.health -= cfg.gameplay.ground_health_decay
-                if not cfg.debug_invincible and player.health <= 0:
+                if not cfg.debug.invincible and player.health <= 0:
                     print("Player hit the floor. Game over.")
                     running = False
                 particle = player.display_particle(Sprite(im.small_explosions, animation_time=30, size_multiplier=2), 100)
@@ -195,7 +195,7 @@ def play(screen, font):
                 if bullet.is_enemy:
                     if bullet.is_colliding(player.rect):
                         player.health -= 10
-                        if not cfg.debug_invincible: player.check_health()
+                        if not cfg.debug.invincible: player.check_health()
                         particles.append(bullet.explode(enemies))
                 else:
                     collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])

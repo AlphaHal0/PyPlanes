@@ -64,7 +64,7 @@
 
   "debug": {
     "show_fps": false,
-    "debug_invincible": false,
+    "invincible": false,
     "show_target_traces": false,
     "show_ai_type": false,
     "disable_sprite_textures": false,

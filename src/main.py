@@ -26,7 +26,7 @@ def finish():
 
 options_menu = None
 
-def options(con = cfg):
+def options(con = cfg, is_keybind: bool = False):
     categories = list(con.d.keys())
     def refresh(c=0):
         global options_menu
@@ -38,14 +38,14 @@ def options(con = cfg):
         else:
             category = categories[c]
             elements.append(Text(f"Page {c+1}/{len(con.d)}", y=20, x=20, color="0xFFFFFF", size=40))
-            elements.append(Text(category, y=(cfg.screen_height//16)+20, x=20, color="0xFFFFFF", size=40))
+            elements.append(Text(category.replace('_', ' ').capitalize(), y=(cfg.screen_height//16)+20, x=20, color="0xFFFFFF", size=40))
             i = 2
             x = 0
             for key, value in con.d[category].items():
                 if i > 14:
                     i = 0
                     x += 1
-                elements.append(ConfigOption(cfg=con, category=category, key=key, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20))
+                elements.append(ConfigOption(cfg=con, category=category, key=key, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20, is_keybind=is_keybind))
                 i += 1
                 
         if c > 0: elements.append(Button(sprite=Sprite(im.ui.small_button_image), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, c-1), y=13*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
@@ -62,7 +62,7 @@ def options(con = cfg):
     refresh()
 
 def keybinds():
-    options(kb)
+    options(kb, is_keybind=True)
 
 def start_game(): play(screen, font)
 

@@ -74,6 +74,7 @@ class ConfigOption(Button):
         self.config = cfg
         self.category = category
         self.key = key
+        self.key_name = key.replace('_', ' ').capitalize()
         value = self.config.d[self.category][self.key]
 
         if is_keybind: self.type = 5
@@ -85,13 +86,13 @@ class ConfigOption(Button):
 
     def update(self, screen, mouse_x, mouse_y, click: bool = False, release: bool = False, no_set_text: bool = False, **kwargs):
         if self.listen_for_events: 
-            self.set_text(f"{self.key}: {self.new_text}_")
+            self.set_text(f"{self.key_name}: {self.new_text}_")
         elif not no_set_text:
             self.screen = screen
             if self.type == 5: # keybind
-                self.set_text(f"{self.key}: {keybind.keymap.get(str(self.config.d[self.category][self.key]))}")
+                self.set_text(f"{self.key_name}: {keybind.keymap.get(str(self.config.d[self.category][self.key]))}")
             else:
-                self.set_text(f"{self.key}: {self.config.d[self.category][self.key]}")
+                self.set_text(f"{self.key_name}: {self.config.d[self.category][self.key]}")
         return super().update(screen, mouse_x, mouse_y, click, release, **kwargs)
     
     def enter_text(self):
