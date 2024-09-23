@@ -84,7 +84,9 @@ class ConfigOption(Button):
         else: self.type = 0
 
     def update(self, screen, mouse_x, mouse_y, click: bool = False, release: bool = False, no_set_text: bool = False, **kwargs):
-        if not no_set_text:
+        if self.listen_for_events: 
+            self.set_text(f"{self.key}: {self.new_text}_")
+        elif not no_set_text:
             self.screen = screen
             if self.type == 5: # keybind
                 self.set_text(f"{self.key}: {keybind.keymap.get(str(self.config.d[self.category][self.key]))}")
@@ -94,31 +96,42 @@ class ConfigOption(Button):
     
     def enter_text(self):
         pygame.key.start_text_input()
-        new_text = ""
-        while True:
-            event = pygame.event.wait()
+        self.new_text = ""
+        self.listen_for_events = True
+
+    def listen(self, event):
+        if self.type != 5:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
-                    try: new_text = new_text[:-1]
+                    try: self.new_text = self.new_text[:-1]
                     except: pass
 
                 elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER) or keybind.is_pressed(event, config.kb.other.quit):
                     try:
                         match self.type:
-                            case 2: self.config.set_value(self.category, self.key, int(new_text))
-                            case 3: self.config.set_value(self.category, self.key, float(new_text))
-                            case 4: self.config.set_value(self.category, self.key, str(new_text))
+                            case 2: self.config.set_value(self.category, self.key, int(self.new_text))
+                            case 3: self.config.set_value(self.category, self.key, float(self.new_text))
+                            case 4: self.config.set_value(self.category, self.key, str(self.new_text))
                     except: pass
                     finally:
                         pygame.key.stop_text_input() 
-                        break
-
+                        self.listen_for_events = False
+                        return
             elif event.type == pygame.TEXTINPUT:
-                new_text += event.text
-            
-            self.set_text(f"{self.key}: {new_text}_")
-            self.update(self.screen, mouse_x=0, mouse_y=0, no_set_text=True)
-            pygame.display.update()
+                self.new_text += event.text
+        else:
+            if event.type == pygame.KEYDOWN:
+                if event.key == config.kb.other.quit:
+                    self.listen_for_events = False
+                    return
+                self.config.set_value(self.category, self.key, event.key)
+                self.listen_for_events = False
+                return
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.config.set_value(self.category, self.key, event.button+1024)
+                self.listen_for_events = False
+                return
                 
 
     def update_config_option(self, right: bool = False):
@@ -131,18 +144,4 @@ class ConfigOption(Button):
 
         else: # left-click
             if self.type == 1: self.config.toggle_value(self.category, self.key)
-            elif self.type in (2,3,4): self.enter_text()
-            elif self.type == 5:
-                while True:
-                    self.set_text(f"{self.key}: _")
-                    self.update(self.screen, mouse_x=0, mouse_y=0, no_set_text=True)
-                    pygame.display.update()
-                    event = pygame.event.wait()
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == config.kb.other.quit: break
-                        self.config.set_value(self.category, self.key, event.key)
-                        break
-
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        self.config.set_value(self.category, self.key, event.button+1024)
-                        break
+            else: self.enter_text()

@@ -15,23 +15,35 @@ class Menu:
     def tick(self, screen: pygame.Surface):
         self.background.draw(screen, 0, 0)
 
+        any_listening = False
+        for element in self.elements:
+            if element.listen_for_events:
+                any_listening = True
+                for event in pygame.event.get():
+                    element.listen(event)
+
         release = False
         rrelease = False
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
-                self.run = False
-                if self.on_quit: self.on_quit()
+        if not any_listening:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
+                    self.run = False
+                    if self.on_quit: self.on_quit()
 
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
-                release = True
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
+                    release = True
 
-            if event.type == pygame.MOUSEBUTTONUP and event.button == 3: # right click
-                rrelease = True
+                if event.type == pygame.MOUSEBUTTONUP and event.button == 3: # right click
+                    rrelease = True
 
-        click = pygame.mouse.get_pressed(3)[0]
-        rclick = pygame.mouse.get_pressed(3)[2]
+            click = pygame.mouse.get_pressed(3)[0]
+            rclick = pygame.mouse.get_pressed(3)[2]
 
-        mouse_pos = pygame.mouse.get_pos()
+            mouse_pos = pygame.mouse.get_pos()
+        else:
+            click = False
+            rclick = False
+            mouse_pos = (0,0)
 
         for element in self.elements:
             element.update(screen=screen, mouse_x=mouse_pos[0], mouse_y=mouse_pos[1], click=click, release=release, rclick=rclick, rrelease=rrelease)
