@@ -38,12 +38,11 @@ class Menu:
 
             click = pygame.mouse.get_pressed(3)[0]
             rclick = pygame.mouse.get_pressed(3)[2]
-
-            mouse_pos = pygame.mouse.get_pos()
         else:
             click = False
             rclick = False
-            mouse_pos = (0,0)
+
+        mouse_pos = pygame.mouse.get_pos()
 
         for element in self.elements:
             element.update(screen=screen, mouse_x=mouse_pos[0], mouse_y=mouse_pos[1], click=click, release=release, rclick=rclick, rrelease=rrelease)
