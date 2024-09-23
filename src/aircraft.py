@@ -12,6 +12,7 @@ import math
 class Aircraft(Entity):
     def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = cfg.shoot_cooldown, spawn_cooldown: int = cfg.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.bomb_cooldown):
         self.acceleration = cfg.physics.aircraft_acceleration
+        self.terminal_velocity = cfg.physics.aircraft_terminal_velocity
         self.shoot_cooldown = 0
         self.bomb_cooldown = 0
         self.max_shoot_cooldown = shoot_cooldown
@@ -55,7 +56,7 @@ class Aircraft(Entity):
         if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
         if not self.falling:
             self.falling = True
-            self.pitch = 10
+            self.pitch = 10 if self.is_enemy else -10
             self.sprite.rotate(self.pitch)
             self.max_shoot_cooldown = cfg.gameplay.shoot_cooldown_crashing
         else: return False
@@ -76,19 +77,15 @@ class Aircraft(Entity):
         dy = target_y - self.y
         distance = self.distance_to(target_x, target_y)
 
-        if distance > trackable_distance:
-            self.velocity_x += dx / distance * self.acceleration
-            self.velocity_y += dy / distance * self.acceleration
-
-        self.velocity_x *= cfg.physics.aircraft_drag
-        self.velocity_y *= cfg.physics.aircraft_drag
-
         if self.x < 0:
             self.x = 0
             self.velocity_x = 0
         elif self.x + self.width > cfg.screen_width:
             self.x = cfg.screen_width - self.width
             self.velocity_x = 0
+        elif distance > trackable_distance:
+            self.velocity_x += min(dx / distance * self.acceleration, self.terminal_velocity)
+
 
         if self.y < 0:
             self.y = 0
@@ -96,6 +93,11 @@ class Aircraft(Entity):
         elif self.y + self.height > cfg.floor_y:
             self.y = cfg.floor_y - self.height
             self.velocity_y = 0
+        elif distance > trackable_distance:
+            self.velocity_y += min(dy / distance * self.acceleration, self.terminal_velocity)
+
+        self.velocity_x *= cfg.physics.aircraft_drag
+        self.velocity_y *= cfg.physics.aircraft_drag
     
     def shoot(self) -> weapon.Bullet | None:
         if self.shoot_cooldown <= 0:

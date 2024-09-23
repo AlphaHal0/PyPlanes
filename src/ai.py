@@ -11,7 +11,7 @@ class BaseAI: # The base AI with no special features.
         self.xmin = cfg.screen_width * 0.5
         self.xmax = cfg.screen_width - size[0] - 10
         self.ymin = 0
-        self.ymax = cfg.floor_y - size[1]
+        self.ymax = cfg.floor_y - size[1] - 50
         self.target_x = self.xmax
         self.target_y = self.ymax * random.random() + self.ymin
         self.shoot = 0
