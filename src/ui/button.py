@@ -93,7 +93,12 @@ class ConfigOption(Button):
             if self.type == 5: # keybind
                 self.set_text(f"{self.key_name}: {keybind.keymap.get(str(self.config.d[self.category][self.key]), "unknown")}")
             else:
-                self.set_text(f"{self.key_name}: {self.config.d[self.category][self.key]}")
+                try:
+                    self.set_text(f"{self.key_name}: {self.config.d[self.category][self.key]}")
+                except KeyError:
+                    self.type = 0
+                    self.base_color, self.click_color = ("0x444444","0xFF0000")
+                    self.set_text("Unknown option")
         return super().update(screen, mouse_x, mouse_y, click, release, **kwargs)
     
     def enter_text(self):
@@ -138,8 +143,6 @@ class ConfigOption(Button):
                 
 
     def update_config_option(self, right: bool = False):
-        value = self.config.d[self.category][self.key]
-
         if right: # right-click
             match self.type:
                 case 1: self.config.toggle_value(self.category, self.key)
@@ -148,4 +151,4 @@ class ConfigOption(Button):
 
         else: # left-click
             if self.type == 1: self.config.toggle_value(self.category, self.key)
-            else: self.enter_text()
+            elif self.type >= 2: self.enter_text()
