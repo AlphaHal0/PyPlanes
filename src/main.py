@@ -74,7 +74,7 @@ def main():
     main_menu = Menu(
         Sprite(im.ui.menu_background_image),
         elements=[
-            Text("MAIN MENU", cfg.screen_width // 2, cfg.screen_height // 8 + 50, color="0xFFFFFF", center=True),
+            Text("PyPlanes", cfg.screen_width // 2, cfg.screen_height // 8 + 50, color="0xFFFFFF", center=True, size=cfg.screen_height // 10),
             Button(x=button_pos, y=2 * cfg.screen_height // 8 + 50, content="PLAY", on_click=start_game),
             Button(x=button_pos, y=3 * cfg.screen_height // 8 + 50, content="OPTIONS", on_click=options),
             Button(x=button_pos, y=4 * cfg.screen_height // 8 + 50, content="KEYBINDS", on_click=keybinds),
