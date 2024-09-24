@@ -14,7 +14,7 @@ class Sprite:
         self.flip_x = flip_x
         self.flip_y = flip_y
 
-        if self.is_animated:
+        if self.is_animated and len(image) > 0:
             if not size: size = image[0].get_size()
             self.anim_time = animation_time
             self.anim_frame = 0
