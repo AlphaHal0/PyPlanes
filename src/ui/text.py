@@ -4,7 +4,8 @@ from config import cfg
 
 class Text(UIElement):
     """Class to represent a rendered font"""
-    def  __init__(self, content: str = "", x: int = 0, y: int = 0, color: pygame.Color = 0, size: int = 0, center: bool = False, width: int = 0, height: int = 0, id: str = ""):
+    def  __init__(self, content: str = "", color: pygame.Color = 0, size: int = 0, center: bool = False, width: int = 0, height: int = 0, **kwargs):
+        super().__init__(**kwargs)
         if size == 0: size = cfg.ui.font_size
         self.content = content
         self.color = color
@@ -16,13 +17,11 @@ class Text(UIElement):
             self.rect = self.render.get_rect()
             self.width = self.rect.width
             self.height = self.rect.height
-        self.x, self.y = x, y
         if center:
-            self.x_adg = x - self.width // 2
-            self.y_adg = y - self.height // 2
+            self.x_adg = self.x - self.width // 2
+            self.y_adg = self.y - self.height // 2
         else:
-            self.x_adg, self.y_adg = x, y
-        super().__init__(id)
+            self.x_adg, self.y_adg = self.x, self.y
 
     def update(self, screen: pygame.Surface, **kwargs):
         """Draw on screen"""

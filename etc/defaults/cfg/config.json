@@ -38,7 +38,9 @@
   "ui": {
     "title_font_size": 100,
     "font_size": 70,
-    "narrow_font_size": 30
+    "narrow_font_size": 30,
+    "grid_margins": [0.01, 0.0025, 0.01, 0.0025],
+    "menu_grid_divisions": [4, 16]
   },
 
   "easter_eggs": {

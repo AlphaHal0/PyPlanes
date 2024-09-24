@@ -11,10 +11,9 @@ from typing import Callable
 
 class Button(UIElement):
     """Class to represent a UI button"""
-    def __init__(self, sprite: Sprite|None = Sprite(im.ui.button), x: int = 0, y: int = 0, content: str = "", font_size: int = cfg.ui.font_size, center_font: bool = True, base_color: pygame.color.Color = "0xAAAAAA", click_color: pygame.color.Color = "0xFFFFFF", hover_color: pygame.color.Color = "0x00FFFF", on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, on_rclick: Callable|tuple|None = None, id: str = ""):
-        super().__init__(id)
+    def __init__(self, sprite: Sprite|None = Sprite(im.ui.button), content: str = "", font_size: int = cfg.ui.font_size, center_font: bool = True, base_color: pygame.color.Color = "0xAAAAAA", click_color: pygame.color.Color = "0xFFFFFF", hover_color: pygame.color.Color = "0x00FFFF", on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, on_rclick: Callable|tuple|None = None, **kwargs):
+        super().__init__(**kwargs)
         self.sprite = sprite
-        self.x, self.y = x, y
         self.center_font = center_font
         self.font_size = font_size
         self.base_color, self.click_color, self.hover_color = base_color, click_color, hover_color
@@ -34,7 +33,10 @@ class Button(UIElement):
         else:
             self.on_rclick = on_rclick
 
-        self.set_text(content)
+        if center_font:
+            self.text = Text(content, x=self.x + self.sprite.size[0] // 2, y=self.y + self.sprite.size[1] // 2, color=self.base_color, size=self.font_size, center=True)
+        else:
+            self.text = Text(content, x=self.x + 10, y=self.y + 10, color=self.base_color, size=self.font_size, center=False)
 
         if self.sprite is None:
             self.sprite = self.text
@@ -64,10 +66,7 @@ class Button(UIElement):
 
     def set_text(self, content: str):
         """Sets the text inside this Button"""
-        if self.center_font:
-            self.text = Text(content, self.x + self.sprite.size[0] // 2, self.y + self.sprite.size[1] // 2, self.base_color, size=self.font_size, center=True)
-        else:
-            self.text = Text(content, self.x + 10, self.y + 10, self.base_color, size=self.font_size, center=False)
+        self.text.set_content(content)
 
     def set_color(self, color: pygame.Color):
         """Sets the colour of this Button's text"""

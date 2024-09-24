@@ -5,10 +5,14 @@ from typing import Callable
 from keybind import is_pressed
 from config import kb
 
+ALIGN_NONE = 0 # does not automatically set element x/y (must be given manually)
+ALIGN_LEFT = 1 # grids x/y to left
+ALIGN_CENTERED = 2 # [TODO]
+
 class Menu:
     """A class for a menu with a background and a list of elements"""
-    # TODO: Add auto grid placement
-    def __init__(self, background: Sprite, elements: list[UIElement], on_quit: Callable|None = None): 
+    def __init__(self, background: Sprite, elements: list[UIElement], on_quit: Callable|None = None, grid_type: int = 0):
+        self.grid_type = grid_type
         self.background = background
         self.elements = elements
         self.on_quit = on_quit
@@ -61,6 +65,9 @@ class Menu:
             self.tick(screen)
             pygame.display.update()
             pygame.time.Clock().tick(60)
+
+    def add_element(self, element: UIElement):
+        self.elements.append(element)
 
     def __str__(self) -> str:
         return f"Menu running={self.run} listening={self.any_listening} element count={len(self.elements)}"
