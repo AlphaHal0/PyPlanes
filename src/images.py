@@ -31,8 +31,7 @@ def flip_image(surface: pygame.Surface, flip_x: bool = True, flip_y: bool = Fals
     """Flips a pygame.Surface"""
     return pygame.transform.flip(surface, flip_x, flip_y)
 
-bullet_image = load_image("weapons/bullets/Shot1.png")
-bullet_image = scale_image(bullet_image, sz.bullet_image)
+bullet_image = scale_image(load_image("weapons/bullets/Shot1.png"), sz.bullet_image)
 
 background_image = scale_image(load_image("sky/side-scroll.jpg"), sz.background_image)
 

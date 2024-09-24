@@ -134,10 +134,9 @@ class Aircraft(Entity):
         else:
             return None
 
-# Create a new AI aircraft that inherits properties from Aircraft.
 class EnemyAircraft(Aircraft):
+    """An Aircraft with enemy AI"""
     def __init__(self, y: int, sprite: Sprite, difficulty: int = 1, ai_type: int = 1):
-        """An Aircraft with enemy AI"""
         super().__init__(x=cfg.screen_width, y=y, sprite=sprite, is_enemy=True, shoot_cooldown=50)
 
         size = self.sprite.size
@@ -159,8 +158,8 @@ class EnemyAircraft(Aircraft):
         return super().draw(screen)
 
 class Moth(EnemyAircraft):
+    """An EnemyAircraft that is a moth"""
     def __init__(self, y: int, difficulty: int = 1):
-        """An EnemyAircraft that is a moth."""
         super().__init__(y, Sprite(images.moth_images, animation_time=random.randint(1, 10)), difficulty)
 
     def destroy(self) -> None:
