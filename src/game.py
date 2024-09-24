@@ -146,6 +146,8 @@ def play(screen, font):
             player.apply_acceleration(target_x, target_y, trackable_distance=50)
             player.update()
 
+            if not cfg.debug.invincible: player.check_health()
+
             if player.ground_collision():
                 player.health -= cfg.gameplay.ground_health_decay
                 if not cfg.debug.invincible and player.health <= 0:
@@ -180,6 +182,7 @@ def play(screen, font):
                     screen.blit(ai_marker, (enemy.x+enemy.sprite.size[0], enemy.y))
 
             if wave_warmup_time:
+                player.health += enemy_count * cfg.gameplay.wave_regen_multiplier
                 wave_warmup_time -= 1
                 if wave_warmup_time == 0:
                     to_spawn = int(enemy_count)
@@ -188,6 +191,7 @@ def play(screen, font):
 
             # Spawn all enemies in one go if cfg.gameplay.wave_mode is True, otherwise spawn one enemy to keep up with the count.
             elif len(enemies) < int(enemy_count) and not cfg.gameplay.wave_mode:
+                player.health += enemy_count * cfg.gameplay.enemy_regen_multiplier
                 spawn_enemy(difficulty=int(enemy_count))
 
             elif len(enemies) == 0 and cfg.gameplay.wave_mode:
@@ -207,7 +211,6 @@ def play(screen, font):
                 if bullet.is_enemy:
                     if bullet.is_colliding(player.rect):
                         player.health -= 10
-                        if not cfg.debug.invincible: player.check_health()
                         particles.append(bullet.explode(enemies))
                 else:
                     collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])

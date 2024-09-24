@@ -11,7 +11,9 @@
     "initial_health": 100,
     "wave_mode": true,
     "disable_takeoff": false,
-    "ground_health_decay": 2
+    "ground_health_decay": 2,
+    "wave_regen_multiplier": 0.1,
+    "enemy_regen_multiplier": 0.1
   },
 
   "physics": {

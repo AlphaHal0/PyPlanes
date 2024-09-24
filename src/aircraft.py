@@ -10,7 +10,7 @@ from images import im
 
 class Aircraft(Entity):
     """An Entity with aircraft mechanics"""
-    def __init__(self, x: int, y: int, sprite: Sprite|None = None, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown):
+    def __init__(self, x: int, y: int, sprite: Sprite|None = None, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, health: float = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown):
         if sprite is None: self.sprite = Sprite()
         self.acceleration = cfg.physics.aircraft_acceleration
         self.terminal_velocity = cfg.physics.aircraft_terminal_velocity
@@ -75,6 +75,8 @@ class Aircraft(Entity):
     def check_health(self) -> bool:
         """Check if the Aircraft's health is less than or equal to 0.
         If so, runs and returns the result from self.fall()"""
+        if self.health > cfg.gameplay.initial_health:
+            self.health = cfg.gameplay.initial_health
         if self.health <= 0:
             return self.fall()
             
