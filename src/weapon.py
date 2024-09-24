@@ -37,12 +37,14 @@ class Weapon(Entity):
 
 class Bullet(Weapon):
     """A Weapon that represents a bullet"""
-    def __init__(self, sprite: Sprite = Sprite(im.weapons.bullet), velocity_x: int = cfg.physics.bullet_velocity, is_enemy: bool = False, **kwargs):
+    def __init__(self, sprite: Sprite|None = None, velocity_x: int = cfg.physics.bullet_velocity, is_enemy: bool = False, **kwargs):
+        if sprite is None: sprite = Sprite(im.weapons.bullet)
         super().__init__(sprite=sprite, velocity_x=-velocity_x if is_enemy else velocity_x, is_enemy=is_enemy, **kwargs)
 
 class Bomb(Weapon):
     """A Weapon that represents a bomb"""
-    def __init__(self, sprite: Sprite = Sprite(im.weapons.bomb), velocity_x: int = 5, velocity_y: int = 0, drag_multiplier: float = 0.1, is_enemy: bool = False, **kwargs):
+    def __init__(self, sprite: Sprite|None = None, velocity_x: int = 5, velocity_y: int = 0, drag_multiplier: float = 0.1, is_enemy: bool = False, **kwargs):
+        if sprite is None: sprite = Sprite(im.weapons.bullet)
         if random() <= cfg.easter_eggs.berry_bomb_chance:
             sprite = Sprite(im.weapons.blueberry)
         super().__init__(sprite=sprite, velocity_x=-velocity_x if is_enemy else velocity_x, velocity_y=velocity_y + cfg.physics.bomb_y_velocity_gain, is_enemy=is_enemy, **kwargs)

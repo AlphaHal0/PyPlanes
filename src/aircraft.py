@@ -10,7 +10,8 @@ from images import im
 
 class Aircraft(Entity):
     """An Entity with aircraft mechanics"""
-    def __init__(self, x: int, y: int, sprite: Sprite = Sprite(), is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown):
+    def __init__(self, x: int, y: int, sprite: Sprite|None = None, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, health: int = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown):
+        if sprite is None: self.sprite = Sprite()
         self.acceleration = cfg.physics.aircraft_acceleration
         self.terminal_velocity = cfg.physics.aircraft_terminal_velocity
         self.shoot_cooldown = 0
@@ -136,7 +137,7 @@ class Aircraft(Entity):
 
 class EnemyAircraft(Aircraft):
     """An Aircraft with enemy AI"""
-    def __init__(self, y: int, sprite: Sprite, difficulty: int = 1, ai_type: int = 1):
+    def __init__(self, y: int, sprite: Sprite|None = None, difficulty: int = 1, ai_type: int = 1):
         super().__init__(x=cfg.screen_width, y=y, sprite=sprite, is_enemy=True, shoot_cooldown=50)
 
         size = self.sprite.size
@@ -160,7 +161,7 @@ class EnemyAircraft(Aircraft):
 class Moth(EnemyAircraft):
     """An EnemyAircraft that is a moth"""
     def __init__(self, y: int, difficulty: int = 1):
-        super().__init__(y, Sprite(im.aircraft.moths, animation_time=random.randint(1, 10)), difficulty)
+        super().__init__(y=y, sprite=Sprite(im.aircraft.moths, animation_time=random.randint(1, 10)), difficulty=difficulty)
 
     def destroy(self) -> None:
         if not cfg.easter_eggs.moth_music_is_main_music:
