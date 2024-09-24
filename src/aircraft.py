@@ -7,7 +7,6 @@ import weapon
 from entity import Entity
 from sprite import Sprite
 import images
-import math
 
 class Aircraft(Entity):
     """An Entity with aircraft mechanics"""

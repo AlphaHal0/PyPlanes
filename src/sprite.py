@@ -1,5 +1,6 @@
 import pygame
 from config import cfg
+import math
 
 class Sprite:
     """A class to manage an image or animated list of images with transformation."""
@@ -63,6 +64,9 @@ class Sprite:
         Otherwise, returns True"""
         if cfg.debug.show_sprite_sizes:
             pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))
+            rad = math.radians(self.rotation)
+            pygame.draw.line(screen, (0, 0, 255), (x, y), (math.sin(rad) * 50 + x, math.cos(rad) * 50 + y), 5) # Points upwards (at 0 degrees) 
+            pygame.draw.line(screen, (0, 255, 0), (x, y), (math.cos(rad) * 100 + x, -(math.sin(rad) * 100) + y), 5) # Points forward (at 90 degrees)
 
         if cfg.debug.disable_sprite_textures: return False
 
