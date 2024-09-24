@@ -7,7 +7,6 @@ class BaseAI:
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         self.speed = 100
         self.fire_rate = fire_rate
-        self.fire_rate = fire_rate
         self.difficulty = difficulty
         self.xmin = cfg.screen_width * 0.5
         self.xmax = cfg.screen_width - size[0] - 10
@@ -47,8 +46,6 @@ class Turret(BaseAI):
     debug_color = 0x00FF00
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
-    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
-        super().__init__(size, difficulty, fire_rate)
         self.iteration = 0
         self.max_iteration = 100 + self.difficulty * self.fire_rate
 
@@ -59,16 +56,13 @@ class Turret(BaseAI):
             self.iteration = self.max_iteration
         else:
             if self.iteration <= self.max_iteration - 100 and self.iteration % (self.fire_rate + 1) == 1:
-                self.shoot += 1
+                self.shoot += 1 # fire
             self.iteration -= 1
         self.constrain()
 
 class Dodger(BaseAI): 
     """Avoid player bullets."""
     debug_color = 0xFFFF00
-    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
-        super().__init__(size, difficulty, fire_rate)
-        self.max_shoot_time = fire_rate * max(1, 5 - difficulty//5)
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
         self.max_shoot_time = fire_rate * max(1, 5 - difficulty//5)
@@ -96,8 +90,6 @@ class Dodger(BaseAI):
 class Offence(BaseAI): 
     """Follow the player."""
     debug_color = 0x0000FF
-    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
-        super().__init__(size, difficulty, fire_rate)
     def __init__(self, size: tuple, difficulty: int, fire_rate: int):
         super().__init__(size, difficulty, fire_rate)
         self.max_shoot_time = cfg.gameplay.enemy_shoot_cooldown * max(1, 5 - difficulty//5)
