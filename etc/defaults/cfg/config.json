@@ -12,8 +12,8 @@
     "wave_mode": true,
     "disable_takeoff": false,
     "ground_health_decay": 2,
-    "wave_regen_multiplier": 0.1,
-    "enemy_regen_multiplier": 0.1
+    "wave_regen_multiplier": 0.04,
+    "enemy_regen_multiplier": 0.8
   },
 
   "physics": {
