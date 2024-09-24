@@ -14,16 +14,18 @@ class Sprite:
         self.flip_x = flip_x
         self.flip_y = flip_y
 
-        if self.is_animated and len(image) > 0:
+        if not image or (self.is_animated and len(image) == 0):
+            size = (100, 100)
+            self.size = size
+            self.image = None
+
+        if self.is_animated:
             if not size: size = image[0].get_size()
             self.anim_time = animation_time
             self.anim_frame = 0
             self.anim_frame_count = len(image)
         else:
-            if image:
-                if not size: size = image.get_size()
-            else:
-                size = (100, 100)
+            if not size: size = image.get_size()
 
         self.base_size = size
         if image: self.set_size(size, size_multiplier)
@@ -31,31 +33,33 @@ class Sprite:
     def update(self):
         """Reloads this sprite with its transformation values.
         If animated, this does so with each of its frames."""
-        if self.is_animated:
-            image = []
-            for i in self.base_image:
-                image.append(pygame.transform.rotate(
+        try:
+            if self.is_animated:
+                image = []
+                for i in self.base_image:
+                    image.append(pygame.transform.rotate(
+                        pygame.transform.flip(
+                            pygame.transform.scale(
+                                i,
+                                self.size
+                            ),
+                            self.flip_x, self.flip_y
+                        ),
+                        self.rotation
+                    ))
+                self.image = image
+            else:
+                self.image = pygame.transform.rotate(
                     pygame.transform.flip(
                         pygame.transform.scale(
-                            i,
+                            self.base_image,
                             self.size
                         ),
                         self.flip_x, self.flip_y
                     ),
                     self.rotation
-                ))
-            self.image = image
-        else:
-            self.image = pygame.transform.rotate(
-                pygame.transform.flip(
-                    pygame.transform.scale(
-                        self.base_image,
-                        self.size
-                    ),
-                    self.flip_x, self.flip_y
-                ),
-                self.rotation
-            )
+                )
+        except: pass
 
     def draw(self, screen: pygame.Surface, x: int, y: int, loop: bool = True) -> bool:
         """Renders this Sprite onto a pygame.Surface, with debug drawing if enabled.
