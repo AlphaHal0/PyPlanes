@@ -32,7 +32,7 @@ def options(con = cfg, is_keybind: bool = False):
     Creates and manages a ui.menu.Menu for the con arg.
     If is_keybind, buttons will be set to manage keybinds"""
     categories = list(con.d.keys())
-    def refresh(c=0):
+    def refresh(c = 0, reset_confirm = 0):
         global options_menu
 
         if options_menu: options_menu.run = False
@@ -46,15 +46,22 @@ def options(con = cfg, is_keybind: bool = False):
             i = 2
             x = 0
             for key, value in con.d[category].items():
-                if i > 14:
+                if i > 15:
                     i = 0
                     x += 1
                 elements.append(ConfigOption(cfg=con, category=category, key=key, grid_pos=(x, i), is_keybind=is_keybind))
                 i += 1
                 
-        if c > 0: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, c-1), grid_pos=(3, 13)))
-        if c < len(con.d)-1: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="-->", base_color="0xFFFF00", on_click=(refresh, c+1), grid_pos=(3.47, 13)))
-        elements.append(Button(sprite=Sprite(im.ui.narrow_button), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=con.reset, grid_pos=(3, 14)))
+        if c > 0: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, c-1), grid_pos=(3, 14)))
+        if c < len(con.d)-1: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="-->", base_color="0xFFFF00", on_click=(refresh, c+1), grid_pos=(3.47, 14)))
+        if reset_confirm == 1:
+            elements.append(Button(sprite=Sprite(im.ui.narrow_button), font_size=cfg.ui.narrow_font_size, content="Confirm reset", base_color="0xFF0000", on_click=(refresh, c, 2), grid_pos=(3, 15)))
+        elif reset_confirm == 2:
+            con.reset()
+            refresh(c)
+            return
+        else:
+            elements.append(Button(sprite=Sprite(im.ui.narrow_button), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF4444", on_click=(refresh, c, 1), grid_pos=(3, 15)))
 
         options_menu = Menu(
             Sprite(im.ui.background),
