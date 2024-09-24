@@ -161,7 +161,7 @@ class EnemyAircraft(Aircraft):
 class Moth(EnemyAircraft):
     """An EnemyAircraft that is a moth"""
     def __init__(self, y: int, difficulty: int = 1):
-        super().__init__(y=y, sprite=Sprite(im.aircraft.moths, animation_time=random.randint(1, 10)), difficulty=difficulty)
+        super().__init__(y=y, sprite=Sprite(im.aircraft.moth, animation_time=random.randint(1, 10)), difficulty=difficulty)
 
     def destroy(self) -> None:
         if not cfg.easter_eggs.moth_music_is_main_music:

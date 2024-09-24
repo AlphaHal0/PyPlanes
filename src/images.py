@@ -74,7 +74,11 @@ class ImageHandler:
                                 continue
                         
                         for i in range(value['anim']):
-                            new_image = image.crop(((i)*(image.width//value['anim']), 0, (i+1)*(image.width//value['anim']), image.height))
+                            if value['mode'].startswith('x'): # split horizontally
+                                new_image = image.crop(((i)*(image.width//value['anim']), 0, (i+1)*(image.width//value['anim']), image.height))
+                            else: # split vertically
+                                new_image = image.crop((0, (i)*(image.height//value['anim']), image.width, (i+1)*(image.height//value['anim'])))
+
                             images.append(self.process_image(value, image=
                                 pygame.image.fromstring(new_image.tobytes(), new_image.size, new_image.mode).convert_alpha())) # Convert PIL Image to Pygame image
                     else:
