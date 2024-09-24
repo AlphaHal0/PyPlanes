@@ -15,7 +15,7 @@ from ui.button import Button, ConfigOption
 from ui.menu import Menu
 from ui.text import Text
 from sprite import Sprite
-import images as im
+from images import im
 from game import play
 
 def finish():
@@ -52,12 +52,12 @@ def options(con = cfg, is_keybind: bool = False):
                 elements.append(ConfigOption(cfg=con, category=category, key=key, y=i*(cfg.screen_height//16)+20, x=x*(cfg.screen_width//4)+20, is_keybind=is_keybind))
                 i += 1
                 
-        if c > 0: elements.append(Button(sprite=Sprite(im.ui.small_button_image), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, c-1), y=13*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
-        if c < len(con.d)-1: elements.append(Button(sprite=Sprite(im.ui.small_button_image), font_size=cfg.ui.narrow_font_size, content="-->", base_color="0xFFFF00", on_click=(refresh, c+1), y=13*(cfg.screen_height//16)+20, x=int(3.47*(cfg.screen_width//4))+20))
-        elements.append(Button(sprite=Sprite(im.ui.narrow_button_image), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=con.reset, y=14*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
+        if c > 0: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, c-1), y=13*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
+        if c < len(con.d)-1: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="-->", base_color="0xFFFF00", on_click=(refresh, c+1), y=13*(cfg.screen_height//16)+20, x=int(3.47*(cfg.screen_width//4))+20))
+        elements.append(Button(sprite=Sprite(im.ui.narrow_button), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF0000", on_click=con.reset, y=14*(cfg.screen_height//16)+20, x=3*(cfg.screen_width//4)+20))
 
         options_menu = Menu(
-            Sprite(im.ui.menu_background_image),
+            Sprite(im.ui.background),
             elements=elements
         )
 
@@ -77,7 +77,7 @@ def main():
  
     button_pos = cfg.screen_width // 2 - cfg.ui.button_size[0] * cfg.screen_width // 2
     main_menu = Menu(
-        Sprite(im.ui.menu_background_image),
+        Sprite(im.ui.background),
         elements=[
             Text("PyPlanes", cfg.screen_width // 2, cfg.screen_height // 8 + 50, color="0xFFFFFF", center=True, size=cfg.screen_height // 10),
             Button(x=button_pos, y=2 * cfg.screen_height // 8 + 50, content="PLAY", on_click=start_game),

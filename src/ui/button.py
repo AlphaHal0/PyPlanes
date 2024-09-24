@@ -6,12 +6,12 @@ from config import cfg
 import keybind
 from ui.element import UIElement
 from ui.text import Text
-import images
+from images import im
 from typing import Callable
 
 class Button(UIElement):
     """Class to represent a UI button"""
-    def __init__(self, sprite: Sprite|None = Sprite(images.ui.button_image), x: int = 0, y: int = 0, content: str = "", font_size: int = cfg.ui.font_size, center_font: bool = True, base_color: pygame.color.Color = "0xAAAAAA", click_color: pygame.color.Color = "0xFFFFFF", hover_color: pygame.color.Color = "0x00FFFF", on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, on_rclick: Callable|tuple|None = None, id: str = ""):
+    def __init__(self, sprite: Sprite|None = Sprite(im.ui.button), x: int = 0, y: int = 0, content: str = "", font_size: int = cfg.ui.font_size, center_font: bool = True, base_color: pygame.color.Color = "0xAAAAAA", click_color: pygame.color.Color = "0xFFFFFF", hover_color: pygame.color.Color = "0x00FFFF", on_click: Callable|tuple|None = None, on_hover: Callable|tuple|None = None, on_rclick: Callable|tuple|None = None, id: str = ""):
         super().__init__(id)
         self.sprite = sprite
         self.x, self.y = x, y
@@ -75,7 +75,7 @@ class Button(UIElement):
 
 class ConfigOption(Button):
     """Class of Button to represent a config option."""
-    def __init__(self, cfg: config.Config, category: str, key: str, sprite: Sprite | None = Sprite(images.ui.narrow_button_image), font_size: int = cfg.ui.narrow_font_size, is_keybind: bool = False, **kwargs):
+    def __init__(self, cfg: config.Config, category: str, key: str, sprite: Sprite | None = Sprite(im.ui.narrow_button), font_size: int = cfg.ui.narrow_font_size, is_keybind: bool = False, **kwargs):
         """cfg must be a config.Config that this button is responsible for.
         category and key represent their respective items in cfg."""
         super().__init__(sprite, on_click=self.update_config_option, on_rclick=(self.update_config_option, True), font_size=font_size, center_font=False, **kwargs)

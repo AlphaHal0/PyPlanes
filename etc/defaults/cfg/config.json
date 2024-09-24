@@ -38,22 +38,7 @@
   "ui": {
     "title_font_size": 100,
     "font_size": 70,
-    "narrow_font_size": 30,
-    "button_size": [0.3, 0.1],
-    "narrow_button_size": [0.2, 0.05],
-    "small_button_size": [0.08, 0.05]
-  },
-
-  "sprite_sizes": {
-    "bullet_image": 0.025,
-    "background_image": [1, 1],
-    "aircraft_image": 0.05,
-    "enemy_image": 0.05,
-    "large_explosions": 0.05,
-    "small_explosions": 0.05,
-    "moth_images": 0.07,
-    "bomb_image": 0.025,
-    "blueberry": 0.0625
+    "narrow_font_size": 30
   },
 
   "easter_eggs": {
@@ -71,6 +56,7 @@
     "disable_sprite_textures": false,
     "show_sprite_sizes": false,
     "mouse_visibility": false,
+    "show_image_inits": false,
     "big_mode": false
   }
 }

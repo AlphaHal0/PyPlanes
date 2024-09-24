@@ -5,7 +5,7 @@ from random import random, randint, choice
 import aircraft
 from particle import Particle
 from sprite import Sprite
-import images as im
+from images import im
 from keybind import is_pressed, is_held
 
 # Game loop
@@ -28,10 +28,10 @@ def play(screen, font):
 
             if image is None:
                 match type:
-                    case 1: image = im.enemy_1_image
-                    case 2: image = im.enemy_2_image
-                    case 3: image = im.enemy_3_image
-                    case 4: image = im.enemy_4_image
+                    case 1: image = im.aircraft.enemy_1
+                    case 2: image = im.aircraft.enemy_2
+                    case 3: image = im.aircraft.enemy_3
+                    case 4: image = im.aircraft.enemy_4
             enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image), difficulty, ai_type=type))
 
     if not cfg.gameplay.wave_mode:
@@ -41,8 +41,8 @@ def play(screen, font):
     scroll_x = 0
     player = aircraft.Aircraft(
         cfg.initial_aircraft_x, 
-        cfg.initial_aircraft_y if cfg.gameplay.disable_takeoff else cfg.floor_y - im.aircraft_image.get_height(), 
-        Sprite(im.aircraft_image), 
+        cfg.initial_aircraft_y if cfg.gameplay.disable_takeoff else cfg.floor_y - im.aircraft.aircraft.get_height(), 
+        Sprite(im.aircraft.aircraft), 
         shoot_cooldown=cfg.gameplay.player_shoot_cooldown, 
         bomb_cooldown=cfg.gameplay.player_bomb_cooldown, 
         health=cfg.gameplay.initial_health)
@@ -77,12 +77,12 @@ def play(screen, font):
         wave_mode_text_opacity = 0
     while running:
         # Draw background
-        screen.blit(im.background_image, (scroll_x, 0))
-        screen.blit(im.background_image, (scroll_x + im.background_image.get_width(), 0))
+        screen.blit(im.background.background, (scroll_x, 0))
+        screen.blit(im.background.background, (scroll_x + im.background.background.get_width(), 0))
 
         # Update scrolling background
         scroll_x -= scroll_speed
-        if scroll_x < -im.background_image.get_width():
+        if scroll_x < -im.background.background.get_width():
             scroll_x = 0
 
         if pregame_timer == 0:
@@ -118,7 +118,7 @@ def play(screen, font):
                     particles.append(Particle(
                         player.x, 
                         player.y, 
-                        sprite=choice((Sprite(im.large_explosions), Sprite(im.small_explosions), Sprite(im.moth_images))),
+                        sprite=choice((Sprite(im.particle.large_explosions), Sprite(im.particle.small_explosions), Sprite(im.aircraft.moth))),
                         duration=randint(10, 100),
                         scale=randint(1,5),
                         adjust_pos=False))
@@ -151,11 +151,11 @@ def play(screen, font):
                 if not cfg.debug.invincible and player.health <= 0:
                     print("Player hit the floor. Game over.")
                     running = False
-                particle = player.display_particle(Sprite(im.small_explosions, animation_time=30, size_multiplier=2), 100)
+                particle = player.display_particle(Sprite(im.particle.small_explosions, animation_time=30, size_multiplier=2), 100)
                 if particle: particles.append(particle)
 
             if player.falling:
-                particle = player.display_particle(Sprite(im.small_explosions, animation_time=5))
+                particle = player.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
                 if particle: particles.append(particle)
 
             enemies = [enemy for enemy in enemies if enemy.alive]
@@ -164,14 +164,14 @@ def play(screen, font):
                 enemy.draw(screen)
                 if enemy.ground_collision():
                     enemy.destroy()
-                    particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True))
+                    particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True))
                     score += 20 if cfg.gameplay.wave_mode else 70
                     enemy_count += cfg.gameplay.enemy_count_increment
                 if enemy.ai.shoot:
                     bullets.append(enemy.shoot())
                     enemy.ai.shoot -= 1
                 if enemy.falling:
-                    particle = enemy.display_particle(Sprite(im.small_explosions, animation_time=5))
+                    particle = enemy.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
                     if particle: particles.append(particle)
 
                 if cfg.debug.show_ai_type:

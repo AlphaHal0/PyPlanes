@@ -1,10 +1,9 @@
 from entity import Entity
-import images
+from images import im
 from random import random
 from particle import Particle
 from sprite import Sprite
 from config import cfg
-import pygame
 
 class Weapon(Entity):
     """A class to represent any weapon, usually initiated by an Aircraft"""
@@ -32,20 +31,20 @@ class Weapon(Entity):
             for i in entities:
                 if i.distance_to(self.x, self.y) < self.explosion_power * 30:
                     i.fall()
-            return Particle(self.x, self.y, sprite=Sprite(images.large_explosions, size_multiplier=self.explosion_power), duration=20 * self.explosion_power)
+            return Particle(self.x, self.y, sprite=Sprite(im.particle.large_explosions, size_multiplier=self.explosion_power), duration=20 * self.explosion_power)
         else:
-            return Particle(self.x, self.y, sprite=Sprite(images.small_explosions), duration=10)
+            return Particle(self.x, self.y, sprite=Sprite(im.particle.small_explosions), duration=10)
 
 class Bullet(Weapon):
     """A Weapon that represents a bullet"""
-    def __init__(self, sprite: Sprite = Sprite(images.bullet_image), velocity_x: int = cfg.physics.bullet_velocity, is_enemy: bool = False, **kwargs):
+    def __init__(self, sprite: Sprite = Sprite(im.weapons.bullet), velocity_x: int = cfg.physics.bullet_velocity, is_enemy: bool = False, **kwargs):
         super().__init__(sprite=sprite, velocity_x=-velocity_x if is_enemy else velocity_x, is_enemy=is_enemy, **kwargs)
 
 class Bomb(Weapon):
     """A Weapon that represents a bomb"""
-    def __init__(self, sprite: Sprite = Sprite(images.bomb_image), velocity_x: int = 5, velocity_y: int = 0, drag_multiplier: float = 0.1, is_enemy: bool = False, **kwargs):
+    def __init__(self, sprite: Sprite = Sprite(im.weapons.bomb), velocity_x: int = 5, velocity_y: int = 0, drag_multiplier: float = 0.1, is_enemy: bool = False, **kwargs):
         if random() <= cfg.easter_eggs.berry_bomb_chance:
-            sprite = Sprite(images.blueberry)
+            sprite = Sprite(im.weapons.blueberry)
         super().__init__(sprite=sprite, velocity_x=-velocity_x if is_enemy else velocity_x, velocity_y=velocity_y + cfg.physics.bomb_y_velocity_gain, is_enemy=is_enemy, **kwargs)
         self.drag_multiplier = drag_multiplier
         

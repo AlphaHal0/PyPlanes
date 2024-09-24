@@ -6,7 +6,7 @@ import ai
 import weapon
 from entity import Entity
 from sprite import Sprite
-import images
+from images import im
 
 class Aircraft(Entity):
     """An Entity with aircraft mechanics"""
@@ -160,7 +160,7 @@ class EnemyAircraft(Aircraft):
 class Moth(EnemyAircraft):
     """An EnemyAircraft that is a moth"""
     def __init__(self, y: int, difficulty: int = 1):
-        super().__init__(y, Sprite(images.moth_images, animation_time=random.randint(1, 10)), difficulty)
+        super().__init__(y, Sprite(im.aircraft.moths, animation_time=random.randint(1, 10)), difficulty)
 
     def destroy(self) -> None:
         if not cfg.easter_eggs.moth_music_is_main_music:
