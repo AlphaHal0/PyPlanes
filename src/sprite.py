@@ -18,7 +18,7 @@ class Sprite:
             if not size: size = image[0].get_size()
             self.anim_time = animation_time
             self.anim_frame = 0
-            self.anim_frame_count = len(image)-1
+            self.anim_frame_count = len(image)
         else:
             if image:
                 if not size: size = image.get_size()
@@ -74,15 +74,17 @@ class Sprite:
             pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))
         else:
             if self.is_animated:
-                frame = self.anim_frame//self.anim_time
-                if frame >= self.anim_frame_count:
+                # TODO: Redo animation system, this is ambiguous
+                # and I can't be bothered to describe it because I've forgotten how it works already
+
+                frame = self.anim_frame // self.anim_time
+                screen.blit(self.image[frame], ((x,y), self.size))
+                self.anim_frame += 1
+                if self.anim_frame >= self.anim_frame_count * self.anim_time:
                     self.anim_frame = 0
                     if not loop: return False
-                else:
-                    self.anim_frame += 1
-                    screen.blit(self.image[frame], ((x,y), self.size))
             else:
-                    screen.blit(self.image, ((x,y), self.size))
+                screen.blit(self.image, ((x,y), self.size))
 
         return True
     

@@ -1,8 +1,10 @@
 {
     "weapons": {
         "bullet": {
-            "fp": "weapons/bullets/shot1",
-            "scale": 0.025
+            "fp": "weapons/bullets/shot",
+            "scale": 0.025,
+            "anim": 3,
+            "mode": "x"
         },
         "bomb": {
             "fp": "weapons/bombs/British/GP-1000lb-MK-IV",
@@ -66,19 +68,22 @@
         "moth": {
             "fp": "easteregg/moth/frame_{}",
             "scale": 0.07,
-            "anim": 8
+            "anim": 8,
+            "mode": "s"
         }
     },
     "particle": {
         "large_explosions": {
             "fp": "particle/fire/large-{}",
             "scale": 0.05,
-            "anim": 4
+            "anim": 4,
+            "mode": "s"
         },
         "small_explosions": {
             "fp": "particle/smoke/large-{}",
             "scale": 0.05,
-            "anim": 4
+            "anim": 4,
+            "mode": "s"
         }
     }
 }

@@ -308,5 +308,6 @@ def play(screen, font):
     # Quit Pygame
     print(f"Final score: {score}")
     pygame.mouse.set_visible(True)
+    pygame.event.set_grab(False)
     pygame.mixer.stop()
     pygame.mixer.music.stop()

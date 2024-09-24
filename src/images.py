@@ -2,6 +2,12 @@ import config
 from config import cfg
 import pygame
 
+try:
+    import PIL.Image
+    PIL_IMPORTED = True
+except ImportError:
+    PIL_IMPORTED = False
+
 def load_image(file: str) -> pygame.Surface:
     """Loads an image from file and returns a pygame.Surface.
     Checks `./mod/res/img/{file}` first, then `./res/img/{file}`.
@@ -48,14 +54,38 @@ class ImageHandler:
             for key, value in contents.items(): # search category items
                 if value.get('anim'): # this is an animated image
                     images = []
-                    for i in range(value['anim']):
-                        # e.g. if value['fp'] was "frame_{}.png" then it loads ["frame_1.png", "frame_2.png", ...]
-                        images.append(self.process_image(value, value['fp'].format(i)))
+                    if value.get('mode').startswith('s'):
+                        for i in range(value['anim']):
+                            # e.g. if value['fp'] was "frame_{}.png" then it loads ["frame_1.png", "frame_2.png", ...]
+                            images.append(self.process_image(value, value['fp'].format(i)))
+                    elif PIL_IMPORTED:
+                        # Load and split image
+                        if cfg.debug.show_image_inits: print("load img", value['fp'] + ".png", end=' ')
+                        try:
+                            image = PIL.Image.open(f"./mod/res/img/{value['fp']}.png")
+                            if cfg.debug.show_image_inits: print("...ok")
+                        except FileNotFoundError: 
+                            try: 
+                                image = PIL.Image.open(f"./res/img/{value['fp']}.png")
+                                if cfg.debug.show_image_inits: print("...ok")
+                            except FileNotFoundError:
+                                if cfg.debug.show_image_inits: print("...NOT FOUND")
+                                setattr(getattr(self, cat), key, None)
+                                continue
+                        
+                        for i in range(value['anim']):
+                            new_image = image.crop(((i)*(image.width//value['anim']), 0, (i+1)*(image.width//value['anim']), image.height))
+                            images.append(self.process_image(value, image=
+                                pygame.image.fromstring(new_image.tobytes(), new_image.size, new_image.mode).convert_alpha())) # Convert PIL Image to Pygame image
+                    else:
+                        print(f"[!!!] Image {key} could not be loaded because Pillow has not been installed. Please install it and try again")
+                        setattr(getattr(self, cat), key, None)
+                        continue
                     setattr(getattr(self, cat), key, images)
                 else:
                     setattr(getattr(self, cat), key, self.process_image(value))
 
-    def process_image(self, value: dict, fp_override: str = "") -> pygame.Surface|None:
+    def process_image(self, value: dict, fp_override: str = "", image: pygame.Surface|None = None) -> pygame.Surface|None:
         """Loads and processes an image based on the contents in value.
         Available functions:
         - fp (str, required): the path to the image (.png ext. added automatically)
@@ -69,13 +99,14 @@ class ImageHandler:
         If `fp_override` is given, loads that file instead.
         Returns None if not found (Sprites should handle being given None automatically)"""
 
-        if cfg.debug.show_image_inits: print("load img", fp_override if fp_override else value['fp'], end=' ')
-        try:
-            image = load_image((fp_override if fp_override else value['fp']) + '.png')
-            if cfg.debug.show_image_inits: print("...ok")
-        except FileNotFoundError:
-            if cfg.debug.show_image_inits: print("...NOT FOUND")
-            return None
+        if image is None:
+            if cfg.debug.show_image_inits: print("load img", fp_override if fp_override else value['fp'], end=' ')
+            try:
+                image = load_image((fp_override if fp_override else value['fp']) + '.png')
+                if cfg.debug.show_image_inits: print("...ok")
+            except FileNotFoundError:
+                if cfg.debug.show_image_inits: print("...NOT FOUND")
+                return None
         
 
         if value.get('flip'): 
