@@ -57,6 +57,8 @@ def play(screen, font):
     wave_mode_text_x = cfg.screen_width
     wave_mode_text_y = cfg.screen_height // 2 - font.get_height() // 2
     running = True
+    game_paused = False
+    frame_step = 0
     framestart = time.time()
 
     if cfg.gameplay.disable_takeoff:
@@ -120,6 +122,9 @@ def play(screen, font):
                         duration=randint(10, 100),
                         scale=randint(1,5),
                         adjust_pos=False))
+                elif is_pressed(event, kb.debug.pause_game):
+                    print("Game paused")
+                    game_paused = not game_paused
                     
                 # pitch
                 elif is_pressed(event, kb.movement.pitch_up):
@@ -276,6 +281,24 @@ def play(screen, font):
         scoredisplay_render = font.render(scoredisplay, False, 0)
 
         screen.blit(scoredisplay_render, (0, 0))
+
+        while game_paused and not frame_step:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT: return
+                elif is_pressed(event, kb.debug.pause_game) or is_pressed(event, kb.other.quit): 
+                    game_paused = False
+                    print("Game resumed")
+                elif is_pressed(event, kb.debug.step_one_frame):
+                    frame_step = 1
+                    break
+                elif is_pressed(event, kb.debug.step_5_frames):
+                    frame_step = 5
+                    break
+                elif is_pressed(event, kb.debug.step_60_frames):
+                    frame_step = 60
+                    break
+
+        if frame_step: frame_step -= 1
 
         # Update display
         framestart = time.time()

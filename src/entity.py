@@ -6,11 +6,13 @@ import math
 class Entity:
     """Base class for all entities in the game. 
     By default, Entities move by their velocity each tick. """
-    def __init__(self, sprite: Sprite = Sprite(), x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True):
+    def __init__(self, sprite: Sprite = Sprite(), x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, id: int = 0):
         self.rect = pygame.Rect((x, y), sprite.size)
         self.x, self.y = x, y
         self.width, self.height = sprite.size
-        self.sprite = sprite # UwU
+        self.sprite = sprite
+        self.rotation = rotation
+        self.id = id
 
         self.alive = True
         
@@ -39,7 +41,7 @@ class Entity:
     def destroy(self) -> None:
         self.alive = False
     
-    def is_colliding(self, rect: pygame.Rect) -> int:
+    def is_colliding(self, rect: pygame.Rect|list[pygame.Rect]) -> int:
         """Returns if this Entity is colliding with a Rect or a list of Rects"""
         if isinstance(rect, list):
             return pygame.Rect.collidelist(self.rect, rect)

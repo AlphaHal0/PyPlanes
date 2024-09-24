@@ -106,16 +106,17 @@ class Aircraft(Entity):
         self.velocity_x *= cfg.physics.aircraft_drag
         self.velocity_y *= cfg.physics.aircraft_drag
     
-    def shoot(self) -> weapon.Bullet | None:
+    def shoot(self, id: str = 0) -> weapon.Bullet | None:
         """Returns a shot weapon.Bullet if not on cooldown, otherwise None"""
         if self.shoot_cooldown <= 0:
             self.shoot_cooldown = self.max_shoot_cooldown
             return weapon.Bullet(
-                (self.x if self.is_enemy else self.x + self.width),
-                self.y + self.height / 2,
-                self.is_enemy,
+                x=(self.x if self.is_enemy else self.x + self.width),
+                y=self.y + self.height / 2,
+                is_enemy=self.is_enemy,
                 velocity_x=cfg.physics.bullet_velocity+(self.velocity_x*cfg.physics.weapon_velocity_multiplier),
-                rotation=self.pitch)
+                rotation=self.pitch,
+                id=id)
         else:
             return None
     
@@ -124,10 +125,10 @@ class Aircraft(Entity):
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
             return weapon.Bomb(
-                (self.x + self.width // 2),
-                self.y + self.height,
-                self.is_enemy,
-                self.velocity_x,
+                x=(self.x + self.width // 2),
+                y=self.y + self.height,
+                is_enemy=self.is_enemy,
+                velocity_x=self.velocity_x,
                 explosion_power=random.randint(4,6),
                 rotation=self.pitch
             )
