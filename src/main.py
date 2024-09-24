@@ -15,7 +15,7 @@ from ui.button import Button, ConfigOption
 from ui.menu import Menu
 from ui.text import Text
 from sprite import Sprite
-from images import im
+from images import im, image_toc
 from game import play
 
 def finish():
@@ -75,7 +75,7 @@ def main():
     # TODO: Config class for UI positioning
     #       Maybe add auto grid placement handled by ui.Menu?
  
-    button_pos = cfg.screen_width // 2 - cfg.ui.button_size[0] * cfg.screen_width // 2
+    button_pos = cfg.screen_width // 2 - image_toc.ui.button['scale'][0] * cfg.screen_width // 2
     main_menu = Menu(
         Sprite(im.ui.background),
         elements=[

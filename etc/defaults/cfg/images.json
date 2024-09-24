@@ -31,7 +31,7 @@
         },
         "narrow_button": {
             "fp": "ui/button",
-            "scale": [0.3, 0.05]
+            "scale": [0.2, 0.05]
         },
         "small_button": {
             "fp": "ui/button",

@@ -72,9 +72,9 @@ class ImageHandler:
         if cfg.debug.show_image_inits: print("load img", fp_override if fp_override else value['fp'], end=' ')
         try:
             image = load_image((fp_override if fp_override else value['fp']) + '.png')
-            print("...ok")
+            if cfg.debug.show_image_inits: print("...ok")
         except FileNotFoundError:
-            print("...NOT FOUND")
+            if cfg.debug.show_image_inits: print("...NOT FOUND")
             return None
         
 
@@ -87,4 +87,5 @@ class ImageHandler:
         return image
 
 image_toc = config.Config("cfg/images.json")
+image_toc.reset()
 im = ImageHandler(image_toc)
