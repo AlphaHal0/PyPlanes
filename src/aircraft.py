@@ -122,7 +122,7 @@ class Aircraft(Entity):
         else:
             return None
     
-    def bomb(self) -> weapon.Bomb | None:
+    def bomb(self, id: str = 0) -> weapon.Bomb | None:
         """Returns a shot weapon.Bomb if not on cooldown, otherwise None"""
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
@@ -132,7 +132,8 @@ class Aircraft(Entity):
                 is_enemy=self.is_enemy,
                 velocity_x=self.velocity_x,
                 explosion_power=random.randint(4,6),
-                rotation=self.pitch
+                rotation=self.pitch,
+                id=id
             )
         else:
             return None
@@ -147,6 +148,7 @@ class EnemyAircraft(Aircraft):
         elif ai_type == 2: self.ai = ai.Turret(size, difficulty, self.max_shoot_cooldown)
         elif ai_type == 3: self.ai = ai.Dodger(size, difficulty, self.max_shoot_cooldown)
         elif ai_type == 4: self.ai = ai.Offence(size, difficulty, self.max_shoot_cooldown)
+        elif ai_type == 5: self.ai = ai.Bomber(size, difficulty, self.max_shoot_cooldown)
         else: self.ai = ai.BaseAI(size)
 
     def ai_tick(self, **ctx):

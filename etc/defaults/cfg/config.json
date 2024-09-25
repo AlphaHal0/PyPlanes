@@ -1,4 +1,13 @@
 {
+  "display": {
+    "screen_width": 1800,
+    "screen_height": 800,
+    "floor_y_ratio": 0.13,
+    "initial_aircraft_x_ratio": 0.1,
+    "initial_aircraft_y_ratio": 0.45,
+    "scroll_speed_ratio": 0.01
+  },
+
   "gameplay": {
     "player_shoot_cooldown": 30,
     "enemy_shoot_cooldown": 30,
@@ -28,13 +37,8 @@
     "aircraft_terminal_velocity": 20
   },
 
-  "display": {
-    "screen_width": 1800,
-    "screen_height": 800,
-    "floor_y_ratio": 0.13,
-    "initial_aircraft_x_ratio": 0.1,
-    "initial_aircraft_y_ratio": 0.45,
-    "scroll_speed_ratio": 0.01
+  "aircraft": {
+    "bomber_minimum_y": 0.2
   },
 
   "ui": {

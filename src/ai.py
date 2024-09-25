@@ -27,7 +27,8 @@ class BaseAI:
         elif self.target_y < self.ymin:
             self.target_y = self.ymin + 10
 
-    def tick(self, ctx: dict): pass
+    def tick(self, ctx: dict): 
+        self.constrain()
 
 class Fly(BaseAI): 
     """AI with basic random movements."""
@@ -38,8 +39,6 @@ class Fly(BaseAI):
 
         if random.random() > 0.97:
             self.shoot += 1 # fire
-
-        self.constrain()
 
 class Turret(BaseAI): 
     """Move to a random position and shoot."""
@@ -58,7 +57,6 @@ class Turret(BaseAI):
             if self.iteration <= self.max_iteration - 100 and self.iteration % (self.fire_rate + 1) == 1:
                 self.shoot += 1 # fire
             self.iteration -= 1
-        self.constrain()
 
 class Dodger(BaseAI): 
     """Avoid player bullets."""
@@ -104,3 +102,24 @@ class Offence(BaseAI):
             self.shoot_time = self.max_shoot_time
         else:
             self.shoot_time -= 1
+
+class Bomber(BaseAI):
+    """Shoot player from in front angles
+    
+        1. Must fly at top 10% of screen
+        2. Must shoot at player if they are 0 to -80 degrees in front and below them or up to 10 degrees above
+        3. Must not rotate to shoot player
+    """
+    debug_color = 0x00FFFF
+    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+        super().__init__(size, difficulty, fire_rate)
+        self.ymin = cfg.screen_height * cfg.aircraft.bomber_minimum_y
+
+        
+    def tick(self, ctx: dict):
+        
+        self.target_x = random.randint(int(self.xmin), int(self.xmax))
+        self.target_y = random.randint(int(self.ymin), int(self.ymax))
+        
+
+        self.shoot += 1

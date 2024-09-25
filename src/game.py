@@ -24,7 +24,7 @@ def play(screen, font):
                 pygame.mixer.music.play(-1)
             enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
         else:
-            if type == 0: type = randint(1, min(4, difficulty))
+            if type == 0: type = randint(1, min(5, difficulty))
 
             if image is None:
                 match type:
@@ -32,6 +32,7 @@ def play(screen, font):
                     case 2: image = im.aircraft.enemy_2
                     case 3: image = im.aircraft.enemy_3
                     case 4: image = im.aircraft.enemy_4
+                    case 5: image = im.aircraft.enemy_5
             enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image), difficulty, ai_type=type))
 
     if not cfg.gameplay.wave_mode:
@@ -106,6 +107,7 @@ def play(screen, font):
                                 case kb.debug.spawn_enemy_ai_2: spawn_enemy(difficulty=int(enemy_count), type=2)
                                 case kb.debug.spawn_enemy_ai_3: spawn_enemy(difficulty=int(enemy_count), type=3)
                                 case kb.debug.spawn_enemy_ai_4: spawn_enemy(difficulty=int(enemy_count), type=4)
+                                case kb.debug.spawn_enemy_ai_5: spawn_enemy(difficulty=int(enemy_count), type=5)
 
                             break
                             
@@ -162,7 +164,7 @@ def play(screen, font):
 
             enemies = [enemy for enemy in enemies if enemy.alive]
             for enemy in enemies:
-                enemy.ai_tick(danger_zones=enemy_ai_danger_zones, player_y=player.y)
+                enemy.ai_tick(danger_zones=enemy_ai_danger_zones, player_y=player.y, player_x=player.x, enemy_y=enemy.y)
                 enemy.draw(screen)
                 if enemy.ground_collision():
                     enemy.destroy()
