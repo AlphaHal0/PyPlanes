@@ -72,6 +72,14 @@
             "mode": "s"
         }
     },
+    "ground_vehicles": {
+        "tank": {
+            "fp": "ground_vehicles/tank",
+            "scale": 0.1,
+            "anim": 2,
+            "mode": "x"
+        }
+    },
     "particle": {
         "large_explosions": {
             "fp": "particle/fire/large-{}",

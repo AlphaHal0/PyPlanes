@@ -25,6 +25,7 @@ class Sprite:
             self.anim_frame = 0
             self.anim_frame_count = len(image)
         else:
+            self.anim_time = 0
             if not size: size = image.get_size()
 
         self.base_size = size

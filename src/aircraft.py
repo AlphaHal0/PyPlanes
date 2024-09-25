@@ -11,15 +11,12 @@ from images import im
 class Aircraft(Entity):
     """An Entity with aircraft mechanics"""
     def __init__(self, x: int, y: int, sprite: Sprite|None = None, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, health: float = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown):
-        if sprite is None: self.sprite = Sprite()
         self.acceleration = cfg.physics.aircraft_acceleration
         self.terminal_velocity = cfg.physics.aircraft_terminal_velocity
         self.shoot_cooldown = 0
         self.bomb_cooldown = 0
         self.max_shoot_cooldown = shoot_cooldown
         self.spawn_cooldown = spawn_cooldown
-        self.time_of_spawn = pygame.time.get_ticks()
-        self.alive = True
         self.falling = False
         self.is_enemy = is_enemy
         self.last_particle_time = 0
@@ -27,6 +24,7 @@ class Aircraft(Entity):
         self.max_bomb_cooldown = bomb_cooldown
         self.pitch = 0
         self.target_pitch = 0
+        self.is_aircraft = True
         super().__init__(sprite, x, y)
 
     def update(self) -> None:

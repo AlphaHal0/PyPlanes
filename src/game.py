@@ -5,6 +5,7 @@ from random import random, randint, choice
 import aircraft
 from particle import Particle
 from sprite import Sprite
+import ground_vehicle
 from images import im
 from keybind import is_pressed, is_held
 
@@ -103,6 +104,9 @@ def play(screen, font):
                                 case kb.debug.spawn_enemy_ai_5: spawn_enemy(difficulty=int(enemy_count), type=5)
 
                             break
+
+                elif is_pressed(event, kb.debug.spawn_ground_enemy):
+                    enemies.append(ground_vehicle.GroundVehicle())
                             
                 elif is_pressed(event, kb.debug.spawn_moth):
                     spawn_enemy(moth=True, difficulty=int(enemy_count))
@@ -157,19 +161,22 @@ def play(screen, font):
 
             enemies = [enemy for enemy in enemies if enemy.alive]
             for enemy in enemies:
-                enemy.ai_tick(danger_zones=enemy_ai_danger_zones, player_y=player.y, player_x=player.x, enemy_y=enemy.y)
                 enemy.draw(screen)
-                if enemy.ground_collision():
-                    enemy.destroy()
-                    particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True))
-                    score += 20 if cfg.gameplay.wave_mode else 70
-                    enemy_count += cfg.gameplay.enemy_count_increment
+                if enemy.is_aircraft:
+                    enemy.ai_tick(danger_zones=enemy_ai_danger_zones, player_y=player.y, player_x=player.x, enemy_y=enemy.y)
+                    if enemy.ground_collision():
+                        enemy.destroy()
+                        particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True))
+                        score += 20 if cfg.gameplay.wave_mode else 70
+                        enemy_count += cfg.gameplay.enemy_count_increment
+                    if enemy.falling:
+                        particle = enemy.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
+                        if particle: particles.append(particle)
+                else:
+                    enemy.update()
                 if enemy.ai.shoot:
                     bullets.append(enemy.shoot())
                     enemy.ai.shoot -= 1
-                if enemy.falling:
-                    particle = enemy.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
-                    if particle: particles.append(particle)
 
                 if cfg.debug.show_ai_type:
                     ai_marker = pygame.Surface((10,10))

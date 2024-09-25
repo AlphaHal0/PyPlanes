@@ -21,6 +21,7 @@
         "spawn_enemy_ai_3": 1073741915,
         "spawn_enemy_ai_4": 1073741916,
         "spawn_enemy_ai_5": 1073741917,
+        "spawn_ground_enemy": 1073741918,
         "pause_game": 1073741911,
         "step_one_frame": 1073741910,
         "step_5_frames": 1073741909,

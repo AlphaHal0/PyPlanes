@@ -6,7 +6,9 @@ import math
 class Entity:
     """Base class for all entities in the game. 
     By default, Entities move by their velocity each tick. """
-    def __init__(self, sprite: Sprite = Sprite(), x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, id: int = 0):
+    def __init__(self, sprite: Sprite|None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, id: int = 0):
+        if sprite is None: sprite = Sprite()
+        
         self.rect = pygame.Rect((x, y), sprite.size)
         self.x, self.y = x, y
         self.width, self.height = sprite.size
@@ -14,6 +16,7 @@ class Entity:
         self.rotation = rotation
         self.id = id
 
+        self.time_of_spawn = pygame.time.get_ticks()
         self.alive = True
         
         if rotation: self.sprite.rotate(rotation)
