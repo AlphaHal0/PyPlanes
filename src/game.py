@@ -25,15 +25,8 @@ def play(screen, font):
             enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
         else:
             if type == 0: type = randint(1, min(5, difficulty))
-
-            if image is None:
-                match type:
-                    case 1: image = im.aircraft.enemy_1
-                    case 2: image = im.aircraft.enemy_2
-                    case 3: image = im.aircraft.enemy_3
-                    case 4: image = im.aircraft.enemy_4
-                    case 5: image = im.aircraft.enemy_5
-            enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, Sprite(image), difficulty, ai_type=type))
+            if image is not None: image = Sprite(image)
+            enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, image, difficulty, ai_type=type))
 
     if not cfg.gameplay.wave_mode:
         for i in range(enemy_count):

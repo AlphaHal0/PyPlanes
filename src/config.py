@@ -3,18 +3,20 @@ import os
 
 if not os.path.exists("./cfg"): os.mkdir("./cfg")
 
-def copy_missing_configs(source: str, dest: str):
+def copy_missing_configs(source: str, dest: str) -> bool:
     """Copies options from one file to another.
     If dest is missing, copies source to dest.
-    Otherwise, reads through all config objects in source and copies over any objects that are not currently in dest."""
+    Otherwise, reads through all config objects in source and copies over any objects that are not currently in dest.
+    Returns False if dest had to be fully reset, else True"""
     with open(source, 'r') as _s: infile = json.load(_s)
     
     try: 
         with open(dest, 'r') as _d: outfile = json.load(_d)
     except (json.JSONDecodeError, FileNotFoundError):
         # copy the file
+        print(f"[!] Reloading file {dest} from defaults")
         with open(dest, 'w') as _d: json.dump(infile, _d)
-        return
+        return False
     
     has_any_changed = False
     
@@ -35,6 +37,8 @@ def copy_missing_configs(source: str, dest: str):
     
     if has_any_changed:
         with open(dest, 'w') as _s: json.dump(outfile, _s)
+
+    return True
 
 class ConfigCategory:
     """A class that handles a config category.

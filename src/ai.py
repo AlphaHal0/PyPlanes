@@ -1,13 +1,17 @@
 import random
 from config import cfg
+from images import im
 
 class BaseAI: 
     """The base AI with no special features."""
     debug_color = 0x000000
-    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
+    default_aircraft_img = None
+    def __init__(self, size: tuple, **kwargs):
         self.speed = 100
-        self.fire_rate = fire_rate
-        self.difficulty = difficulty
+        for arg, value in kwargs.items(): # Set all params given to the AI to attributes
+            # e.g. if the class is given fire_rate as a param on init
+            # then self.fire_rate gets defined
+            setattr(self, arg, value)
         self.xmin = cfg.screen_width * 0.5
         self.xmax = cfg.screen_width - size[0] - 10
         self.ymin = 0
@@ -33,18 +37,22 @@ class BaseAI:
 class Fly(BaseAI): 
     """AI with basic random movements."""
     debug_color = 0xFF0000
-    def tick(self, ctx: dict): # What is ctx? Why is it not used? Why is it still defined? UwU
+    default_aircraft_img = im.aircraft.enemy_1
+    def tick(self, ctx: dict):
         self.target_x += random.randint(-self.speed, self.speed)
         self.target_y += random.randint(-self.speed, self.speed)
 
         if random.random() > 0.97:
             self.shoot += 1 # fire
 
+        super().tick(ctx)
+
 class Turret(BaseAI): 
     """Move to a random position and shoot."""
     debug_color = 0x00FF00
-    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
-        super().__init__(size, difficulty, fire_rate)
+    default_aircraft_img = im.aircraft.enemy_2
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.iteration = 0
         self.max_iteration = 100 + self.difficulty * self.fire_rate
 
@@ -58,17 +66,20 @@ class Turret(BaseAI):
                 self.shoot += 1 # fire
             self.iteration -= 1
 
+        super().tick(ctx)
+
 class Dodger(BaseAI): 
     """Avoid player bullets."""
     debug_color = 0xFFFF00
-    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
-        super().__init__(size, difficulty, fire_rate)
-        self.max_shoot_time = fire_rate * max(1, 5 - difficulty//5)
+    default_aircraft_img = im.aircraft.enemy_3
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.max_shoot_time = self.fire_rate * max(1, 5 - self.difficulty//5)
         self.shoot_time = self.max_shoot_time
 
     def tick(self, ctx: dict):
         c = 0
-        while self.check_is_obstructed(ctx["danger_zones"]) and c < 10: # limit to 10 attempts because UwU
+        while self.check_is_obstructed(ctx["danger_zones"]) and c < 10: # limit to 10 attempts
             self.target_y = random.randint(int(self.ymin), int(self.ymax))
             self.target_x = random.randint(int(self.xmin), int(self.xmax))
             c += 1
@@ -78,6 +89,8 @@ class Dodger(BaseAI):
             self.shoot_time = self.max_shoot_time
         else:
             self.shoot_time -= 1
+
+        super().tick(ctx)
         
     def check_is_obstructed(self, danger_zones: list):
         for i in danger_zones:
@@ -88,9 +101,10 @@ class Dodger(BaseAI):
 class Offence(BaseAI): 
     """Follow the player."""
     debug_color = 0x0000FF
-    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
-        super().__init__(size, difficulty, fire_rate)
-        self.max_shoot_time = cfg.gameplay.enemy_shoot_cooldown * max(1, 5 - difficulty//5)
+    default_aircraft_img = im.aircraft.enemy_4
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.max_shoot_time = cfg.gameplay.enemy_shoot_cooldown * max(1, 5 - self.difficulty//5)
         self.shoot_time = self.max_shoot_time
         self.target_x = random.randint(int(self.xmin), int(self.xmax))
 
@@ -103,6 +117,8 @@ class Offence(BaseAI):
         else:
             self.shoot_time -= 1
 
+        super().tick(ctx)
+
 class Bomber(BaseAI):
     """Shoot player from in front angles
     
@@ -111,15 +127,26 @@ class Bomber(BaseAI):
         3. Must not rotate to shoot player
     """
     debug_color = 0x00FFFF
-    def __init__(self, size: tuple, difficulty: int, fire_rate: int):
-        super().__init__(size, difficulty, fire_rate)
+    default_aircraft_img = im.aircraft.enemy_5
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.ymin = cfg.screen_height * cfg.aircraft.bomber_minimum_y
 
         
     def tick(self, ctx: dict):
-        
         self.target_x = random.randint(int(self.xmin), int(self.xmax))
         self.target_y = random.randint(int(self.ymin), int(self.ymax))
         
-
         self.shoot += 1
+
+        super().tick(ctx)
+
+# List of types
+ai_types: list[BaseAI] = [
+    BaseAI,
+    Fly,
+    Turret,
+    Dodger,
+    Offence,
+    Bomber
+]

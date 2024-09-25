@@ -141,15 +141,14 @@ class Aircraft(Entity):
 class EnemyAircraft(Aircraft):
     """An Aircraft with enemy AI"""
     def __init__(self, y: int, sprite: Sprite|None = None, difficulty: int = 1, ai_type: int = 1):
-        super().__init__(x=cfg.screen_width, y=y, sprite=sprite, is_enemy=True, shoot_cooldown=50)
+        
+        if sprite is None: sprite = Sprite(ai.ai_types[ai_type].default_aircraft_img)
+        size = sprite.size
+        # Get type from index and init AI class
+        self.ai = ai.ai_types[ai_type](size=size, difficulty=difficulty, fire_rate=cfg.gameplay.enemy_shoot_cooldown)
 
-        size = self.sprite.size
-        if ai_type == 1: self.ai = ai.Fly(size, difficulty, self.max_shoot_cooldown)
-        elif ai_type == 2: self.ai = ai.Turret(size, difficulty, self.max_shoot_cooldown)
-        elif ai_type == 3: self.ai = ai.Dodger(size, difficulty, self.max_shoot_cooldown)
-        elif ai_type == 4: self.ai = ai.Offence(size, difficulty, self.max_shoot_cooldown)
-        elif ai_type == 5: self.ai = ai.Bomber(size, difficulty, self.max_shoot_cooldown)
-        else: self.ai = ai.BaseAI(size)
+        super().__init__(x=cfg.screen_width, y=y, sprite=sprite, is_enemy=True, shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown)
+
 
     def ai_tick(self, **ctx):
         """Ticks the EnemyAircraft's AI and runs self.update()"""
