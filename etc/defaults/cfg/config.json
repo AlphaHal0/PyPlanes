@@ -5,7 +5,8 @@
     "floor_y_ratio": 0.13,
     "initial_aircraft_x_ratio": 0.1,
     "initial_aircraft_y_ratio": 0.45,
-    "scroll_speed_ratio": 0.01
+    "scroll_speed_ratio": 0.01,
+    "shake_intensity": 1.0
   },
 
   "gameplay": {

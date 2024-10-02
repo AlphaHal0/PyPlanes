@@ -92,6 +92,12 @@
             "scale": 0.05,
             "anim": 4,
             "mode": "s"
+        },
+        "afterburner": {
+            "fp": "particle/exhaust/rocket",
+            "scale": 0.1,
+            "anim": 3,
+            "mode": "x"
         }
     }
 }

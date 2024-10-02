@@ -55,6 +55,7 @@ def play(screen, font):
     game_paused = False
     frame_step = 0
     framestart = time.time()
+    shake = 0
 
     if cfg.gameplay.disable_takeoff:
         # Set initial values for when not taking off
@@ -139,6 +140,23 @@ def play(screen, font):
                 new_bullet = player.shoot()
                 if new_bullet is not None:
                     bullets.append(new_bullet)
+            
+            if is_held(kb.debug.thrust):
+                particles.append(Particle(
+                    player.x + player.width * 0.3,
+                    player.y + player.height * 0.5,
+                    sprite=Sprite(im.particle.afterburner),
+                    scale=1,
+                    velocity_x=-40,
+                    move_with_screen=True
+                ))
+                if scroll_speed < cfg.scroll_speed * 2:
+                    scroll_speed += 0.2
+
+                shake = (scroll_speed - cfg.scroll_speed) / cfg.scroll_speed * 5
+            else:
+                if scroll_speed > cfg.scroll_speed:
+                    scroll_speed -= 0.2
 
             # Update aircraft position and check for collisions
             target_x, target_y = pygame.mouse.get_pos()
@@ -259,6 +277,12 @@ def play(screen, font):
 
         # Draw aircraft
         player.draw(screen)
+
+        # Apply screen shake
+        shake *= cfg.display.shake_intensity 
+        shake = int(shake)
+        screen.scroll(randint(-shake, shake), randint(-shake, shake))
+        shake = 0
 
         health_bar = pygame.Surface((150,10))
         health_bar.fill(0xFF0000)
