@@ -33,7 +33,6 @@ def play(screen, font):
         for i in range(enemy_count):
             spawn_enemy()
 
-    scroll_x = 0
     player = aircraft.Aircraft(
         cfg.initial_aircraft_x, 
         cfg.initial_aircraft_y if cfg.gameplay.disable_takeoff else cfg.floor_y - im.aircraft.aircraft.get_height(), 
@@ -43,7 +42,7 @@ def play(screen, font):
         health=cfg.gameplay.initial_health)
     enemies = []
     enemy_count = cfg.gameplay.initial_enemy_aircraft
-    scroll_x = 0
+    scroll_x = [0, 0, 0]
     bullets = []
     particles = []
     enemy_ai_danger_zones = []
@@ -73,13 +72,18 @@ def play(screen, font):
         wave_mode_text_opacity = 0
     while running:
         # Draw background
-        screen.blit(im.background.background, (scroll_x, 0))
-        screen.blit(im.background.background, (scroll_x + im.background.background.get_width(), 0))
+        i = 2
+        for image in (im.background.layer_1, im.background.layer_2, im.background.layer_3):
+            screen.blit(image, (scroll_x[i], 0))
+            screen.blit(image, (scroll_x[i] + cfg.screen_width, 0))
+            i -= 1
 
         # Update scrolling background
-        scroll_x -= scroll_speed
-        if scroll_x < -im.background.background.get_width():
-            scroll_x = 0
+        for i in range(3):
+            scroll_x[i] -= scroll_speed // (i+1)
+
+            if scroll_x[i] < -cfg.screen_width:
+                scroll_x[i] = 0
 
         if pregame_timer == 0:
             for event in pygame.event.get():

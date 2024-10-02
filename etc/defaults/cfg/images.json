@@ -17,8 +17,16 @@
         }
     },
     "background": {
-        "background": {
-            "fp": "background/mountains",
+        "layer_1": {
+            "fp": "background/layer_1",
+            "scale": [1, 1]
+        },
+        "layer_2": {
+            "fp": "background/layer_2",
+            "scale": [1, 1]
+        },
+        "layer_3": {
+            "fp": "background/layer_3",
             "scale": [1, 1]
         }
     },
