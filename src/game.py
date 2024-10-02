@@ -148,7 +148,9 @@ def play(screen, font):
                     sprite=Sprite(im.particle.afterburner),
                     scale=1,
                     velocity_x=-40,
-                    move_with_screen=True
+                    move_with_screen=True,
+                    rotation=player.pitch,
+                    adj_velocity_for_rot=True
                 ))
                 if scroll_speed < cfg.scroll_speed * 2:
                     scroll_speed += 0.2
@@ -165,17 +167,20 @@ def play(screen, font):
 
             if not cfg.debug.invincible: player.check_health()
 
+            if player.falling:
+                particle = player.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
+                if particle: particles.append(particle)
+                shake = 2
+
             if player.ground_collision():
                 player.health -= cfg.gameplay.ground_health_decay
                 if not cfg.debug.invincible and player.health <= 0:
                     print("Player hit the floor. Game over.")
                     running = False
                 particle = player.display_particle(Sprite(im.particle.small_explosions, animation_time=30, size_multiplier=2), 100)
-                if particle: particles.append(particle)
-
-            if player.falling:
-                particle = player.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
-                if particle: particles.append(particle)
+                if particle: 
+                    particles.append(particle)
+                    shake = 8
 
             enemies = [enemy for enemy in enemies if enemy.alive]
             for enemy in enemies:
@@ -229,8 +234,10 @@ def play(screen, font):
                 bullet.update()
 
                 if bullet.is_enemy:
+                    # Bullet is colliding with player
                     if bullet.is_colliding(player.rect):
                         player.health -= 10
+                        shake = 8
                         particles.append(bullet.explode(enemies))
                 else:
                     collided_aircraft = bullet.is_colliding([enemy.rect for enemy in enemies])
@@ -279,10 +286,12 @@ def play(screen, font):
         player.draw(screen)
 
         # Apply screen shake
-        shake *= cfg.display.shake_intensity 
-        shake = int(shake)
-        screen.scroll(randint(-shake, shake), randint(-shake, shake))
-        shake = 0
+        if shake > 0.1:
+            shake_mod = int(shake * cfg.display.shake_intensity)
+            screen.scroll(
+                randint(-shake_mod, shake_mod), 
+                randint(-shake_mod, shake_mod))
+            shake *= 0.8
 
         health_bar = pygame.Surface((150,10))
         health_bar.fill(0xFF0000)
