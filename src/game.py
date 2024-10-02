@@ -281,13 +281,12 @@ def play(screen, font):
                 scroll_speed = cfg.scroll_speed
                 pygame.mouse.set_visible(cfg.debug.mouse_visibility)
 
+        # Draw aircraft
+        player.draw(screen)
 
         particles = [particle for particle in particles if particle.alive]
         for particle in particles:
-            particle.draw(screen)
-
-        # Draw aircraft
-        player.draw(screen)
+            particle.draw(screen, scroll_speed)
 
         # Apply screen shake
         if shake > 0.1:

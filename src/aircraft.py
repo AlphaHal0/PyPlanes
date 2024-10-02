@@ -114,7 +114,7 @@ class Aircraft(Entity):
                 x=(self.x if self.is_enemy else self.x + self.width),
                 y=self.y + self.height / 2,
                 is_enemy=self.is_enemy,
-                velocity_x=cfg.physics.bullet_velocity+(self.velocity_x*cfg.physics.weapon_velocity_multiplier),
+                velocity_x=(cfg.physics.enemy_bullet_velocity if self.is_enemy else cfg.physics.player_bullet_velocity) + (self.velocity_x*cfg.physics.weapon_velocity_multiplier),
                 rotation=self.pitch,
                 id=id)
         else:

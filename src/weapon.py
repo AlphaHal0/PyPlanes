@@ -37,7 +37,7 @@ class Weapon(Entity):
 
 class Bullet(Weapon):
     """A Weapon that represents a bullet"""
-    def __init__(self, sprite: Sprite|None = None, velocity_x: int = cfg.physics.bullet_velocity, is_enemy: bool = False, **kwargs):
+    def __init__(self, sprite: Sprite|None = None, velocity_x: int = cfg.physics.enemy_bullet_velocity, is_enemy: bool = False, **kwargs):
         if sprite is None: sprite = Sprite(im.weapons.bullet, animation_time=5)
         super().__init__(sprite=sprite, velocity_x=-velocity_x if is_enemy else velocity_x, is_enemy=is_enemy, **kwargs)
 

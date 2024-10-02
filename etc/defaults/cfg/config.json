@@ -27,7 +27,8 @@
   },
 
   "physics": {
-    "bullet_velocity": 20,
+    "enemy_bullet_velocity": 20,
+    "player_bullet_velocity": 30,
     "weapon_velocity_multiplier": 0.2,
     "bomb_x_velocity_decay": 0.05,
     "bomb_y_velocity_gain": 0.1,
