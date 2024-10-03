@@ -10,7 +10,7 @@
     "advanced_vfx": false,
     "fast_vfx": true,
     "avfx_precision": 2,
-    "avfx_step": 360
+    "avfx_step": 720
   },
 
   "gameplay": {

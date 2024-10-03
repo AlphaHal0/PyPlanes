@@ -128,7 +128,7 @@ def play(screen, font):
                         scale=randint(1,5),
                         adjust_pos=False))
                 elif is_pressed(event, kb.debug.shockwave):
-                    particles.append(ScreenDistortion(player.x, player.y, 10, width=30, time_alive=120))
+                    particles.append(ScreenDistortion(player.x+player.width//2, player.y+player.height//2, 50, direction=player.pitch, angle=360, width=30, time_alive=20))
                 
                 elif is_pressed(event, kb.debug.pause_game):
                     print("Game paused")
