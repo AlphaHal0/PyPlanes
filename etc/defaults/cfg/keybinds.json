@@ -22,10 +22,12 @@
         "spawn_enemy_ai_4": 1073741916,
         "spawn_enemy_ai_5": 1073741917,
         "spawn_ground_enemy": 1073741918,
-        "pause_game": 1073741911,
-        "step_one_frame": 1073741910,
-        "step_5_frames": 1073741909,
-        "step_60_frames": 1073741908,
-        "thrust": 118
+        "pause_game": 1030,
+        "unpause_game": 1030,
+        "step_one_frame": 1028,
+        "step_5_frames": 1029,
+        "step_60_frames": 1031,
+        "thrust": 118,
+        "shockwave": 57
     }
 }

@@ -6,7 +6,11 @@
     "initial_aircraft_x_ratio": 0.1,
     "initial_aircraft_y_ratio": 0.45,
     "scroll_speed_ratio": 0.01,
-    "shake_intensity": 1.0
+    "shake_intensity": 1.0,
+    "advanced_vfx": false,
+    "fast_vfx": true,
+    "avfx_precision": 2,
+    "avfx_step": 360
   },
 
   "gameplay": {
@@ -67,6 +71,7 @@
     "show_sprite_sizes": false,
     "mouse_visibility": false,
     "show_image_inits": false,
-    "big_mode": false
+    "big_mode": false,
+    "show_distortion": false
   }
 }

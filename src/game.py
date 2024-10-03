@@ -8,6 +8,7 @@ from sprite import Sprite
 import ground_vehicle
 from images import im
 from keybind import is_pressed, is_held
+from vfx import ScreenDistortion
 
 # Game loop
 def play(screen, font):
@@ -126,6 +127,9 @@ def play(screen, font):
                         duration=randint(10, 100),
                         scale=randint(1,5),
                         adjust_pos=False))
+                elif is_pressed(event, kb.debug.shockwave):
+                    particles.append(ScreenDistortion(player.x, player.y, 10, width=30, time_alive=120))
+                
                 elif is_pressed(event, kb.debug.pause_game):
                     print("Game paused")
                     game_paused = not game_paused
@@ -324,9 +328,9 @@ def play(screen, font):
         screen.blit(scoredisplay_render, (0, 0))
 
         while game_paused and not frame_step:
-            for event in pygame.event.get():
+            for event in pygame.event.get((pygame.MOUSEWHEEL, pygame.MOUSEBUTTONDOWN, pygame.QUIT)):
                 if event.type == pygame.QUIT: return
-                elif is_pressed(event, kb.debug.pause_game) or is_pressed(event, kb.other.quit): 
+                elif is_pressed(event, kb.debug.unpause_game) or is_pressed(event, kb.other.quit): 
                     game_paused = False
                     print("Game resumed")
                 elif is_pressed(event, kb.debug.step_one_frame):
