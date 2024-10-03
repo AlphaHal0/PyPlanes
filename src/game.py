@@ -10,7 +10,7 @@ from images import im
 from keybind import is_pressed, is_held
 from vfx import ScreenDistortion
 
-# Game loop
+# Main game loop
 def play(screen, font):
     if cfg.easter_eggs.moth_music_is_main_music:
         pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
@@ -56,6 +56,15 @@ def play(screen, font):
     frame_step = 0
     framestart = time.time()
     shake = 0
+    if cfg.debug.enable_profiling:
+        profiler = {} 
+        profiler['0'] = framestart
+
+    def record_profile(stage: str):
+        """Record the current time in an array to be processed later"""
+        if cfg.debug.enable_profiling: 
+            profiler[stage] = round(time.time() - profiler['0'], 5)
+            profiler['0'] = time.time()
 
     if cfg.gameplay.disable_takeoff:
         # Set initial values for when not taking off
@@ -72,6 +81,7 @@ def play(screen, font):
         scroll_speed = 0
         wave_mode_text_opacity = 0
     while running:
+        record_profile("0")
         # Draw background
         i = 2
         for image in (im.background.layer_1, im.background.layer_2, im.background.layer_3):
@@ -85,6 +95,8 @@ def play(screen, font):
 
             if scroll_x[i] < -cfg.screen_width:
                 scroll_x[i] = 0
+
+        record_profile("Draw background")
 
         if pregame_timer == 0:
             for event in pygame.event.get():
@@ -168,6 +180,8 @@ def play(screen, font):
                 if scroll_speed > cfg.scroll_speed:
                     scroll_speed -= 0.2
 
+            record_profile("Inputs")
+
             # Update aircraft position and check for collisions
             target_x, target_y = pygame.mouse.get_pos()
             player.apply_acceleration(target_x, target_y, trackable_distance=50)
@@ -189,6 +203,8 @@ def play(screen, font):
                 if particle: 
                     particles.append(particle)
                     shake = 8
+
+            record_profile("Player")
 
             enemies = [enemy for enemy in enemies if enemy.alive]
             for enemy in enemies:
@@ -214,6 +230,8 @@ def play(screen, font):
                     ai_marker.fill(enemy.ai.debug_color)
                     screen.blit(ai_marker, (enemy.x+enemy.sprite.size[0], enemy.y))
 
+            record_profile("Enemies")
+
             if wave_warmup_time:
                 player.health += enemy_count * cfg.gameplay.wave_regen_multiplier
                 wave_warmup_time -= 1
@@ -234,6 +252,8 @@ def play(screen, font):
                 wave_warmup_time = 120
                 wave_mode_text_x = cfg.screen_width
                 wave_mode_text_opacity = 255
+
+            record_profile("Enemy spawn")
 
             # Update and draw bullets
             bullets = [bullet for bullet in bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= cfg.screen_width]
@@ -266,6 +286,8 @@ def play(screen, font):
                         
                 bullet.draw(screen)
 
+            record_profile("Bullets")
+
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
@@ -292,6 +314,8 @@ def play(screen, font):
         for particle in particles:
             particle.draw(screen, scroll_speed)
 
+        record_profile("Particles")
+
         # Apply screen shake
         if shake > 0.1:
             shake_mod = int(shake * cfg.display.shake_intensity)
@@ -310,6 +334,8 @@ def play(screen, font):
             (player.x+(player.width//2-80),
             player.y-player.height)
         )
+
+        record_profile("Misc")
         
         scoredisplay = f"Score {score} | Difficulty {round(enemy_count, 1)}"
         if cfg.gameplay.wave_mode: 
@@ -326,6 +352,8 @@ def play(screen, font):
         scoredisplay_render = font.render(scoredisplay, False, 0)
 
         screen.blit(scoredisplay_render, (0, 0))
+
+        record_profile("Text")
 
         while game_paused and not frame_step:
             for event in pygame.event.get((pygame.MOUSEWHEEL, pygame.MOUSEBUTTONDOWN, pygame.QUIT)):
@@ -345,8 +373,16 @@ def play(screen, font):
 
         if frame_step: frame_step -= 1
 
+        if cfg.debug.enable_profiling: 
+            maximum = ('0', 0)
+            for key, value in profiler.items():
+                if key == '0': continue
+                if value > maximum[1]: maximum = (key, value)
+            print(maximum)
+
         # Update display
         framestart = time.time()
+        if cfg.debug.enable_profiling: profiler['0'] = framestart
         pygame.display.update()
         pygame.time.Clock().tick(60)
 

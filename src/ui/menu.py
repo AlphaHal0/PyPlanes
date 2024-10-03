@@ -56,8 +56,6 @@ class Menu:
         for element in self.elements:
             element.update(screen=screen, mouse_x=mouse_pos[0], mouse_y=mouse_pos[1], click=click, release=release, rclick=rclick, rrelease=rrelease)
 
-        pygame.display.update()
-
     def loop(self, screen: pygame.Surface):
         """Starts an infinite loop where this will be updated and the screen will refresh every tick.
         Stops when the Quit button is pressed."""

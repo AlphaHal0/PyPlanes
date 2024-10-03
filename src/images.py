@@ -8,14 +8,20 @@ try:
 except ImportError:
     PIL_IMPORTED = False
 
-def load_image(file: str) -> pygame.Surface:
+def load_image(file: str, alpha: bool = True) -> pygame.Surface:
     """Loads an image from file and returns a pygame.Surface.
     Checks `./mod/res/img/{file}` first, then `./res/img/{file}`.
     """
     try:
-        return pygame.image.load(f"./mod/res/img/{file}").convert_alpha()
+        img = pygame.image.load(f"./mod/res/img/{file}")
     except FileNotFoundError:
-        return pygame.image.load(f"./res/img/{file}").convert_alpha()
+        img = pygame.image.load(f"./res/img/{file}")
+
+    # Only convert with alpha if needed
+    if alpha:
+        return img.convert_alpha()
+    else:
+        return img.convert()
 
 def scale_image(surface: pygame.Surface, size: list|float, relative: bool = True) -> pygame.Surface:
     """Returns a scaled pygame.Surface by size.
@@ -106,7 +112,7 @@ class ImageHandler:
         if image is None:
             if cfg.debug.show_image_inits: print("load img", fp_override if fp_override else value['fp'], end=' ')
             try:
-                image = load_image((fp_override if fp_override else value['fp']) + '.png')
+                image = load_image((fp_override if fp_override else value['fp']) + '.png', value.get('alpha', True))
                 if cfg.debug.show_image_inits: print("...ok")
             except FileNotFoundError:
                 if cfg.debug.show_image_inits: print("...NOT FOUND")

@@ -19,7 +19,8 @@
     "background": {
         "layer_1": {
             "fp": "background/layer_1",
-            "scale": [1, 1]
+            "scale": [1, 1],
+            "alpha": false
         },
         "layer_2": {
             "fp": "background/layer_2",
@@ -33,19 +34,23 @@
     "ui": {
         "background": {
             "fp": "ui/background",
-            "scale": [1, 1]
+            "scale": [1, 1],
+            "alpha": false
         },
         "button": {
             "fp": "ui/button",
-            "scale": [0.3, 0.1]
+            "scale": [0.3, 0.1],
+            "alpha": false
         },
         "narrow_button": {
             "fp": "ui/button",
-            "scale": [0.2, 0.05]
+            "scale": [0.2, 0.05],
+            "alpha": false
         },
         "small_button": {
             "fp": "ui/button",
-            "scale": [0.08, 0.05]
+            "scale": [0.08, 0.05],
+            "alpha": false
         }
     },
     "aircraft": {

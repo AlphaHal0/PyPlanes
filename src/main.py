@@ -9,7 +9,8 @@ pygame.font.init()
 
 font = pygame.font.Font(size=50)
 # Set up the screen
-screen = pygame.display.set_mode((cfg.screen_width, cfg.screen_height))
+screen = pygame.display.set_mode((cfg.screen_width, cfg.screen_height), flags=pygame.DOUBLEBUF)
+screen.set_alpha(None)
 
 from ui.button import Button, ConfigOption
 from ui.menu import Menu, ALIGN_LEFT, ALIGN_NONE
