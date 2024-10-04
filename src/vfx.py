@@ -40,7 +40,6 @@ class ScreenDistortion:
                     rad = numpy.radians(i + a/cfg.display.avfx_precision + 90)
                     sr = numpy.sin(rad)
                     cr = numpy.cos(rad)
-                    numpy.cuda.Stream.null.synchronize()
 
                     for p in range(self.width):
                         pointer_x = int(sr * (size + p) + self.x)
