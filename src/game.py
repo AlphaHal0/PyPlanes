@@ -9,9 +9,10 @@ import ground_vehicle
 from images import im
 from keybind import is_pressed, is_held
 from vfx import ScreenDistortion
+from display import screen
 
 # Main game loop
-def play(screen, font):
+def play():
     if cfg.easter_eggs.moth_music_is_main_music:
         pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
         pygame.mixer.music.play(-1)
@@ -50,11 +51,12 @@ def play(screen, font):
     score = 0
     wave = 1
     wave_mode_text_x = cfg.screen_width
-    wave_mode_text_y = cfg.screen_height // 2 - font.get_height() // 2
+    wave_mode_text_y = cfg.screen_height // 2 - screen.font.get_height() // 2
     running = True
     game_paused = False
     frame_step = 0
     framestart = time.time()
+    background = [Sprite(i) for i in (im.background.layer_1, im.background.layer_2, im.background.layer_3)]
     shake = 0
     if cfg.debug.enable_profiling:
         profiler = {} 
@@ -84,9 +86,9 @@ def play(screen, font):
         record_profile("0")
         # Draw background
         i = 2
-        for image in (im.background.layer_1, im.background.layer_2, im.background.layer_3):
-            screen.blit(image, (scroll_x[i], 0))
-            screen.blit(image, (scroll_x[i] + cfg.screen_width, 0))
+        for image in background:
+            image.draw(scroll_x[i], 0)
+            image.draw(scroll_x[i] + cfg.screen_width, 0)
             i -= 1
 
         # Update scrolling background
@@ -208,7 +210,7 @@ def play(screen, font):
 
             enemies = [enemy for enemy in enemies if enemy.alive]
             for enemy in enemies:
-                enemy.draw(screen)
+                enemy.draw()
                 if enemy.is_aircraft:
                     enemy.ai_tick(danger_zones=enemy_ai_danger_zones, player_y=player.y, player_x=player.x, enemy_y=enemy.y)
                     if enemy.ground_collision():
@@ -228,7 +230,7 @@ def play(screen, font):
                 if cfg.debug.show_ai_type:
                     ai_marker = pygame.Surface((10,10))
                     ai_marker.fill(enemy.ai.debug_color)
-                    screen.blit(ai_marker, (enemy.x+enemy.sprite.size[0], enemy.y))
+                    screen.surface.blit(ai_marker, (enemy.x+enemy.sprite.size[0], enemy.y))
 
             record_profile("Enemies")
 
@@ -284,7 +286,7 @@ def play(screen, font):
                 if bullet.ground_collision():
                     particles.append(bullet.explode(enemies))
                         
-                bullet.draw(screen)
+                bullet.draw()
 
             record_profile("Bullets")
 
@@ -308,18 +310,18 @@ def play(screen, font):
                 pygame.mouse.set_visible(cfg.debug.mouse_visibility)
 
         # Draw aircraft
-        player.draw(screen)
+        player.draw()
 
         particles = [particle for particle in particles if particle.alive]
         for particle in particles:
-            particle.draw(screen, scroll_speed)
+            particle.draw(scroll_speed)
 
         record_profile("Particles")
 
         # Apply screen shake
         if shake > 0.1:
             shake_mod = int(shake * cfg.display.shake_intensity)
-            screen.scroll(
+            screen.surface.scroll(
                 randint(-shake_mod, shake_mod), 
                 randint(-shake_mod, shake_mod))
             shake *= 0.8
@@ -329,7 +331,7 @@ def play(screen, font):
         health_bar.fill(0x00FF00, rect=(0,0,(player.health/cfg.gameplay.initial_health)*150,10)),
 
         # Draw health bar
-        screen.blit(
+        screen.surface.blit(
             health_bar,
             (player.x+(player.width//2-80),
             player.y-player.height)
@@ -341,17 +343,17 @@ def play(screen, font):
         if cfg.gameplay.wave_mode: 
             scoredisplay += f"| Wave {wave}"
             if wave_mode_text_opacity > 0:
-                wavemodedisplay = font.render(f"Wave {wave}", False, 0)
+                wavemodedisplay = screen.font.render(f"Wave {wave}", False, 0)
                 wavemodedisplay.set_alpha(wave_mode_text_opacity)
-                screen.blit(wavemodedisplay, (wave_mode_text_x, wave_mode_text_y))
+                screen.surface.blit(wavemodedisplay, (wave_mode_text_x, wave_mode_text_y))
                 wave_mode_text_x -= cfg.scroll_speed * (wave_mode_text_x / cfg.screen_width - 0.4)
                 if wave_warmup_time <= 0:
                     wave_mode_text_opacity -= 2
 
         if cfg.debug.show_fps: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
-        scoredisplay_render = font.render(scoredisplay, False, 0)
+        scoredisplay_render = screen.font.render(scoredisplay, False, 0)
 
-        screen.blit(scoredisplay_render, (0, 0))
+        screen.surface.blit(scoredisplay_render, (0, 0))
 
         record_profile("Text")
 
@@ -383,8 +385,7 @@ def play(screen, font):
         # Update display
         framestart = time.time()
         if cfg.debug.enable_profiling: profiler['0'] = framestart
-        pygame.display.update()
-        pygame.time.Clock().tick(60)
+        screen.update()
 
     # Quit Pygame
     print(f"Final score: {score}")

@@ -18,10 +18,10 @@ class Particle(Entity):
         if duration != 0:
             self.sprite.anim_time = duration * self.sprite.anim_time // self.sprite.anim_frame_count
 
-    def draw(self, screen, scroll_speed: int = cfg.scroll_speed):
-        """Draws this sprite onto screen.
+    def draw(self, scroll_speed: int = cfg.scroll_speed):
+        """Draws this sprite onto the screen.
         If self.move_with_screen is set, move x pos by scroll_speed."""
         if self.move_with_screen: self.x -= scroll_speed
 
         self.update()
-        self.alive = self.sprite.draw(screen, self.x, self.y, False)
+        self.alive = self.sprite.draw(self.x, self.y, False)

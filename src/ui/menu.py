@@ -4,6 +4,7 @@ from ui.element import UIElement
 from typing import Callable
 from keybind import is_pressed
 from config import kb
+from display import screen
 
 ALIGN_NONE = 0 # does not automatically set element x/y (must be given manually)
 ALIGN_LEFT = 1 # grids x/y to left
@@ -19,9 +20,9 @@ class Menu:
         self.any_listening = False
         self.run = True
 
-    def tick(self, screen: pygame.Surface):
+    def tick(self):
         """Draw on screen and update contained elements."""
-        self.background.draw(screen, 0, 0)
+        self.background.draw(0, 0)
 
         # Check if any elements of this Menu are waiting for an input
         any_listening = False
@@ -54,15 +55,14 @@ class Menu:
         mouse_pos = pygame.mouse.get_pos()
 
         for element in self.elements:
-            element.update(screen=screen, mouse_x=mouse_pos[0], mouse_y=mouse_pos[1], click=click, release=release, rclick=rclick, rrelease=rrelease)
+            element.update(mouse_x=mouse_pos[0], mouse_y=mouse_pos[1], click=click, release=release, rclick=rclick, rrelease=rrelease)
 
-    def loop(self, screen: pygame.Surface):
+    def loop(self):
         """Starts an infinite loop where this will be updated and the screen will refresh every tick.
         Stops when the Quit button is pressed."""
         while self.run:
-            self.tick(screen)
-            pygame.display.update()
-            pygame.time.Clock().tick(60)
+            self.tick()
+            screen.update()
 
     def add_element(self, element: UIElement):
         self.elements.append(element)

@@ -1,6 +1,7 @@
 from ui.element import UIElement
 import pygame
 from config import cfg
+from display import screen
 
 class Text(UIElement):
     """Class to represent a rendered font"""
@@ -23,12 +24,12 @@ class Text(UIElement):
         else:
             self.x_adg, self.y_adg = self.x, self.y
 
-    def update(self, screen: pygame.Surface, **kwargs):
+    def update(self, **kwargs):
         """Draw on screen"""
         if cfg.debug.show_sprite_sizes:
-            pygame.draw.rect(screen, (0, 255, 255), ((self.x_adg, self.y_adg), (self.width, self.height)))
-            pygame.draw.circle(screen, (0, 0, 255), (self.x, self.y), 5)
-        screen.blit(self.render, (self.x_adg, self.y_adg))
+            pygame.draw.rect(screen.surface, (0, 255, 255), ((self.x_adg, self.y_adg), (self.width, self.height)))
+            pygame.draw.circle(screen.surface, (0, 0, 255), (self.x, self.y), 5)
+        screen.surface.blit(self.render, (self.x_adg, self.y_adg))
         return super().update(**kwargs)
 
     def reload(self):

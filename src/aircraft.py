@@ -7,6 +7,7 @@ import weapon
 from entity import Entity
 from sprite import Sprite
 from images import im
+from display import screen
 
 class Aircraft(Entity):
     """An Entity with aircraft mechanics"""
@@ -154,10 +155,10 @@ class EnemyAircraft(Aircraft):
         self.apply_acceleration(self.ai.target_x, self.ai.target_y, trackable_distance=50)
         self.update()
 
-    def draw(self, screen: pygame.Surface) -> None:
+    def draw(self) -> None:
         if cfg.debug.show_target_traces:
-            pygame.draw.line(screen, (255, 0, 0), (self.x, self.y), (self.ai.target_x, self.ai.target_y), 5)
-        return super().draw(screen)
+            pygame.draw.line(screen.surface, (255, 0, 0), (self.x, self.y), (self.ai.target_x, self.ai.target_y), 5)
+        return super().draw()
 
 class Moth(EnemyAircraft):
     """An EnemyAircraft that is a moth"""

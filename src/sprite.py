@@ -1,6 +1,7 @@
 import pygame
 from config import cfg
 import math
+from display import screen
 
 class Sprite:
     """A class to manage an image or animated list of images with transformation."""
@@ -62,34 +63,34 @@ class Sprite:
                 )
         except: pass
 
-    def draw(self, screen: pygame.Surface, x: int, y: int, loop: bool = True) -> bool:
+    def draw(self, x: int, y: int, loop: bool = True) -> bool:
         """Renders this Sprite onto a pygame.Surface, with debug drawing if enabled.
         If textures are disabled, returns False.
         If loop is False and this sprite has run through all of its animation frames, returns False.
         Otherwise, returns True"""
         if cfg.debug.show_sprite_sizes:
-            pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))
+            pygame.draw.rect(screen.surface, (255, 0, 255), ((x,y), self.size))
             rad = math.radians(self.rotation)
-            pygame.draw.line(screen, (0, 0, 255), (x, y), (math.sin(rad) * 50 + x, math.cos(rad) * 50 + y), 5) # Points upwards (at 0 degrees) 
-            pygame.draw.line(screen, (0, 255, 0), (x, y), (math.cos(rad) * 100 + x, -(math.sin(rad) * 100) + y), 5) # Points forward (at 90 degrees)
+            pygame.draw.line(screen.surface, (0, 0, 255), (x, y), (math.sin(rad) * 50 + x, math.cos(rad) * 50 + y), 5) # Points upwards (at 0 degrees) 
+            pygame.draw.line(screen.surface, (0, 255, 0), (x, y), (math.cos(rad) * 100 + x, -(math.sin(rad) * 100) + y), 5) # Points forward (at 90 degrees)
 
         if cfg.debug.disable_sprite_textures: return False
 
         if self.image is None:
-            pygame.draw.rect(screen, (255, 0, 255), ((x,y), self.size))
+            pygame.draw.rect(screen.surface, (255, 0, 255), ((x,y), self.size))
         else:
             if self.is_animated:
                 # TODO: Redo animation system, this is ambiguous
                 # and I can't be bothered to describe it because I've forgotten how it works already
 
                 frame = self.anim_frame // self.anim_time
-                screen.blit(self.image[frame], ((x,y), self.size))
+                screen.draw_image(self.image[frame], ((x,y), self.size))
                 self.anim_frame += 1
                 if self.anim_frame >= self.anim_frame_count * self.anim_time:
                     self.anim_frame = 0
                     if not loop: return False
             else:
-                screen.blit(self.image, ((x,y), self.size))
+                screen.draw_image(self.image, ((x,y), self.size))
 
         return True
     

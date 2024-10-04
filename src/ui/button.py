@@ -41,7 +41,7 @@ class Button(UIElement):
         if self.sprite is None:
             self.sprite = self.text
 
-    def update(self, screen, mouse_x, mouse_y, click: bool = False, release: bool = False, rclick: bool = False, rrelease: bool = False, **kwargs):
+    def update(self, mouse_x, mouse_y, click: bool = False, release: bool = False, rclick: bool = False, rrelease: bool = False, **kwargs):
         """Checks for mouse actions and renders on screen"""
         super().update(**kwargs)
 
@@ -60,9 +60,9 @@ class Button(UIElement):
             self.set_color(self.base_color)
 
         if self.sprite is not None:
-            self.sprite.draw(screen, self.x, self.y)
+            self.sprite.draw(self.x, self.y)
 
-        self.text.update(screen)
+        self.text.update()
 
     def set_text(self, content: str):
         """Sets the text inside this Button"""
@@ -92,12 +92,11 @@ class ConfigOption(Button):
         elif isinstance(value, str): self.type = 4
         else: self.type = 0
 
-    def update(self, screen, mouse_x, mouse_y, click: bool = False, release: bool = False, no_set_text: bool = False, **kwargs):
+    def update(self, mouse_x, mouse_y, click: bool = False, release: bool = False, no_set_text: bool = False, **kwargs):
         """Updates this ConfigOption"""
         if self.listen_for_events: 
             self.set_text(f"{self.key_name}: {self.new_text}_")
         elif not no_set_text:
-            self.screen = screen
             if self.type == 5: # keybind
                 self.set_text(f"{self.key_name}: {keybind.keymap.get(str(self.config.d[self.category][self.key]), "unknown")}")
             else:
@@ -108,7 +107,7 @@ class ConfigOption(Button):
                     self.type = 0
                     self.base_color, self.click_color = ("0x444444","0xFF0000")
                     self.set_text("Unknown option")
-        return super().update(screen, mouse_x, mouse_y, click, release, **kwargs)
+        return super().update(mouse_x, mouse_y, click, release, **kwargs)
     
     def enter_text(self):
         """Marks this button as 'listening'. 

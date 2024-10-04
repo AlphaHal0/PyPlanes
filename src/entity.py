@@ -37,9 +37,9 @@ class Entity:
         self.y += self.velocity_y
         self.rect.update((self.x, self.y), self.rect.size)
 
-    def draw(self, screen: pygame.Surface) -> None:
-        """Draws the Entity onto a pygame.Surface"""
-        self.sprite.draw(screen, self.x, self.y)
+    def draw(self) -> None:
+        """Draws the Entity onto the screen"""
+        self.sprite.draw(self.x, self.y)
 
     def destroy(self) -> None:
         self.alive = False

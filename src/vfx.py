@@ -1,6 +1,7 @@
 import pygame
 import math
 from config import cfg
+from display import screen
 
 class ScreenDistortion:
     """A class that represents special screen effects"""
@@ -16,13 +17,13 @@ class ScreenDistortion:
         self.move_with_screen = move_with_screen
         self.time_alive = time_alive - 64 # once this reaches 0, die
 
-    def draw(self, screen: pygame.Surface, scroll_speed: int = cfg.scroll_speed):
+    def draw(self, scroll_speed: int = cfg.scroll_speed):
         """Display the effect on screen"""
         size = self.radius + 1
         init_direction = self.direction - self.angle // 2
 
         if cfg.display.advanced_vfx: # Slower but more realistic (distort individual pixels)
-            screen.lock() # lock to be processed
+            screen.surface.lock() # lock to be processed
             density = size / cfg.display.avfx_step + 1 # x shifts per degree
             for i in range(init_direction, init_direction + self.angle):
                 for a in range(-int(density*(cfg.display.avfx_precision//2)), int(density*(cfg.display.avfx_precision//2))):
@@ -38,9 +39,9 @@ class ScreenDistortion:
                             continue
 
                         if cfg.debug.show_distortion:
-                            screen.set_at((pointer_x, pointer_y), "0x000000")
+                            screen.surface.set_at((pointer_x, pointer_y), "0x000000")
 
-                        ref_px = screen.get_at((pointer_x, pointer_y))
+                        ref_px = screen.surface.get_at((pointer_x, pointer_y))
 
                         pointer_x = int(sr * (size + self.width + p) + self.x)
                         pointer_y = int(cr * (size + self.width + p) + self.y)
@@ -49,10 +50,10 @@ class ScreenDistortion:
                             continue
 
                         if cfg.debug.show_distortion:
-                            screen.set_at((pointer_x, pointer_y), "0xFFFFFF")
+                            screen.surface.set_at((pointer_x, pointer_y), "0xFFFFFF")
                         else:
-                            screen.set_at((pointer_x, pointer_y), ref_px)
-            screen.unlock()
+                            screen.surface.set_at((pointer_x, pointer_y), ref_px)
+            screen.surface.unlock()
 
         else: # Faster (change color of pixels using shape)
             arc = pygame.Surface((size+self.width, size+self.width), pygame.SRCALPHA)
@@ -76,7 +77,7 @@ class ScreenDistortion:
             
             arc.set_alpha(self.alpha)
 
-            screen.blit(
+            screen.surface.blit(
                 arc,
                 (self.x - size // 2, self.y - size // 2)
             )

@@ -3,15 +3,6 @@
 import pygame
 from config import cfg, kb
 
-# Initialize Pygame
-pygame.init()
-pygame.font.init()
-
-font = pygame.font.Font(size=50)
-# Set up the screen
-screen = pygame.display.set_mode((cfg.screen_width, cfg.screen_height), flags=pygame.DOUBLEBUF)
-screen.set_alpha(None)
-
 from ui.button import Button, ConfigOption
 from ui.menu import Menu, ALIGN_LEFT, ALIGN_NONE
 from ui.text import Text
@@ -70,14 +61,14 @@ def options(con = cfg, is_keybind: bool = False):
             grid_type=ALIGN_LEFT
         )
 
-        options_menu.loop(screen)
+        options_menu.loop()
 
     refresh()
 
 def keybinds():
     options(kb, is_keybind=True)
 
-def start_game(): play(screen, font)
+def start_game(): play()
 
 def main():
     """Main loop"""
@@ -96,7 +87,7 @@ def main():
         grid_type=ALIGN_NONE
     )
 
-    main_menu.loop(screen)
+    main_menu.loop()
 
 main()
 finish()
