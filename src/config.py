@@ -124,4 +124,11 @@ cfg.scroll_speed = cfg.display.scroll_speed_ratio * cfg.screen_width
 cfg.initial_aircraft_x = cfg.display.initial_aircraft_x_ratio * cfg.screen_width
 cfg.initial_aircraft_y = cfg.display.initial_aircraft_y_ratio * cfg.screen_height
 
+try:
+    import OpenGL
+    cfg.opengl = cfg.display.opengl
+except ImportError:
+    cfg.opengl = False
+    if cfg.display.opengl: print("[!!] OpenGL is not installed. Using default pygame display")
+
 kb = Config("cfg/keybinds.json")

@@ -117,3 +117,8 @@ class Sprite:
             self.base_size = size    
             self.size = (size[0] * size_multiplier, size[1] * size_multiplier)
         if not no_update: self.update()
+
+def new_sprite(**kwargs) -> Sprite:
+    """Create a new Sprite"""
+    if cfg.opengl:
+        return

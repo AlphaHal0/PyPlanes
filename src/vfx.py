@@ -4,11 +4,12 @@ from config import cfg
 from display import screen
 
 try:
+    import cupy
     import numpy
-    numpy_installed = True
+    cupy_installed = True
 except ImportError:
-    numpy_installed = False
-    print("[!!!] Numpy is not installed. Advanced VFX will not be available")
+    cupy_installed = False
+    print("[!!!] Cupy and Numpy are not installed. Advanced VFX will not be available")
 
 class ScreenDistortion:
     """A class that represents special screen effects"""
@@ -29,16 +30,17 @@ class ScreenDistortion:
         size = self.radius + 1
         init_direction = self.direction - self.angle // 2
 
-        if cfg.display.advanced_vfx and numpy_installed: # Slower but more realistic (distort individual pixels)
+        if cfg.display.advanced_vfx and cupy_installed: # Slower but more realistic (distort individual pixels)
             screen.surface.lock() # lock to be processed
             c = numpy.frombuffer(screen.surface.get_view('1'), numpy.uint8)\
                 .reshape(cfg.screen_height, cfg.screen_width, 4) # Convert screen buffer to array
             density = size / cfg.display.avfx_step + 1 # x shifts per degree
             for i in range(init_direction, init_direction + self.angle):
                 for a in range(-int(density*(cfg.display.avfx_precision//2)), int(density*(cfg.display.avfx_precision//2))):
-                    rad = math.radians(i + a/cfg.display.avfx_precision + 90)
-                    sr = math.sin(rad)
-                    cr = math.cos(rad)
+                    rad = cupy.radians(i + a/cfg.display.avfx_precision + 90)
+                    sr = cupy.sin(rad)
+                    cr = cupy.cos(rad)
+                    cupy.cuda.Stream.null.synchronize()
 
                     for p in range(self.width):
                         pointer_x = int(sr * (size + p) + self.x)

@@ -1,6 +1,7 @@
 import config
 from config import cfg
 import pygame
+from OpenGL.GL import *
 
 try:
     import PIL.Image
@@ -40,6 +41,20 @@ def scale_image(surface: pygame.Surface, size: list|float, relative: bool = True
 def flip_image(surface: pygame.Surface, flip_x: bool = True, flip_y: bool = False) -> pygame.Surface:
     """Flips a pygame.Surface"""
     return pygame.transform.flip(surface, flip_x, flip_y)
+
+def surface_to_texture(surface: pygame.Surface):
+    """Converts a surface to an OpenGL texture, if OpenGL is enabled"""
+    if not cfg.opengl: return surface
+
+    img_data = pygame.image.tostring(surface, 'ARGB')
+    texID = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, texID)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface.get_width(), surface.get_height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+
+    glEnable(GL_TEXTURE_2D)
+    return texID
 
 class ImageCategory:
     """A class that handles an image category.
@@ -125,7 +140,7 @@ class ImageHandler:
         if value.get('scale'):
             image = scale_image(image, value['scale'], value.get('relative', True))
 
-        return image
+        return surface_to_texture(image)
 
 image_toc = config.Config("cfg/images.json")
 image_toc.reset()

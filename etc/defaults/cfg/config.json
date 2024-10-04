@@ -11,7 +11,8 @@
     "fast_vfx": true,
     "avfx_precision": 2,
     "avfx_step": 720,
-    "fullscreen": false
+    "fullscreen": false,
+    "opengl": false
   },
 
   "gameplay": {
