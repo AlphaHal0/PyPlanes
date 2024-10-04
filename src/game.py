@@ -72,9 +72,9 @@ def play():
         # Set initial values for when not taking off
         wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
         wave_mode_text_opacity = 255
+        screen.render_text(f"Wave {wave}", display=False, id="wavemode")
         scroll_speed = cfg.scroll_speed
         pregame_timer = 0
-        wave_mode_text_opacity = 255
         pygame.mouse.set_visible(cfg.debug.mouse_visibility)
     else:
         # Set initial values for taking off
@@ -254,6 +254,7 @@ def play():
                 wave_warmup_time = 120
                 wave_mode_text_x = cfg.screen_width
                 wave_mode_text_opacity = 255
+                screen.render_text(f"Wave {wave}", display=False, id="wavemode")
 
             record_profile("Enemy spawn")
 
@@ -306,6 +307,7 @@ def play():
             if pregame_timer == 0:
                 wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
                 wave_mode_text_opacity = 255
+                screen.render_text(f"Wave {wave}", display=False, id="wavemode")
                 scroll_speed = cfg.scroll_speed
                 pygame.mouse.set_visible(cfg.debug.mouse_visibility)
 
@@ -343,17 +345,14 @@ def play():
         if cfg.gameplay.wave_mode: 
             scoredisplay += f"| Wave {wave}"
             if wave_mode_text_opacity > 0:
-                wavemodedisplay = screen.font.render(f"Wave {wave}", False, 0)
-                wavemodedisplay.set_alpha(wave_mode_text_opacity)
-                screen.surface.blit(wavemodedisplay, (wave_mode_text_x, wave_mode_text_y))
+                screen.set_cached_text_alpha("wavemode", wave_mode_text_opacity)
+                screen.display_cached_text("wavemode", wave_mode_text_x, wave_mode_text_y)
                 wave_mode_text_x -= cfg.scroll_speed * (wave_mode_text_x / cfg.screen_width - 0.4)
                 if wave_warmup_time <= 0:
                     wave_mode_text_opacity -= 2
 
         if cfg.debug.show_fps: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
-        scoredisplay_render = screen.font.render(scoredisplay, False, 0)
-
-        screen.surface.blit(scoredisplay_render, (0, 0))
+        screen.render_text(scoredisplay, x=0, y=0)
 
         record_profile("Text")
 

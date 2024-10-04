@@ -3,6 +3,13 @@ import math
 from config import cfg
 from display import screen
 
+try:
+    import numpy
+    numpy_installed = True
+except ImportError:
+    numpy_installed = False
+    print("[!!!] Numpy is not installed. Advanced VFX will not be available")
+
 class ScreenDistortion:
     """A class that represents special screen effects"""
     def __init__(self, x: int, y: int, velocity: int, direction: int = 0, angle: int = 360, width: int = 10, time_alive: int = 60, move_with_screen: bool = False) -> None:
@@ -22,8 +29,10 @@ class ScreenDistortion:
         size = self.radius + 1
         init_direction = self.direction - self.angle // 2
 
-        if cfg.display.advanced_vfx: # Slower but more realistic (distort individual pixels)
+        if cfg.display.advanced_vfx and numpy_installed: # Slower but more realistic (distort individual pixels)
             screen.surface.lock() # lock to be processed
+            c = numpy.frombuffer(screen.surface.get_view('1'), numpy.uint8)\
+                .reshape(cfg.screen_height, cfg.screen_width, 4) # Convert screen buffer to array
             density = size / cfg.display.avfx_step + 1 # x shifts per degree
             for i in range(init_direction, init_direction + self.angle):
                 for a in range(-int(density*(cfg.display.avfx_precision//2)), int(density*(cfg.display.avfx_precision//2))):
@@ -39,9 +48,9 @@ class ScreenDistortion:
                             continue
 
                         if cfg.debug.show_distortion:
-                            screen.surface.set_at((pointer_x, pointer_y), "0x000000")
+                            c[pointer_y][pointer_x] = [0, 0, 0, 255]
 
-                        ref_px = screen.surface.get_at((pointer_x, pointer_y))
+                        ref_px = c[pointer_y][pointer_x]
 
                         pointer_x = int(sr * (size + self.width + p) + self.x)
                         pointer_y = int(cr * (size + self.width + p) + self.y)
@@ -50,9 +59,9 @@ class ScreenDistortion:
                             continue
 
                         if cfg.debug.show_distortion:
-                            screen.surface.set_at((pointer_x, pointer_y), "0xFFFFFF")
+                            c[pointer_y][pointer_x] = [255, 255, 255, 255]
                         else:
-                            screen.surface.set_at((pointer_x, pointer_y), ref_px)
+                            c[pointer_y][pointer_x] = ref_px
             screen.surface.unlock()
 
         else: # Faster (change color of pixels using shape)
