@@ -4,7 +4,7 @@ from config import cfg
 from display import screen
 
 try:
-    import cupy
+    #import cupy
     import numpy
     cupy_installed = True
 except ImportError:
@@ -37,10 +37,10 @@ class ScreenDistortion:
             density = size / cfg.display.avfx_step + 1 # x shifts per degree
             for i in range(init_direction, init_direction + self.angle):
                 for a in range(-int(density*(cfg.display.avfx_precision//2)), int(density*(cfg.display.avfx_precision//2))):
-                    rad = cupy.radians(i + a/cfg.display.avfx_precision + 90)
-                    sr = cupy.sin(rad)
-                    cr = cupy.cos(rad)
-                    cupy.cuda.Stream.null.synchronize()
+                    rad = numpy.radians(i + a/cfg.display.avfx_precision + 90)
+                    sr = numpy.sin(rad)
+                    cr = numpy.cos(rad)
+                    numpy.cuda.Stream.null.synchronize()
 
                     for p in range(self.width):
                         pointer_x = int(sr * (size + p) + self.x)
