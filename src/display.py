@@ -38,7 +38,7 @@ class PygameDisplay(Display):
         self.font = pygame.font.Font(size=50)
 
     def draw_image(self, image, dest):
-        self.surface.blit(image, dest)
+        self.surface.blit(image.image, dest)
 
     def render_text(self, content: str, color: pygame.Color = 0, antialias: bool = False, opacity: int = 255, x: int = 0, y: int = 0, display: bool = True, id: str = ""):
         """Display text onto screen. 
@@ -101,11 +101,9 @@ class OpenGLDisplay(Display):
         glLoadIdentity()
         glDisable(GL_LIGHTING)
         glEnable(GL_TEXTURE_2D)
-        #glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        #glClearColor(0, 0, 0, 1.0)
 
         # draw texture openGL Texture
-        glBindTexture(GL_TEXTURE_2D, image)
+        glBindTexture(GL_TEXTURE_2D, image.image)
         glBegin(GL_QUADS)
         glTexCoord2f(0, 0); glVertex2f(-1, 1)
         glTexCoord2f(0, 1); glVertex2f(-1, -1)

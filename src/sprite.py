@@ -2,10 +2,11 @@ import pygame
 from config import cfg
 import math
 from display import screen
+from texture import Texture
 
 class Sprite:
     """A class to manage an image or animated list of images with transformation."""
-    def __init__(self, image: pygame.Surface|list[pygame.Surface]|None = None, 
+    def __init__(self, image: Texture|list[Texture]|None = None, 
     animation_time: int = 1, size: tuple|None = None, size_multiplier: int = 1, 
     rotation: int = 0, flip_x: bool = False, flip_y: bool = False) -> None:
         
@@ -21,13 +22,13 @@ class Sprite:
             self.image = None
 
         if self.is_animated:
-            if not size: size = image[0].get_size()
+            if not size: size = image[0].size
             self.anim_time = animation_time
             self.anim_frame = 0
             self.anim_frame_count = len(image)
         else:
             self.anim_time = 0
-            if not size: size = image.get_size()
+            if not size: size = image.size
 
         self.base_size = size
         if image: self.set_size(size, size_multiplier)
@@ -39,27 +40,29 @@ class Sprite:
             if self.is_animated:
                 image = []
                 for i in self.base_image:
-                    image.append(pygame.transform.rotate(
+                    image.append(Texture(pygame.transform.rotate(
                         pygame.transform.flip(
                             pygame.transform.scale(
-                                i,
+                                i.image,
                                 self.size
                             ),
                             self.flip_x, self.flip_y
                         ),
                         self.rotation
-                    ))
+                    ), self.size))
                 self.image = image
             else:
-                self.image = pygame.transform.rotate(
-                    pygame.transform.flip(
-                        pygame.transform.scale(
-                            self.base_image,
-                            self.size
+                self.image = Texture(
+                    pygame.transform.rotate(
+                        pygame.transform.flip(
+                            pygame.transform.scale(
+                                self.base_image.image,
+                                self.size
+                            ),
+                            self.flip_x, self.flip_y
                         ),
-                        self.flip_x, self.flip_y
-                    ),
-                    self.rotation
+                        self.rotation
+                    ), self.size
                 )
         except: pass
 

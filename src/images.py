@@ -1,6 +1,7 @@
 import config
 from config import cfg
 import pygame
+from texture import Texture
 if cfg.opengl:
     from OpenGL.GL import *
 
@@ -45,17 +46,18 @@ def flip_image(surface: pygame.Surface, flip_x: bool = True, flip_y: bool = Fals
 
 def surface_to_texture(surface: pygame.Surface):
     """Converts a surface to an OpenGL texture, if OpenGL is enabled"""
-    if not cfg.opengl: return surface
+    if not cfg.opengl: return Texture(surface, surface.get_size())
 
+    w, h = surface.get_width(), surface.get_height()
     img_data = pygame.image.tostring(surface, 'ARGB')
     texID = glGenTextures(1)
     glBindTexture(GL_TEXTURE_2D, texID)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, surface.get_width(), surface.get_height(), 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img_data)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
     glEnable(GL_TEXTURE_2D)
-    return texID
+    return Texture(surface, (w, h))
 
 class ImageCategory:
     """A class that handles an image category.
