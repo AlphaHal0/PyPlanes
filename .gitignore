@@ -14,6 +14,7 @@
 /venv.bak
 /data
 /target
+/.buildozer
 __pycache__/
 *.py[cod]
 .env

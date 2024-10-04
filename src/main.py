@@ -1,5 +1,7 @@
 # To Create ENV: py -m venv env
 # To Enter ENV: env/scripts/activate.ps1
+__version__ = "0.0.1"
+
 import pygame
 from config import cfg, kb
 
