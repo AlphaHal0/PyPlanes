@@ -1,7 +1,8 @@
 import config
 from config import cfg
 import pygame
-from OpenGL.GL import *
+if cfg.opengl:
+    from OpenGL.GL import *
 
 try:
     import PIL.Image
