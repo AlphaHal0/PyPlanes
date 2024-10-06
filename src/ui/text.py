@@ -2,9 +2,11 @@ from ui.element import UIElement
 import pygame
 from config import cfg
 from display import screen
+if cfg.opengl:
+    from OpenGL.GL import *
 
 class Text(UIElement):
-    """Class to represent a rendered font"""
+    """Class to represent a self.render font"""
     def  __init__(self, content: str = "", color: pygame.Color = 0, size: int = 0, center: bool = False, width: int = 0, height: int = 0, **kwargs):
         super().__init__(**kwargs)
         if size == 0: size = cfg.ui.font_size
@@ -29,7 +31,15 @@ class Text(UIElement):
         if cfg.debug.show_sprite_sizes:
             pygame.draw.rect(screen.surface, (0, 255, 255), ((self.x_adg, self.y_adg), (self.width, self.height)))
             pygame.draw.circle(screen.surface, (0, 0, 255), (self.x, self.y), 5)
-        screen.surface.blit(self.render, (self.x_adg, self.y_adg))
+        
+        if cfg.opengl:
+            text_data = pygame.image.tostring(self.render, "RGBA", True)
+            glWindowPos2d(self.x_adg, cfg.screen_height-self.y_adg-self.render.get_height())
+            glDrawPixels(self.render.get_width(), self.render.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, text_data)
+        else:
+            screen.surface.blit(self.render, (self.x_adg, self.y_adg))
+
+
         return super().update(**kwargs)
 
     def reload(self):

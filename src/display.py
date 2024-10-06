@@ -14,9 +14,29 @@ class Display:
         self.text_cache = {}
 
     def draw_image(self, image, dest, area = None, **kwargs): pass
-    def render_text(self, content: str, color: pygame.Color = 0, antialias: bool = False, opacity: int = 255, x: int = 0, y: int = 0, display: bool = True, id: str = ""): pass
+    def render_text(self, content: str, color: pygame.Color = 0, antialias: bool = False, opacity: int = 255, display: bool = True, id: str = ""): 
+        """Display text onto screen. 
+        If id is given, stores in cache.
+        If display is False, does not show straight away"""
+
+        if not (display or id): return # no point rendering if not displayed or put in cache
+
+        rendered = self.font.render(content, antialias, color)
+        if opacity < 255:
+            rendered.set_alpha(opacity)
+
+        if id:
+            self.text_cache[id] = rendered
+
+        return rendered
+
     def display_cached_text(self, id: str = "", x: int = 0, y: int = 0): pass
-    def set_cached_text_alpha(self, id: str, opacity: int = 255): pass
+
+    def set_cached_text_alpha(self, id: str, opacity: int = 255):
+        rendered = self.text_cache.get(id)
+        if rendered:
+            rendered.set_alpha(opacity)
+
     def update(self):
         pygame.display.flip()
         pygame.time.Clock().tick(60)
@@ -41,19 +61,8 @@ class PygameDisplay(Display):
     def draw_image(self, image, dest, area: pygame.Rect = None, **kwargs):
         self.surface.blit(image.image, dest, area)
 
-    def render_text(self, content: str, color: pygame.Color = 0, antialias: bool = False, opacity: int = 255, x: int = 0, y: int = 0, display: bool = True, id: str = ""):
-        """Display text onto screen. 
-        If id is given, stores in cache.
-        If display is False, does not show straight away"""
-
-        if not (display or id): return # no point rendering if not displayed or put in cache
-
-        rendered = self.font.render(content, antialias, color)
-        if opacity < 255:
-            rendered.set_alpha(opacity)
-
-        if id:
-            self.text_cache[id] = rendered
+    def render_text(self, content: str, x: int = 0, y: int = 0, display: bool = True, **kwargs):
+        rendered = super().render_text(content, display=display, **kwargs)
 
         if display:
             self.surface.blit(rendered, (x, y))
@@ -63,11 +72,6 @@ class PygameDisplay(Display):
         rendered = self.text_cache.get(id)
         if rendered:
             self.surface.blit(rendered, (x, y))
-
-    def set_cached_text_alpha(self, id: str, opacity: int = 255):
-        rendered = self.text_cache.get(id)
-        if rendered:
-            rendered.set_alpha(opacity)
 
 class OpenGLDisplay(Display):
     """Display using OpenGL"""
@@ -88,16 +92,34 @@ class OpenGLDisplay(Display):
         glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
         gluOrtho2D(0, cfg.screen_width, cfg.screen_height, 0)
-        
 
-    def draw_image(self, image, dest: tuple, area: tuple = None, rotation: int = 0, size: tuple = None, flip_x: bool = False, flip_y: bool = False, **kwargs):
+    def display_cached_text(self, id: str = "", x: int = 0, y: int = 0):
+        rendered = self.text_cache.get(id)
+        if rendered:
+            text_data = pygame.image.tostring(rendered, "RGBA", True)
+            glWindowPos2d(x, cfg.screen_height-y-+rendered.get_height())
+            glDrawPixels(rendered.get_width(), rendered.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, text_data)
+            
+        
+    def render_text(self, content: str, x: int = 0, y: int = 0, display: bool = True, **kwargs):
+        rendered = super().render_text(content, **kwargs)
+
+        if display:
+            text_data = pygame.image.tostring(rendered, "RGBA", True)
+            glWindowPos2d(x, cfg.screen_height-y-rendered.get_height())
+            glDrawPixels(rendered.get_width(), rendered.get_height(), GL_RGBA, GL_UNSIGNED_BYTE, text_data)
+
+    def draw_image(self, image, dest: tuple, area: tuple = None, rotation: int = 0, size: tuple = None, **kwargs):
         # draw texture openGL Texture
         glBindTexture(GL_TEXTURE_2D, image.image) # prepare texture
         glEnable(GL_TEXTURE_2D)
 
         glMatrixMode(GL_MODELVIEW)
         glLoadIdentity()
+
         glTranslate(dest[0], dest[1], 0) # set position
+        glRotate(-rotation, 0, 0, 1)
+
         glBegin(GL_QUADS)
         # create quad with texture 
         glVertex(0, 0, 1); glTexCoord2f(0, 0)

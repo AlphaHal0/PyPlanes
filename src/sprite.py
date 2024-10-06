@@ -39,7 +39,26 @@ class Sprite:
     def update(self):
         """Reloads this sprite with its transformation values.
         If animated, this does so with each of its frames."""
-        if cfg.opengl: return
+        if cfg.opengl: 
+            try:
+                if self.is_animated:
+                    image = []
+                    for i in self.base_image:
+                        image.append(Texture(
+                            pygame.transform.flip(
+                                i.image,
+                                not self.flip_x, self.flip_y
+                            )
+                        ))
+                    self.image = image
+                else:
+                    self.image = Texture(
+                        pygame.transform.flip(
+                            self.base_image.image,
+                            not self.flip_x, self.flip_y
+                        )
+                    )
+            except: self.image = None
         try:
             if self.is_animated:
                 image = []
