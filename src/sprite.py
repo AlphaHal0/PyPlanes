@@ -30,12 +30,16 @@ class Sprite:
             self.anim_time = 0
             if not size: size = image.size
 
+        if cfg.opengl:
+            self.image = image
+
         self.base_size = size
         if image: self.set_size(size, size_multiplier)
 
     def update(self):
         """Reloads this sprite with its transformation values.
         If animated, this does so with each of its frames."""
+        if cfg.opengl: return
         try:
             if self.is_animated:
                 image = []
@@ -64,9 +68,9 @@ class Sprite:
                         self.rotation
                     ), self.size
                 )
-        except: pass
+        except: self.image = None
 
-    def draw(self, x: int, y: int, loop: bool = True) -> bool:
+    def draw(self, x: int, y: int, loop: bool = True, area: pygame.Rect = None) -> bool:
         """Renders this Sprite onto a pygame.Surface, with debug drawing if enabled.
         If textures are disabled, returns False.
         If loop is False and this sprite has run through all of its animation frames, returns False.
@@ -87,13 +91,13 @@ class Sprite:
                 # and I can't be bothered to describe it because I've forgotten how it works already
 
                 frame = self.anim_frame // self.anim_time
-                screen.draw_image(self.image[frame], ((x,y), self.size))
+                screen.draw_image(self.image[frame], (x,y), area=area, flip_x=self.flip_x, flip_y=self.flip_y, rotation=self.rotation)
                 self.anim_frame += 1
                 if self.anim_frame >= self.anim_frame_count * self.anim_time:
                     self.anim_frame = 0
                     if not loop: return False
             else:
-                screen.draw_image(self.image, ((x,y), self.size))
+                screen.draw_image(self.image, (x,y), area=area, flip_x=self.flip_x, flip_y=self.flip_y, rotation=self.rotation)
 
         return True
     

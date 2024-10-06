@@ -87,8 +87,8 @@ def play():
         # Draw background
         i = 2
         for image in background:
-            image.draw(scroll_x[i], 0)
-            image.draw(scroll_x[i] + cfg.screen_width, 0)
+            image.draw(scroll_x[i], 0, area=(0, 0, scroll_x[i] + cfg.screen_width, cfg.screen_height))
+            image.draw(scroll_x[i] + cfg.screen_width, 0, area=(scroll_x[i] + cfg.screen_width, 0, cfg.screen_width, cfg.screen_height))
             i -= 1
 
         # Update scrolling background

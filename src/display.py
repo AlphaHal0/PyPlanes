@@ -3,6 +3,7 @@ from config import cfg
 
 if cfg.opengl:
     from OpenGL.GL import *
+    from OpenGL.GLU import *
 
 class Display:
     def __init__(self) -> None:
@@ -12,7 +13,7 @@ class Display:
         # TODO: split text into own class
         self.text_cache = {}
 
-    def draw_image(self, image, dest): pass
+    def draw_image(self, image, dest, area = None, **kwargs): pass
     def render_text(self, content: str, color: pygame.Color = 0, antialias: bool = False, opacity: int = 255, x: int = 0, y: int = 0, display: bool = True, id: str = ""): pass
     def display_cached_text(self, id: str = "", x: int = 0, y: int = 0): pass
     def set_cached_text_alpha(self, id: str, opacity: int = 255): pass
@@ -37,8 +38,8 @@ class PygameDisplay(Display):
         pygame.font.init()
         self.font = pygame.font.Font(size=50)
 
-    def draw_image(self, image, dest):
-        self.surface.blit(image.image, dest)
+    def draw_image(self, image, dest, area: pygame.Rect = None, **kwargs):
+        self.surface.blit(image.image, dest, area)
 
     def render_text(self, content: str, color: pygame.Color = 0, antialias: bool = False, opacity: int = 255, x: int = 0, y: int = 0, display: bool = True, id: str = ""):
         """Display text onto screen. 
@@ -80,36 +81,36 @@ class OpenGLDisplay(Display):
         self.surface = pygame.display.set_mode((cfg.screen_width, cfg.screen_height), flags=flags)
         pygame.display.set_caption("PyPlanes (OpenGL)")
 
-        # basic opengl configuration
-        glViewport(0, 0, cfg.screen_width, cfg.screen_height)
-        glDepthRange(0, 1)
-        glMatrixMode(GL_PROJECTION)
-        glMatrixMode(GL_MODELVIEW)
-        glLoadIdentity()
-        glShadeModel(GL_SMOOTH)
-        glClearColor(0.0, 0.0, 0.0, 0.0)
-        glClearDepth(1.0)
-        glDisable(GL_DEPTH_TEST)
-        glDisable(GL_LIGHTING)
-        glDepthFunc(GL_LEQUAL)
-        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST)
-        glEnable(GL_BLEND)
+        pygame.font.init()
+        self.font = pygame.font.Font(size=50)
 
-    def draw_image(self, image, dest):
-        # prepare to render the texture-mapped rectangle
-        glClear(GL_COLOR_BUFFER_BIT)
+        glClearColor(*(0,0,0,0))
+        glMatrixMode(GL_PROJECTION)
         glLoadIdentity()
-        glDisable(GL_LIGHTING)
+        gluOrtho2D(0, cfg.screen_width, cfg.screen_height, 0)
+        
+
+    def draw_image(self, image, dest: tuple, area: tuple = None, rotation: int = 0, size: tuple = None, flip_x: bool = False, flip_y: bool = False, **kwargs):
+        # draw texture openGL Texture
+        glBindTexture(GL_TEXTURE_2D, image.image) # prepare texture
         glEnable(GL_TEXTURE_2D)
 
-        # draw texture openGL Texture
-        glBindTexture(GL_TEXTURE_2D, image.image)
+        glMatrixMode(GL_MODELVIEW)
+        glLoadIdentity()
+        glTranslate(dest[0], dest[1], 0) # set position
         glBegin(GL_QUADS)
-        glTexCoord2f(0, 0); glVertex2f(-1, 1)
-        glTexCoord2f(0, 1); glVertex2f(-1, -1)
-        glTexCoord2f(1, 1); glVertex2f(1, -1)
-        glTexCoord2f(1, 0); glVertex2f(1, 1)
+        # create quad with texture 
+        glVertex(0, 0, 1); glTexCoord2f(0, 0)
+        glVertex(image.size[0], 0, 1); glTexCoord2f(0, 1)
+        glVertex(image.size[0], image.size[1], 1); glTexCoord2f(1, 1)
+        glVertex(0, image.size[1], 1); glTexCoord2f(1, 0)
         glEnd()
+        glDisable(GL_TEXTURE_2D)
+        #glFlush()
+
+    def update(self):
+        super().update()
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
 # Initialise screen
 if cfg.opengl:
