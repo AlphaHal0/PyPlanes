@@ -4,12 +4,11 @@ from config import cfg
 from display import screen
 
 try:
-    #import cupy
     import numpy
-    cupy_installed = True
+    numpy_installed = True
 except ImportError:
-    cupy_installed = False
-    print("[!!!] Cupy and Numpy are not installed. Advanced VFX will not be available")
+    numpy_installed = False
+    print("[!!!] Numpy is not installed. Advanced VFX will not be available")
 
 class ScreenDistortion:
     """A class that represents special screen effects"""
@@ -30,7 +29,7 @@ class ScreenDistortion:
         size = self.radius + 1
         init_direction = self.direction - self.angle // 2
 
-        if cfg.display.advanced_vfx and cupy_installed: # Slower but more realistic (distort individual pixels)
+        if cfg.display.advanced_vfx and numpy_installed: # Slower but more realistic (distort individual pixels)
             screen.surface.lock() # lock to be processed
             c = numpy.frombuffer(screen.surface.get_view('1'), numpy.uint8)\
                 .reshape(cfg.screen_height, cfg.screen_width, 4) # Convert screen buffer to array
