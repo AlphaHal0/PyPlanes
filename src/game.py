@@ -56,15 +56,6 @@ def play():
     frame_step = 0
     background = [Sprite(i) for i in (im.background.layer_1, im.background.layer_2, im.background.layer_3)]
     shake = 0
-    if cfg.debug.enable_profiling:
-        profiler = {} 
-        profiler['0'] = pygame.time.get_ticks()
-
-    def record_profile(stage: str):
-        """Record the current time in an array to be processed later"""
-        if cfg.debug.enable_profiling: 
-            profiler[stage] = round(pygame.time.get_ticks() - profiler['0'], 5)
-            profiler['0'] = pygame.time.get_ticks()
 
     if cfg.gameplay.disable_takeoff:
         # Set initial values for when not taking off
@@ -81,7 +72,6 @@ def play():
         scroll_speed = 0
         wave_mode_text_opacity = 0
     while running:
-        record_profile("0")
         # Draw background
         i = 2
         for image in background:
@@ -95,8 +85,6 @@ def play():
 
             if scroll_x[i] < -cfg.screen_width:
                 scroll_x[i] = 0
-
-        record_profile("Draw background")
 
         if pregame_timer == 0:
             for event in pygame.event.get():
@@ -180,8 +168,6 @@ def play():
                 if scroll_speed > cfg.scroll_speed:
                     scroll_speed -= 0.2
 
-            record_profile("Inputs")
-
             # Update aircraft position and check for collisions
             target_x, target_y = pygame.mouse.get_pos()
             player.apply_acceleration(target_x, target_y, trackable_distance=50)
@@ -203,8 +189,6 @@ def play():
                 if particle: 
                     particles.append(particle)
                     shake = 8
-
-            record_profile("Player")
 
             enemies = [enemy for enemy in enemies if enemy.alive]
             for enemy in enemies:
@@ -230,8 +214,6 @@ def play():
                     ai_marker.fill(enemy.ai.debug_color)
                     screen.surface.blit(ai_marker, (enemy.x+enemy.sprite.size[0], enemy.y))
 
-            record_profile("Enemies")
-
             if wave_warmup_time:
                 player.health += enemy_count * cfg.gameplay.wave_regen_multiplier
                 wave_warmup_time -= 1
@@ -253,8 +235,6 @@ def play():
                 wave_mode_text_x = cfg.screen_width
                 wave_mode_text_opacity = 255
                 screen.render_text(f"Wave {wave}", display=False, id="wavemode")
-
-            record_profile("Enemy spawn")
 
             # Update and draw bullets
             bullets = [bullet for bullet in bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= cfg.screen_width]
@@ -287,8 +267,6 @@ def play():
                         
                 bullet.draw()
 
-            record_profile("Bullets")
-
         else:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
@@ -316,8 +294,6 @@ def play():
         for particle in particles:
             particle.draw(scroll_speed)
 
-        record_profile("Particles")
-
         # Apply screen shake
         if shake > 0.1:
             shake_mod = int(shake * cfg.display.shake_intensity)
@@ -336,8 +312,6 @@ def play():
             (player.x+(player.width//2-80),
             player.y-player.height)
         )
-
-        record_profile("Misc")
         
         scoredisplay = f"Score {score} | Difficulty {round(enemy_count, 1)}"
         if cfg.gameplay.wave_mode: 
@@ -351,8 +325,6 @@ def play():
 
         if cfg.debug.show_fps: scoredisplay += f" | FPS {round(screen.clock.get_fps())}"
         screen.render_text(scoredisplay, x=0, y=0)
-
-        record_profile("Text")
 
         while game_paused and not frame_step:
             for event in pygame.event.get((pygame.MOUSEWHEEL, pygame.MOUSEBUTTONDOWN, pygame.QUIT)):
@@ -372,15 +344,7 @@ def play():
 
         if frame_step: frame_step -= 1
 
-        if cfg.debug.enable_profiling: 
-            maximum = ('0', 0)
-            for key, value in profiler.items():
-                if key == '0': continue
-                if value > maximum[1]: maximum = (key, value)
-            print(maximum)
-
         # Update display
-        if cfg.debug.enable_profiling: profiler['0'] = pygame.time.get_ticks()
         screen.update()
 
     # Quit Pygame

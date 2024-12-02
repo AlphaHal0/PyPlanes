@@ -73,7 +73,6 @@
     "mouse_visibility": false,
     "show_image_inits": false,
     "big_mode": false,
-    "show_distortion": false,
-    "enable_profiling": false
+    "show_distortion": false
   }
 }
