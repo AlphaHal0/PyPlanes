@@ -1,5 +1,4 @@
 import pygame
-import time
 from config import cfg, kb
 from random import random, randint, choice
 import aircraft
@@ -55,18 +54,17 @@ def play():
     running = True
     game_paused = False
     frame_step = 0
-    framestart = time.time()
     background = [Sprite(i) for i in (im.background.layer_1, im.background.layer_2, im.background.layer_3)]
     shake = 0
     if cfg.debug.enable_profiling:
         profiler = {} 
-        profiler['0'] = framestart
+        profiler['0'] = pygame.time.get_ticks()
 
     def record_profile(stage: str):
         """Record the current time in an array to be processed later"""
         if cfg.debug.enable_profiling: 
-            profiler[stage] = round(time.time() - profiler['0'], 5)
-            profiler['0'] = time.time()
+            profiler[stage] = round(pygame.time.get_ticks() - profiler['0'], 5)
+            profiler['0'] = pygame.time.get_ticks()
 
     if cfg.gameplay.disable_takeoff:
         # Set initial values for when not taking off
@@ -351,7 +349,7 @@ def play():
                 if wave_warmup_time <= 0:
                     wave_mode_text_opacity -= 2
 
-        if cfg.debug.show_fps: scoredisplay += f" | FPS {round(1/(time.time() - framestart))}"
+        if cfg.debug.show_fps: scoredisplay += f" | FPS {round(screen.clock.get_fps())}"
         screen.render_text(scoredisplay, x=0, y=0)
 
         record_profile("Text")
@@ -382,8 +380,7 @@ def play():
             print(maximum)
 
         # Update display
-        framestart = time.time()
-        if cfg.debug.enable_profiling: profiler['0'] = framestart
+        if cfg.debug.enable_profiling: profiler['0'] = pygame.time.get_ticks()
         screen.update()
 
     # Quit Pygame

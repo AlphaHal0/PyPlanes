@@ -20,13 +20,15 @@ class PygameDisplay(Display):
         self.surface = pygame.display.set_mode((cfg.screen_width, cfg.screen_height), flags=flags)
         self.surface.set_alpha(None)
         self.font = pygame.font.Font(size=50)
+        
+        self.clock = pygame.time.Clock()
 
         # This is a dictionary of rendered text to avoid rendering text every frame
         # TODO: split text into own class
         self.text_cache = {}
 
     def draw_image(self, image, dest):
-        self.surface.blit(image, dest)
+        self.surface.blit(image, dest, special_flags=pygame.BLEND_ALPHA_SDL2)
 
     def render_text(self, content: str, color: pygame.Color = 0, antialias: bool = False, opacity: int = 255, x: int = 0, y: int = 0, display: bool = True, id: str = ""):
         """Display text onto screen. 
@@ -58,7 +60,12 @@ class PygameDisplay(Display):
 
     def update(self):
         pygame.display.flip()
-        pygame.time.Clock().tick(60)
+
+        self.clock.tick(60)
+
+        # delay = int((1000/60) - (pygame.time.get_ticks() - self.last_tick_time))
+        # pygame.time.delay(delay)
+        # self.last_tick_time = pygame.time.get_ticks()
 
 # Initialise screen
 screen = PygameDisplay()
