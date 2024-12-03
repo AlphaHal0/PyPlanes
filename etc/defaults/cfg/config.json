@@ -59,7 +59,7 @@
   "easter_eggs": {
     "moth_chance": 0.001,
     "moth_music": true,
-    "moth_music_is_main_music": false,
+    "moth_music_is_main_music": true,
     "berry_bomb_chance": 0.005
   },
 

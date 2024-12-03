@@ -335,7 +335,7 @@ class Game:
         """Update and draw bullets"""
 
         self.bullets = [bullet for bullet in self.bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= cfg.screen_width] # uh
-        enemy_ai_danger_zones = []
+        self.enemy_ai_danger_zones = []
         for bullet in self.bullets:
             bullet.update()
 
@@ -357,7 +357,7 @@ class Game:
                         self.particles.append(bullet.explode(self.enemies))
                         i.explode()
 
-                enemy_ai_danger_zones.append(bullet.y)
+                self.enemy_ai_danger_zones.append(bullet.y)
 
             if bullet.ground_collision():
                 self.particles.append(bullet.explode(self.enemies))
