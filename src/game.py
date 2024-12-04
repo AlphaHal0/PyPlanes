@@ -348,7 +348,7 @@ class Game:
             else:
                 collided_aircraft = bullet.is_colliding([enemy.rect for enemy in self.enemies])
                 if collided_aircraft > -1:
-                    if self.enemies[collided_aircraft].fall(): score += 30
+                    if self.enemies[collided_aircraft].hit(): score += 30
                     self.particles.append(bullet.explode(self.enemies)) # delete bullet
 
                 # NOT EFFICIENT: I'm sure there's a better way than this

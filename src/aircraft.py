@@ -17,7 +17,6 @@ class Aircraft(Entity):
         self.shoot_cooldown = 0
         self.bomb_cooldown = 0
         self.max_shoot_cooldown = shoot_cooldown
-        self.spawn_cooldown = spawn_cooldown
         self.falling = False
         self.is_enemy = is_enemy
         self.last_particle_time = 0
@@ -26,7 +25,7 @@ class Aircraft(Entity):
         self.pitch = 0
         self.target_pitch = 0
         self.is_aircraft = True
-        super().__init__(sprite, x, y)
+        super().__init__(sprite, x, y, spawn_cooldown=spawn_cooldown)
 
     def update(self) -> None:
         """Tick"""
@@ -51,7 +50,7 @@ class Aircraft(Entity):
             self.target_pitch = value
         return self.pitch
 
-    def fall(self) -> bool:
+    def hit(self) -> bool:
         """Marks the aircraft as 'falling' - its movement and rotation is limited to downwards.
         Returns False if already falling, else True"""
         if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
@@ -78,7 +77,7 @@ class Aircraft(Entity):
             self.health = cfg.gameplay.initial_health
         if self.health <= 0:
             return self.fall()
-            
+
     def apply_acceleration(self, target_x: int, target_y: int, trackable_distance: int = 50) -> None:
         """Accelerates towards the target pos if the distance is greater than trackable_distance"""
         dx = target_x - self.x
@@ -106,7 +105,7 @@ class Aircraft(Entity):
 
         self.velocity_x *= cfg.physics.aircraft_drag
         self.velocity_y *= cfg.physics.aircraft_drag
-    
+
     def shoot(self, id: str = 0) -> weapon.Bullet | None:
         """Returns a shot weapon.Bullet if not on cooldown, otherwise None"""
         if self.shoot_cooldown <= 0:
@@ -120,7 +119,7 @@ class Aircraft(Entity):
                 id=id)
         else:
             return None
-    
+
     def bomb(self, id: str = 0) -> weapon.Bomb | None:
         """Returns a shot weapon.Bomb if not on cooldown, otherwise None"""
         if self.bomb_cooldown <= 0:
@@ -140,7 +139,7 @@ class Aircraft(Entity):
 class EnemyAircraft(Aircraft):
     """An Aircraft with enemy AI"""
     def __init__(self, y: int, sprite: Sprite|None = None, difficulty: int = 1, ai_type: int = 1):
-        
+
         if sprite is None: sprite = Sprite(ai.ai_types[ai_type].default_aircraft_img)
         size = sprite.size
         # Get type from index and init AI class

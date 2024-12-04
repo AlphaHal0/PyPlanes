@@ -19,6 +19,7 @@ class GroundVehicle(Entity):
         self.velocity_x = 0.001 * cfg.screen_width * self.speed - cfg.scroll_speed
         self.is_aircraft = False
         self.is_enemy = True
+        self.inert = False # becomes inert when hit
 
     def update(self) -> None:
         """Update.
@@ -26,6 +27,15 @@ class GroundVehicle(Entity):
         if self.x < 0:
             self.alive = False
         return super().update()
+
+    def hit(self) -> bool:
+        if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
+        if not self.inert:
+            self.inert = True
+            self.sprite.anim_time = 60
+            return True
+        else:
+            return False
 
     # TODO: make parent Vehicle class for GV and Aircraft and put this in there
     def display_particle(self, sprite: Sprite, delay: int = 400) -> particle.Particle | None:
