@@ -35,16 +35,16 @@ class Weapon(Entity):
         else:
             return Particle(self.x, self.y, sprite=Sprite(im.particle.small_explosions), duration=10)
 
+    def update(self) -> None:
+        if not 0 <= self.rect.x <= cfg.screen_width:
+            self.alive = False
+        return super().update()
+
 class Bullet(Weapon):
     """A Weapon that represents a bullet"""
     def __init__(self, sprite: Sprite|None = None, velocity_x: int = cfg.physics.enemy_bullet_velocity, is_enemy: bool = False, **kwargs):
         if sprite is None: sprite = Sprite(im.weapons.bullet, animation_time=5)
         super().__init__(sprite=sprite, velocity_x=-velocity_x if is_enemy else velocity_x, is_enemy=is_enemy, **kwargs)
-
-    def update(self) -> None:
-        if not 0 <= self.rect.x <= cfg.screen_width:
-            self.alive = False
-        return super().update()
 
 class Bomb(Weapon):
     """A Weapon that represents a bomb"""
