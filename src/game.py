@@ -188,6 +188,10 @@ class Game:
                 new_bomb = self.player.bomb()
                 if new_bomb is not None:
                     self.bullets.append(new_bomb)
+            elif is_pressed(event, kb.weapons.rocket):
+                new_rocket = self.player.drop_rocket()
+                if new_rocket is not None:
+                    self.bullets.append(new_rocket)
             elif is_pressed(event, kb.debug.spawn_enemy):
                 while True:
                     event = pygame.event.wait()
@@ -208,7 +212,7 @@ class Game:
                 self.spawn_enemy(moth=True, difficulty=int(self.enemy_count))
             elif is_pressed(event, kb.debug.kill_all):
                 for enemy in self.enemies:
-                    enemy.fall()
+                    enemy.hit()
             elif is_pressed(event, kb.debug.spawn_particle):
                 self.particles.append(Particle(
                     self.player.x,
@@ -218,7 +222,7 @@ class Game:
                     scale=randint(1,5),
                     adjust_pos=False))
             elif is_pressed(event, kb.debug.shockwave):
-                self.particles.append(ScreenDistortion(self.player.x+self.player.width//2, self.player.y+-self.player.height//2, 50, direction=self.player.pitch, angle=360, width=30, time_alive=20))
+                self.particles.append(ScreenDistortion(self.player.x+self.player.width//2, self.player.y+-self.player.height//2, 50, direction=self.player.pitch, angle=360, width=10, time_alive=20))
 
             elif is_pressed(event, kb.debug.pause_game):
                 print("Game paused")
@@ -334,7 +338,7 @@ class Game:
     def update_bullets(self):
         """Update and draw bullets"""
 
-        self.bullets = [bullet for bullet in self.bullets if bullet is not None and bullet.alive and 0 <= bullet.rect.x <= cfg.screen_width] # uh
+        self.bullets = [bullet for bullet in self.bullets if bullet is not None and bullet.alive]
         self.enemy_ai_danger_zones = []
         for bullet in self.bullets:
             bullet.update()
@@ -348,7 +352,7 @@ class Game:
             else:
                 collided_aircraft = bullet.is_colliding([enemy.rect for enemy in self.enemies])
                 if collided_aircraft > -1:
-                    if self.enemies[collided_aircraft].hit(): score += 30
+                    if self.enemies[collided_aircraft].hit(): self.score += 30
                     self.particles.append(bullet.explode(self.enemies)) # delete bullet
 
                 # NOT EFFICIENT: I'm sure there's a better way than this

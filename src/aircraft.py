@@ -72,11 +72,11 @@ class Aircraft(Entity):
 
     def check_health(self) -> bool:
         """Check if the Aircraft's health is less than or equal to 0.
-        If so, runs and returns the result from self.fall()"""
+        If so, runs and returns the result from self.hit()"""
         if self.health > cfg.gameplay.initial_health:
             self.health = cfg.gameplay.initial_health
         if self.health <= 0:
-            return self.fall()
+            return self.hit()
 
     def apply_acceleration(self, target_x: int, target_y: int, trackable_distance: int = 50) -> None:
         """Accelerates towards the target pos if the distance is greater than trackable_distance"""
@@ -125,6 +125,22 @@ class Aircraft(Entity):
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
             return weapon.Bomb(
+                x=(self.x + self.width // 2),
+                y=self.y + self.height,
+                is_enemy=self.is_enemy,
+                velocity_x=self.velocity_x,
+                explosion_power=random.randint(4,6),
+                rotation=self.pitch,
+                id=id
+            )
+        else:
+            return None
+
+    def drop_rocket(self, id: str = 0) -> weapon.Rocket | None:
+        """Returns a shot weapon.Rocket if not on cooldown, otherwise None"""
+        if self.bomb_cooldown <= 0:
+            self.bomb_cooldown = self.max_bomb_cooldown
+            return weapon.Rocket(
                 x=(self.x + self.width // 2),
                 y=self.y + self.height,
                 is_enemy=self.is_enemy,

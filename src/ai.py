@@ -2,7 +2,7 @@ import random
 from config import cfg
 from images import im
 
-class BaseAI: 
+class BaseAI:
     """The base AI with no special features."""
     debug_color = 0x000000
     default_aircraft_img = None
@@ -31,10 +31,16 @@ class BaseAI:
         elif self.target_y < self.ymin:
             self.target_y = self.ymin + 10
 
-    def tick(self, ctx: dict): 
+    def tick(self, ctx: dict):
         self.constrain()
 
-class Fly(BaseAI): 
+    def check_is_obstructed(self, danger_zones: list) -> int:
+        for i in danger_zones:
+            if abs(self.target_y-i) < 100:
+                return i
+        return 0
+
+class Fly(BaseAI):
     """AI with basic random movements."""
     debug_color = 0xFF0000
     default_aircraft_img = im.aircraft.enemy_1
@@ -47,7 +53,7 @@ class Fly(BaseAI):
 
         super().tick(ctx)
 
-class Turret(BaseAI): 
+class Turret(BaseAI):
     """Move to a random position and shoot."""
     debug_color = 0x00FF00
     default_aircraft_img = im.aircraft.enemy_2
@@ -68,7 +74,7 @@ class Turret(BaseAI):
 
         super().tick(ctx)
 
-class Dodger(BaseAI): 
+class Dodger(BaseAI):
     """Avoid player bullets."""
     debug_color = 0xFFFF00
     default_aircraft_img = im.aircraft.enemy_3
@@ -91,14 +97,8 @@ class Dodger(BaseAI):
             self.shoot_time -= 1
 
         super().tick(ctx)
-        
-    def check_is_obstructed(self, danger_zones: list):
-        for i in danger_zones:
-            if abs(self.target_y-i) < 100:
-                return True
-        return False
-    
-class Offence(BaseAI): 
+
+class Offence(BaseAI):
     """Follow the player."""
     debug_color = 0x0000FF
     default_aircraft_img = im.aircraft.enemy_4
@@ -109,19 +109,28 @@ class Offence(BaseAI):
         self.target_x = random.randint(int(self.xmin), int(self.xmax))
 
     def tick(self, ctx: dict):
-        self.target_y = ctx['player_y']
-
         if self.shoot_time == 0:
             self.shoot += 1
             self.shoot_time = self.max_shoot_time
+            self.target_y = ctx['player_y']
         else:
             self.shoot_time -= 1
+
+        obstructed = self.check_is_obstructed(ctx["danger_zones"])
+        if obstructed:
+            # Move up if:
+            # - Danger zone is below the aircraft AND target Y can go up further
+            # - Danger zone is above the aircraft AND target Y cannot go down further
+            if (self.target_y > obstructed and self.target_y < self.ymax) or self.target_y < self.ymin:
+                self.target_y += 50
+            else:
+                self.target_y -= 50
 
         super().tick(ctx)
 
 class Bomber(BaseAI):
     """Shoot player from in front angles
-    
+
         1. Must fly at top 10% of screen
         2. Must shoot at player if they are 0 to -80 degrees in front and below them or up to 10 degrees above
         3. Must not rotate to shoot player
@@ -132,11 +141,11 @@ class Bomber(BaseAI):
         super().__init__(**kwargs)
         self.ymin = cfg.screen_height * cfg.aircraft.bomber_minimum_y
 
-        
+
     def tick(self, ctx: dict):
         self.target_x = random.randint(int(self.xmin), int(self.xmax))
         self.target_y = random.randint(int(self.ymin), int(self.ymax))
-        
+
         self.shoot += 1
 
         super().tick(ctx)

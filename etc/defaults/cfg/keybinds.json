@@ -6,7 +6,8 @@
     "weapons": {
         "shoot": 1025,
         "shoot_hold": 1073742049,
-        "bomb": 32
+        "bomb": 32,
+        "rocket": 114
     },
     "other": {
         "quit": 27

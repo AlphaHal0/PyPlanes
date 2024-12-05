@@ -11,6 +11,10 @@
             "flip": {"x": true},
             "scale": 0.025
         },
+        "rocket": {
+            "fp": "weapons/rockets/rocket",
+            "scale": 0.025
+        },
         "blueberry": {
             "fp": "easteregg/blueberry",
             "scale": 0.0625
