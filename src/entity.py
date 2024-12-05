@@ -32,6 +32,14 @@ class Entity:
             self.velocity_x = velocity_x
             self.velocity_y = velocity_y
 
+    def apply_rotated_velocity(self, force: float, direction: int|None = None):
+        """Apply a force to this Entity with a direction"""
+        if direction == None:
+            direction = self.rotation
+            rad = math.radians(-direction)
+            self.velocity_x += force * math.cos(rad)
+            self.velocity_y += force * math.sin(rad)
+
     def update(self) -> None:
         """Update the position of the Entity using its velocity"""
         self.x += self.velocity_x

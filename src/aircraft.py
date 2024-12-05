@@ -129,6 +129,7 @@ class Aircraft(Entity):
                 y=self.y + self.height,
                 is_enemy=self.is_enemy,
                 velocity_x=self.velocity_x,
+                velocity_y=self.velocity_y * cfg.physics.bomb_init_y_multiplier,
                 explosion_power=random.randint(4,6),
                 rotation=self.pitch,
                 id=id
@@ -145,6 +146,7 @@ class Aircraft(Entity):
                 y=self.y + self.height,
                 is_enemy=self.is_enemy,
                 velocity_x=self.velocity_x,
+                velocity_y=self.velocity_y * cfg.physics.bomb_init_y_multiplier,
                 explosion_power=random.randint(4,6),
                 rotation=self.pitch,
                 id=id

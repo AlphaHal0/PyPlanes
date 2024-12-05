@@ -65,19 +65,19 @@ class Bomb(Weapon):
 
 class Rocket(Weapon):
     """A Weapon that represents a rocket"""
-    def __init__(self, sprite: Sprite|None = None, velocity_x: int = 0, drag_multiplier: float = 0.1, is_enemy: bool = False, **kwargs):
+    def __init__(self, sprite: Sprite|None = None, velocity_x: int = 0, velocity_y: int = 0, drag_multiplier: float = 0.1, is_enemy: bool = False, **kwargs):
         if sprite is None: sprite = Sprite(im.weapons.rocket)
-        super().__init__(sprite=sprite, velocity_x=-velocity_x if is_enemy else velocity_x, is_enemy=is_enemy, **kwargs)
+        super().__init__(sprite=sprite, velocity_x=-velocity_x if is_enemy else velocity_x, velocity_y=velocity_y + cfg.physics.bomb_y_velocity_gain, is_enemy=is_enemy, **kwargs)
         self.drag_multiplier = drag_multiplier
-        self.drop_delay = 30
+        self.drop_delay = 20
 
     def update(self):
         """Updates this Rocket.
         Speeds up on the X axis when active."""
         super().update()
         if self.drop_delay == 0:
-            self.velocity_x += cfg.physics.rocket_thrust * (1 + self.velocity_x / cfg.physics.rocket_terminal_velocity)
-            self.velocity_y -= cfg.physics.rocket_y_stabilisation_multiplier * self.velocity_y * self.drag_multiplier
+            self.velocity_y -= cfg.physics.rocket_y_stabilisation_multiplier * self.velocity_y * self.drag_multiplier * (1 - abs(self.rotation) / 45)
+            self.apply_rotated_velocity(cfg.physics.rocket_thrust * (1 + self.velocity_x / cfg.physics.rocket_terminal_velocity))
         else:
             self.velocity_y += cfg.physics.bomb_y_velocity_gain * (1 + self.velocity_y / cfg.physics.bomb_terminal_velocity)
             self.drop_delay -= 1

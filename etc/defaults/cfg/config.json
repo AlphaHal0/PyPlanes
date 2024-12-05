@@ -38,6 +38,7 @@
     "bomb_x_velocity_decay": 0.05,
     "bomb_y_velocity_gain": 0.1,
     "bomb_terminal_velocity": 20,
+    "bomb_init_y_multiplier": 0.2,
     "initial_enemy_speed": 1,
     "aircraft_drag": 0.92,
     "aircraft_acceleration": 1.0,
