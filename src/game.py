@@ -9,6 +9,11 @@ from images import im
 from keybind import is_pressed, is_held
 from vfx import ScreenDistortion
 from display import screen
+import weapon
+
+# ----------------------------- #
+# TODO: Change collision system #
+# ----------------------------- #
 
 class Game:
     """A class that represents the game logic"""
@@ -142,6 +147,22 @@ class Game:
                 randint(-shake_mod, shake_mod))
             self.shake *= 0.8
 
+    def spawn_particle(self, particle: Particle|None) -> bool:
+        if not particle:
+            return False
+
+        else:
+            self.particles.append(particle)
+            return True
+
+    def spawn_bullet(self, weapon: weapon.Weapon|None) -> bool:
+        if not weapon:
+            return False
+
+        else:
+            self.bullets.append(weapon)
+            return True
+
     def hud(self):
         """Draw HUD elements"""
         health_bar = pygame.Surface((150,10))
@@ -183,15 +204,15 @@ class Game:
             elif is_pressed(event, kb.weapons.shoot):
                 new_bullet = self.player.shoot()
                 if new_bullet is not None:
-                    self.bullets.append(new_bullet)
+                    self.spawn_bullet(new_bullet)
             elif is_pressed(event, kb.weapons.bomb):
                 new_bomb = self.player.bomb()
                 if new_bomb is not None:
-                    self.bullets.append(new_bomb)
+                    self.spawn_bullet(new_bomb)
             elif is_pressed(event, kb.weapons.rocket):
                 new_rocket = self.player.drop_rocket()
                 if new_rocket is not None:
-                    self.bullets.append(new_rocket)
+                    self.spawn_bullet(new_rocket)
             elif is_pressed(event, kb.debug.spawn_enemy):
                 while True:
                     event = pygame.event.wait()
@@ -214,7 +235,7 @@ class Game:
                 for enemy in self.enemies:
                     enemy.hit()
             elif is_pressed(event, kb.debug.spawn_particle):
-                self.particles.append(Particle(
+                self.spawn_particle(Particle(
                     self.player.x,
                     self.player.y,
                     sprite=choice((Sprite(im.particle.large_explosions), Sprite(im.particle.small_explosions), Sprite(im.aircraft.moth))),
@@ -222,7 +243,7 @@ class Game:
                     scale=randint(1,5),
                     adjust_pos=False))
             elif is_pressed(event, kb.debug.shockwave):
-                self.particles.append(ScreenDistortion(self.player.x+self.player.width//2, self.player.y+-self.player.height//2, 50, direction=self.player.pitch, angle=360, width=10, time_alive=20))
+                self.spawn_particle(ScreenDistortion(self.player.x+self.player.width//2, self.player.y+-self.player.height//2, 50, direction=self.player.pitch, angle=360, width=10, time_alive=20))
 
             elif is_pressed(event, kb.debug.pause_game):
                 print("Game paused")
@@ -241,10 +262,10 @@ class Game:
         if is_held(kb.weapons.shoot_hold):
             new_bullet = self.player.shoot()
             if new_bullet is not None:
-                self.bullets.append(new_bullet)
+                self.spawn_bullet(new_bullet)
 
         if is_held(kb.debug.thrust):
-            self.particles.append(Particle(
+            self.spawn_particle(Particle(
                 self.player.x + self.player.width * 0.3,
                 self.player.y + self.player.height * 0.5,
                 sprite=Sprite(im.particle.afterburner),
@@ -272,7 +293,7 @@ class Game:
 
         if self.player.falling:
             particle = self.player.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
-            if particle: self.particles.append(particle)
+            if particle: self.spawn_particle(particle)
             self.shake = 2
 
         if self.player.ground_collision():
@@ -282,7 +303,7 @@ class Game:
                 self.running = False
             particle = self.player.display_particle(Sprite(im.particle.small_explosions, animation_time=30, size_multiplier=2), 100)
             if particle:
-                self.particles.append(particle)
+                self.spawn_particle(particle)
                 self.shake = 8
 
     def process_enemies(self):
@@ -294,16 +315,16 @@ class Game:
                 enemy.ai_tick(danger_zones=self.enemy_ai_danger_zones, player_y=self.player.y, player_x=self.player.x, enemy_y=enemy.y)
                 if enemy.ground_collision():
                     enemy.destroy()
-                    self.particles.append(Particle(enemy.x, enemy.y, sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True))
+                    self.spawn_particle(Particle(enemy.x, enemy.y, sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True))
                     self.score += 20 if cfg.gameplay.wave_mode else 70
                     self.enemy_count += cfg.gameplay.enemy_count_increment
                 if enemy.falling:
                     particle = enemy.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
-                    if particle: self.particles.append(particle)
+                    if particle: self.spawn_particle(particle)
             else:
                 enemy.update()
             if enemy.ai.shoot:
-                self.bullets.append(enemy.shoot())
+                self.spawn_bullet(enemy.shoot())
                 enemy.ai.shoot -= 1
 
             if cfg.debug.show_ai_type:
@@ -348,23 +369,23 @@ class Game:
                 if bullet.is_colliding(self.player.rect):
                     self.player.health -= 10
                     self.shake = 8
-                    self.particles.append(bullet.explode(self.enemies))
+                    self.spawn_particle(bullet.explode(self.enemies))
             else:
                 collided_aircraft = bullet.is_colliding([enemy.rect for enemy in self.enemies])
                 if collided_aircraft > -1:
                     if self.enemies[collided_aircraft].hit(): self.score += 30
-                    self.particles.append(bullet.explode(self.enemies)) # delete bullet
+                    self.spawn_particle(bullet.explode(self.enemies)) # delete bullet
 
                 # NOT EFFICIENT: I'm sure there's a better way than this
                 for i in self.bullets:
                     if bullet.is_colliding_entity(i): # Allow bullets to collide
-                        self.particles.append(bullet.explode(self.enemies))
+                        self.spawn_particle(bullet.explode(self.enemies))
                         i.explode()
 
                 self.enemy_ai_danger_zones.append(bullet.y)
 
             if bullet.ground_collision():
-                self.particles.append(bullet.explode(self.enemies))
+                self.spawn_particle(bullet.explode(self.enemies))
 
             bullet.draw()
 
