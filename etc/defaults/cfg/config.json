@@ -44,7 +44,7 @@
     "aircraft_acceleration": 1.0,
     "aircraft_terminal_velocity": 20,
     "rocket_terminal_velocity": 20,
-    "rocket_thrust": 0.1,
+    "rocket_thrust": 1.5,
     "rocket_y_stabilisation_multiplier": 0.5
   },
 
