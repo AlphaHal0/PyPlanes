@@ -82,7 +82,8 @@ class Game:
 
     def loop(self):
         """Main game loop"""
-        self.draw_background()
+        if not cfg.easter_eggs.secret_option:
+            self.draw_background()
 
         if self.pregame_timer == 0:
             self.logic()
@@ -187,6 +188,10 @@ class Game:
                     self.wave_mode_text_opacity -= 2
 
         if cfg.debug.show_fps: scoredisplay += f" | FPS {round(screen.clock.get_fps())}"
+
+        if cfg.easter_eggs.secret_option and screen.clock.get_fps() < 10: # Nothing to see here
+            screen.render_text("How's your FPS looking??? :3", color="0xFFFFFF", opacity=64, x=10, y=cfg.screen_height//2, id="fps_looks_shit")
+
         screen.render_text(scoredisplay, x=0, y=0)
 
     def logic(self):

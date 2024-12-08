@@ -29,7 +29,7 @@ class ScreenDistortion:
         size = self.radius + 1
         init_direction = self.direction - self.angle // 2
 
-        if cfg.display.advanced_vfx and numpy_installed: # Slower but more realistic (distort individual pixels)
+        if (cfg.display.advanced_vfx or cfg.easter_eggs.secret_option) and numpy_installed: # Slower but more realistic (distort individual pixels)
             screen.surface.lock() # lock to be processed
             c = numpy.frombuffer(screen.surface.get_view('1'), numpy.uint8)\
                 .reshape(cfg.screen_height, cfg.screen_width, 4) # Convert screen buffer to array
@@ -70,20 +70,20 @@ class ScreenDistortion:
             if cfg.display.fast_vfx:
                 # Draw a square outline
                 pygame.draw.lines(
-                    arc, 
-                    "0x888888", 
+                    arc,
+                    "0x888888",
                     True,
                     [(0, 0), (size, 0), (size, size), (0, size)],
                     self.width)
             else:
                 pygame.draw.arc(
-                    arc, 
-                    "0x888888", 
-                    (0, 0, size, size), 
-                    math.radians(init_direction), 
+                    arc,
+                    "0x888888",
+                    (0, 0, size, size),
+                    math.radians(init_direction),
                     math.radians(init_direction + self.angle),
                     width=self.width)
-            
+
             arc.set_alpha(self.alpha)
 
             screen.surface.blit(
@@ -95,7 +95,7 @@ class ScreenDistortion:
         self.time_alive -= 1
 
         # gradually fade out
-        if -64 < self.time_alive < 0: 
+        if -64 < self.time_alive < 0:
             self.alpha -= 1
         elif self.time_alive <= -64:
             self.alive = False

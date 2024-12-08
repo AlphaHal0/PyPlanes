@@ -4,6 +4,7 @@ import particle
 from config import cfg
 import ai
 import weapon
+import vfx
 from entity import Entity
 from sprite import Sprite
 from images import im
@@ -67,7 +68,11 @@ class Aircraft(Entity):
         current_time = pygame.time.get_ticks()
         if current_time - self.last_particle_time > delay:
             self.last_particle_time = current_time
-            return particle.Particle(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), sprite=sprite, move_with_screen=not self.is_enemy)
+
+            if cfg.easter_eggs.secret_option: # Don't mind this :)
+                return vfx.ScreenDistortion(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), 50, angle=360, width=sprite.size[0] // 5, time_alive=20, move_with_screen=not self.is_enemy)
+            else:
+                return particle.Particle(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), sprite=sprite, move_with_screen=not self.is_enemy)
         else: return None
 
     def check_health(self) -> bool:
