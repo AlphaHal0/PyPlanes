@@ -1,16 +1,33 @@
+import config
 from config import cfg
 import pygame
 
-sz = cfg.sprite_sizes
-ui_sz = cfg.ui
+try:
+    import PIL.Image
+    PIL_IMPORTED = True
+except ImportError:
+    PIL_IMPORTED = False
 
-def load_image(file: str):
+def load_image(file: str, alpha: bool = True) -> pygame.Surface:
+    """Loads an image from file and returns a pygame.Surface.
+    Checks `./mod/res/img/{file}` first, then `./res/img/{file}`.
+    """
     try:
-        return pygame.image.load(f"./mod/res/img/{file}").convert_alpha()
+        img = pygame.image.load(f"./mod/res/img/{file}")
     except FileNotFoundError:
-        return pygame.image.load(f"./res/img/{file}").convert_alpha()
+        img = pygame.image.load(f"./res/img/{file}")
 
-def scale_image(surface: pygame.Surface, size: list|float, relative: bool = True):
+    # Only convert with alpha if needed
+    if alpha:
+        return img.convert_alpha()
+    else:
+        return img.convert()
+
+def scale_image(surface: pygame.Surface, size: list|float, relative: bool = True) -> pygame.Surface:
+    """Returns a scaled pygame.Surface by size.
+    If relative is True, the surface is scaled as a fraction of the screen size.
+    e.g. 0.1 returns a Surface that is 0.1 times the screen height
+    and [0.1, 0.2] returns a Surface that is 0.1x height and 0.2x width."""
     if relative:
         if isinstance(size, list):
             return pygame.transform.scale(surface, (size[0] * cfg.screen_width, size[1] * cfg.screen_height))
@@ -20,42 +37,96 @@ def scale_image(surface: pygame.Surface, size: list|float, relative: bool = True
     else:
         return pygame.transform.scale(surface, size)
 
-def flip_image(surface: pygame.Surface, flip_x: bool = True, flip_y: bool = False):
+def flip_image(surface: pygame.Surface, flip_x: bool = True, flip_y: bool = False) -> pygame.Surface:
+    """Flips a pygame.Surface"""
     return pygame.transform.flip(surface, flip_x, flip_y)
 
-bullet_image = load_image("weapons/bullets/Shot1.png")
-bullet_image = scale_image(bullet_image, sz.bullet_image)
+class ImageCategory:
+    """A class that handles an image category.
+    ImageHandler initialises this class and manually sets attributes for it."""
+    def __init__(self) -> None:
+        pass
 
-background_image = scale_image(load_image("sky/side-scroll.jpg"), sz.background_image)
+class ImageHandler:
+    """Class to manage images.
+    Images are loaded from a Config and stored as attributes"""
+    def __init__(self, con: config.Config) -> None:
+        self.con = con
+        self.load()
 
-class ui:
-    menu_background_image = scale_image(load_image(f"ui/background.png"), sz.background_image)
-    button_image = scale_image(load_image(f"ui/button.png"), ui_sz.button_size)
-    narrow_button_image = scale_image(load_image(f"ui/button.png"), ui_sz.narrow_button_size)
+    def load(self):
+        for cat, contents in self.con.d.items(): # search categories
+            setattr(self, cat, ImageCategory())
+            for key, value in contents.items(): # search category items
+                if value.get('anim'): # this is an animated image
+                    images = []
+                    if value.get('mode').startswith('s'):
+                        for i in range(value['anim']):
+                            # e.g. if value['fp'] was "frame_{}.png" then it loads ["frame_1.png", "frame_2.png", ...]
+                            images.append(self.process_image(value, value['fp'].format(i)))
+                    elif PIL_IMPORTED:
+                        # Load and split image
+                        if cfg.debug.show_image_inits: print("load img", value['fp'] + ".png", end=' ')
+                        try:
+                            image = PIL.Image.open(f"./mod/res/img/{value['fp']}.png")
+                            if cfg.debug.show_image_inits: print("...ok")
+                        except FileNotFoundError: 
+                            try: 
+                                image = PIL.Image.open(f"./res/img/{value['fp']}.png")
+                                if cfg.debug.show_image_inits: print("...ok")
+                            except FileNotFoundError:
+                                if cfg.debug.show_image_inits: print("...NOT FOUND")
+                                setattr(getattr(self, cat), key, None)
+                                continue
+                        
+                        for i in range(value['anim']):
+                            if value['mode'].startswith('x'): # split horizontally
+                                new_image = image.crop(((i)*(image.width//value['anim']), 0, (i+1)*(image.width//value['anim']), image.height))
+                            else: # split vertically
+                                new_image = image.crop((0, (i)*(image.height//value['anim']), image.width, (i+1)*(image.height//value['anim'])))
 
-aircraft_image = scale_image(load_image("planes/player/spitfire.png"), sz.aircraft_image)
+                            images.append(self.process_image(value, image=
+                                pygame.image.fromstring(new_image.tobytes(), new_image.size, new_image.mode).convert_alpha())) # Convert PIL Image to Pygame image
+                    else:
+                        print(f"[!!!] Image {key} could not be loaded because Pillow has not been installed. Please install it and try again")
+                        setattr(getattr(self, cat), key, None)
+                        continue
+                    setattr(getattr(self, cat), key, images)
+                else:
+                    setattr(getattr(self, cat), key, self.process_image(value))
 
-enemy_1_image = scale_image(load_image("planes/enemies/enemy_lvl_1.png"), sz.enemy_image)
-enemy_2_image = scale_image(load_image("planes/enemies/enemy_lvl_2.png"), sz.enemy_image)
-enemy_3_image = scale_image(load_image("planes/enemies/enemy_lvl_3.png"), sz.enemy_image)
-enemy_4_image = scale_image(load_image("planes/enemies/enemy_lvl_4.png"), sz.enemy_image)
-enemy_5_image = scale_image(load_image("planes/enemies/enemy_lvl_5.png"), sz.enemy_image)
+    def process_image(self, value: dict, fp_override: str = "", image: pygame.Surface|None = None) -> pygame.Surface|None:
+        """Loads and processes an image based on the contents in value.
+        Available functions:
+        - fp (str, required): the path to the image (.png ext. added automatically)
+        - flip (dict, optional): settings to flip image
+        -   flip.x // flip.y (bools, optional): axes to flip on
+        - scale (list|float, optional): settings to scale image
+        -   if scale is a float, keeps proportions and scales as a fraction of screen height
+        -   if scale is a list, scales based on screen width and height
+        - relative (bool, optional): if true, scales by pixel values instead of fractions (not recommended)
 
-large_explosions = []
-for i in range(4):
-    large_explosions.append(
-        scale_image(load_image(f"particle/fire/large-{i+1}.png"), sz.large_explosions))
+        If `fp_override` is given, loads that file instead.
+        Returns None if not found (Sprites should handle being given None automatically)"""
 
-small_explosions = []
-for i in range(4):
-    small_explosions.append(
-        scale_image(load_image(f"particle/smoke/large-{i+1}.png"), sz.small_explosions))
-    
-moth_images = []
-for i in range(8):
-    moth_images.append(
-        scale_image(load_image(f"easteregg/moth/frame_{i}.png"), sz.moth_images))
+        if image is None:
+            if cfg.debug.show_image_inits: print("load img", fp_override if fp_override else value['fp'], end=' ')
+            try:
+                image = load_image((fp_override if fp_override else value['fp']) + '.png', value.get('alpha', True))
+                if cfg.debug.show_image_inits: print("...ok")
+            except FileNotFoundError:
+                if cfg.debug.show_image_inits: print("...NOT FOUND")
+                return None
+        
 
-bomb_image = flip_image(scale_image(load_image("weapons/bombs/British/GP-1000lb-MK-IV.png"), sz.bomb_image))
+        if value.get('flip'): 
+            image = flip_image(image, value['flip'].get('x', False), value['flip'].get('y', False))
 
-blueberry = scale_image(load_image("easteregg/blueberry.png"), sz.blueberry)
+        if value.get('scale'):
+            image = scale_image(image, value['scale'], value.get('relative', True))
+
+        return image
+
+image_toc = config.Config("cfg/images.json")
+image_toc.reset()
+im = ImageHandler(image_toc)

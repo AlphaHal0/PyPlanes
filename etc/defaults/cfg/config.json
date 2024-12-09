@@ -2,68 +2,82 @@
   "display": {
     "screen_width": 1800,
     "screen_height": 800,
-    "floor_y_ratio": 0.12,
+    "floor_y_ratio": 0.13,
     "initial_aircraft_x_ratio": 0.1,
-    "initial_aircraft_y_ratio": 0.45
+    "initial_aircraft_y_ratio": 0.45,
+    "scroll_speed_ratio": 0.01,
+    "shake_intensity": 1.0,
+    "advanced_vfx": false,
+    "fast_vfx": true,
+    "avfx_precision": 2,
+    "avfx_step": 720,
+    "fullscreen": false
   },
 
-  "physics": {
-    "bullet_velocity": 20,
-    "weapon_relative_velocity_multiplier": 0.2,
-    "bomb_x_velocity_decay": 0.05,
-    "bomb_y_velocity_gain": 0.1,
-    "bomb_terminal_velocity": 20,
-    "initial_enemy_speed": 1
-  },
   "gameplay": {
-    "shoot_cooldown": 30,
     "player_shoot_cooldown": 30,
+    "enemy_shoot_cooldown": 30,
+    "crashing_shoot_multiplier": 0.5,
     "spawn_cooldown": 1000,
-    "bomb_cooldown": 100,
     "player_bomb_cooldown": 100,
+    "enemy_bomb_cooldown": 100,
     "initial_enemy_aircraft": 1,
     "enemy_count_increment": 0.4,
     "initial_health": 100,
     "wave_mode": true,
     "disable_takeoff": false,
-    "scroll_speed_ratio": 0.01
+    "ground_health_decay": 2,
+    "wave_regen_multiplier": 0.04,
+    "enemy_regen_multiplier": 0.8
   },
 
-  "sprite_sizes": {
-    "bullet_image": 0.025,
-    "background_image": [1, 1],
-    "aircraft_image": 0.05,
-    "enemy_image": 0.05,
-    "large_explosions": 0.05,
-    "small_explosions": 0.05,
-    "moth_images": 0.07,
-    "bomb_image": 0.025,
-    "blueberry": 0.0625
+  "physics": {
+    "enemy_bullet_velocity": 20,
+    "player_bullet_velocity": 30,
+    "weapon_velocity_multiplier": 0.2,
+    "bomb_x_velocity_decay": 0.05,
+    "bomb_y_velocity_gain": 0.1,
+    "bomb_terminal_velocity": 20,
+    "bomb_init_y_multiplier": 0.2,
+    "initial_enemy_speed": 1,
+    "aircraft_drag": 0.92,
+    "aircraft_acceleration": 1.0,
+    "aircraft_terminal_velocity": 20,
+    "rocket_terminal_velocity": 20,
+    "rocket_thrust": 1.5,
+    "rocket_y_stabilisation_multiplier": 0.5
+  },
+
+  "aircraft": {
+    "bomber_minimum_y": 0.2
   },
 
   "ui": {
     "title_font_size": 100,
     "font_size": 70,
     "narrow_font_size": 30,
-    "button_size": [0.3, 0.1],
-    "narrow_button_size": [0.2, 0.05]
+    "grid_margins": [0.01, 0.0025, 0.01, 0.0025],
+    "menu_grid_divisions": [4, 16]
   },
 
-  "eggs": {
+  "easter_eggs": {
     "moth_chance": 0.001,
     "moth_music": true,
-    "moth_music_is_main_music": false,
-    "berry_bomb_chance": 0.005
+    "moth_music_is_main_music": true,
+    "berry_bomb_chance": 0.005,
+    "secret_option": false
   },
 
   "debug": {
     "show_fps": false,
-    "debug_invincible": false,
+    "invincible": false,
     "show_target_traces": false,
     "show_ai_type": false,
     "disable_sprite_textures": false,
     "show_sprite_sizes": false,
     "mouse_visibility": false,
-    "big_mode": false
+    "show_image_inits": false,
+    "big_mode": false,
+    "show_distortion": false
   }
 }

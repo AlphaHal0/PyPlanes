@@ -1,24 +1,34 @@
 {
-    "other": {
-        "quit": 27
-    },
     "movement": {
         "pitch_up": 119,
         "pitch_down": 115
     },
     "weapons": {
         "shoot": 1025,
-        "bomb": 32
+        "shoot_hold": 1073742049,
+        "bomb": 32,
+        "rocket": 114
+    },
+    "other": {
+        "quit": 27
     },
     "debug": {
-        "spawn_enemy": 108,
-        "spawn_moth": 99,
-        "spawn_particle": 112,
-        "kill_all": 109,
+        "spawn_enemy": 1073741922,
+        "spawn_moth": 1073741921,
+        "spawn_particle": 1073741908,
+        "kill_all": 1073741923,
         "spawn_enemy_ai_1": 1073741913,
         "spawn_enemy_ai_2": 1073741914,
         "spawn_enemy_ai_3": 1073741915,
         "spawn_enemy_ai_4": 1073741916,
-        "spawn_enemy_ai_5": 1073741917
+        "spawn_enemy_ai_5": 1073741917,
+        "spawn_ground_enemy": 1073741918,
+        "pause_game": 1030,
+        "unpause_game": 1030,
+        "step_one_frame": 1028,
+        "step_5_frames": 1029,
+        "step_60_frames": 1031,
+        "thrust": 118,
+        "shockwave": 57
     }
 }
