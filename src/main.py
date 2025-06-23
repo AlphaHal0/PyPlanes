@@ -24,36 +24,40 @@ def options(con = cfg, is_keybind: bool = False):
     Creates and manages a ui.menu.Menu for the con arg.
     If is_keybind, buttons will be set to manage keybinds"""
     categories = list(con.d.keys())
-    def refresh(c = 0, reset_confirm = 0):
-        global options_menu
+    def refresh(page = 0, reset_confirm = 0, close = False): # TODO: function function ambiguous. TODO message also ambiguous. fix.
+        global options_menu # TODO: remove global
 
         if options_menu: options_menu.run = False
+        if close:
+            return
         elements = []
         if len(con.d) < 1:
             elements.append(Text("This configuration has no options.", grid_pos=(0, 0), color="0xFFFFFF", size=40))
         else:
-            category = categories[c]
-            elements.append(Text(f"Page {c+1}/{len(con.d)}", grid_pos=(0, 0), color="0xFFFFFF", size=40))
+            category = categories[page]
+            elements.append(Text(f"Page {page+1}/{len(con.d)}", grid_pos=(0, 0), color="0xFFFFFF", size=40))
             elements.append(Text(category.replace('_', ' ').capitalize(), grid_pos=(0, 1), color="0xFFFFFF", size=40))
             i = 2
             x = 0
             for key, value in con.d[category].items():
-                if i > 15:
+                if i > 12:
                     i = 0
                     x += 1
                 elements.append(ConfigOption(cfg=con, category=category, key=key, grid_pos=(x, i), is_keybind=is_keybind))
                 i += 1
 
-        if c > 0: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, c-1), grid_pos=(3, 14)))
-        if c < len(con.d)-1: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="-->", base_color="0xFFFF00", on_click=(refresh, c+1), grid_pos=(3.47, 14)))
+        if page > 0: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, page-1), grid_pos=(3, 14)))
+        if page < len(con.d)-1: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="-->", base_color="0xFFFF00", on_click=(refresh, page+1), grid_pos=(3.47, 14)))
         if reset_confirm == 1:
-            elements.append(Button(sprite=Sprite(im.ui.narrow_button), font_size=cfg.ui.narrow_font_size, content="Confirm reset", base_color="0xFF0000", on_click=(refresh, c, 2), grid_pos=(3, 15)))
+            elements.append(Button(sprite=Sprite(im.ui.narrow_button), font_size=cfg.ui.narrow_font_size, content="Confirm reset", base_color="0xFF0000", on_click=(refresh, page, 2), grid_pos=(3, 15)))
         elif reset_confirm == 2:
             con.reset()
-            refresh(c)
+            refresh(page)
             return
         else:
-            elements.append(Button(sprite=Sprite(im.ui.narrow_button), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF4444", on_click=(refresh, c, 1), grid_pos=(3, 15)))
+            elements.append(Button(sprite=Sprite(im.ui.narrow_button), font_size=cfg.ui.narrow_font_size, content="Reset to defaults", base_color="0xFF4444", on_click=(refresh, page, 1), grid_pos=(3, 15)))
+
+        elements.append(Button(sprite=Sprite(im.ui.narrow_button), font_size=cfg.ui.narrow_font_size, content="Back to Menu", base_color="0xAAAAAA", on_click=(refresh, page, 0, True), grid_pos=(0, 15)))
 
         options_menu = Menu(
             Sprite(im.ui.background),
@@ -87,7 +91,7 @@ def main():
             Button(x=button_pos, y=4 * cfg.screen_height // 8 + 50, content="KEYBINDS", on_click=keybinds),
             Button(x=button_pos, y=6 * cfg.screen_height // 8 + 50, content="QUIT", on_click=finish),
         ],
-        on_quit=finish,
+        on_close=finish,
         grid_type=ALIGN_NONE
     )
 

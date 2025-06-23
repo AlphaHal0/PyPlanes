@@ -1,9 +1,9 @@
-# ----------------- #
-# EXPERIMENTAL CODE #
-# ----------------- #
-# This code is experimental and may or may not be added
-# to the final release. It may not be optimised in any way
-# for readibility, performance, or compatibility.
+#^ ----------------- #
+#^ EXPERIMENTAL CODE #
+#^ ----------------- #
+#^ This code is experimental and may or may not be added
+#^ to the final release. It may not be optimised in any way
+#^ for readibility, performance, or compatibility.
 
 from config import cfg
 

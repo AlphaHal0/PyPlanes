@@ -12,11 +12,11 @@ ALIGN_CENTERED = 2 # [TODO]
 
 class Menu:
     """A class for a menu with a background and a list of elements"""
-    def __init__(self, background: Sprite, elements: list[UIElement], on_quit: Callable|None = None, grid_type: int = 0):
+    def __init__(self, background: Sprite, elements: list[UIElement], on_close: Callable|None = None, grid_type: int = 0):
         self.grid_type = grid_type
         self.background = background
         self.elements = elements
-        self.on_quit = on_quit
+        self.on_close = on_close
         self.any_listening = False
         self.run = True
 
@@ -37,9 +37,7 @@ class Menu:
         if not any_listening:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
-                    self.run = False
-                    if self.on_quit: self.on_quit()
-
+                    self.close()
                 if event.type == pygame.MOUSEBUTTONUP and event.button == 1:
                     release = True
 
@@ -63,6 +61,11 @@ class Menu:
         while self.run:
             self.tick()
             screen.update()
+
+    def close(self):
+        """Close menu"""
+        self.run = False
+        if self.on_close: self.on_close()
 
     def add_element(self, element: UIElement):
         self.elements.append(element)
