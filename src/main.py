@@ -43,7 +43,7 @@ def options(con = cfg, is_keybind: bool = False):
                     x += 1
                 elements.append(ConfigOption(cfg=con, category=category, key=key, grid_pos=(x, i), is_keybind=is_keybind))
                 i += 1
-                
+
         if c > 0: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="<--", base_color="0xFFFF00", on_click=(refresh, c-1), grid_pos=(3, 14)))
         if c < len(con.d)-1: elements.append(Button(sprite=Sprite(im.ui.small_button), font_size=cfg.ui.narrow_font_size, content="-->", base_color="0xFFFF00", on_click=(refresh, c+1), grid_pos=(3.47, 14)))
         if reset_confirm == 1:
@@ -72,7 +72,11 @@ def start_game(): play()
 
 def main():
     """Main loop"""
- 
+
+    # play menu music (synth noodles)
+    pygame.mixer.music.load(f"./res/audio/intro.ogg", "music_menu")
+    pygame.mixer.music.play(1)
+
     button_pos = cfg.screen_width // 2 - image_toc.ui.button['scale'][0] * cfg.screen_width // 2
     main_menu = Menu(
         Sprite(im.ui.background),

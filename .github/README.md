@@ -17,3 +17,7 @@ Feel free to discuss and chat at our [Discussion Page](https://github.com/AlphaH
 1. Ensure that you are running one of the latest versions of Python (We use `Python 3.12.3` for the timebeing)
 2. Install the packages from `requirements.txt`
 3. Run the python file `main.py`
+
+- - - - -
+
+All music in this game is custom-made and is licensed under CC BY-SA unless otherwise specified
