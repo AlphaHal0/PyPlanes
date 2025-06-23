@@ -9,6 +9,7 @@ from entity import Entity
 from sprite import Sprite
 from images import im
 from display import screen
+import physics
 
 class Aircraft(Entity):
     """An Entity with aircraft mechanics"""
@@ -26,6 +27,10 @@ class Aircraft(Entity):
         self.pitch = 0
         self.target_pitch = 0
         self.is_aircraft = True
+        # Enable advanced physics if aircraft belongs to player and advanced physics is enabled
+        self.enable_advanced_physics = (not is_enemy) and cfg.advanced_phys.enable_advanced_physics
+        if self.enable_advanced_physics: self.physics = physics.AircraftPhysics()
+
         super().__init__(sprite, x, y, spawn_cooldown=spawn_cooldown)
 
     def update(self) -> None:

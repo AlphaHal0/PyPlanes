@@ -48,6 +48,10 @@
     "rocket_y_stabilisation_multiplier": 0.5
   },
 
+  "advanced_phys": {
+    "enable_advanced_physics": false
+  },
+
   "aircraft": {
     "bomber_minimum_y": 0.2
   },
