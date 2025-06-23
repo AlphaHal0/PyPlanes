@@ -21,19 +21,19 @@ class Game:
         # init vars
         self.enemies = []
         self.enemy_count = cfg.gameplay.initial_enemy_aircraft
-        self.scroll_x = [0, 0, 0]
+        self.scroll_x = [0, 0, 0] # Background scroll of each parallax layer
         self.bullets = []
         self.particles = []
-        self.enemy_ai_danger_zones = []
+        self.enemy_ai_danger_zones = [] # Areas of the screen that the AI should avoid (not hard limits)
         self.score = 0
         self.wave = 1
         self.wave_mode_text_x = cfg.screen_width
         self.wave_mode_text_y = cfg.screen_height // 2 - screen.font.get_height() // 2
         self.running = True
         self.game_paused = False
-        self.frame_step = 0
-        self.background = [Sprite(i) for i in (im.background.layer_1, im.background.layer_2, im.background.layer_3)]
-        self.shake = 0
+        self.frame_step = 0 # number of frames to step if the game is paused
+        self.background = [Sprite(i) for i in (im.background.layer_1, im.background.layer_2, im.background.layer_3)] # background sprites
+        self.shake = 0 # screen shake
 
         if cfg.gameplay.disable_takeoff:
             # Set initial values for when not taking off
@@ -52,9 +52,9 @@ class Game:
 
         # init player aircraft
         self.player = aircraft.Aircraft(
-            cfg.initial_aircraft_x,
-            cfg.initial_aircraft_y if cfg.gameplay.disable_takeoff else cfg.floor_y - im.aircraft.aircraft.get_height(),
-            Sprite(im.aircraft.aircraft),
+            x=cfg.initial_aircraft_x,
+            y=cfg.initial_aircraft_y if cfg.gameplay.disable_takeoff else cfg.floor_y - im.aircraft.aircraft.get_height(),
+            sprite=Sprite(im.aircraft.aircraft),
             shoot_cooldown=cfg.gameplay.player_shoot_cooldown,
             bomb_cooldown=cfg.gameplay.player_bomb_cooldown,
             health=cfg.gameplay.initial_health)
@@ -64,33 +64,22 @@ class Game:
             for i in range(self.enemy_count):
                 self.spawn_enemy()
 
+        # Play music if enabled
         if cfg.easter_eggs.moth_music_is_main_music:
             pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
             pygame.mixer.music.play(-1)
 
-    def spawn_enemy(self, image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False, type: int = 0):
-        if (cfg.easter_eggs.moth_chance and random() <= cfg.easter_eggs.moth_chance) or moth:
-            # Spawn moth and play music
-            if cfg.easter_eggs.moth_music and not pygame.mixer.music.get_busy():
-                pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
-                pygame.mixer.music.play(-1)
-            self.enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
-        else:
-            if type == 0: type = randint(1, min(5, difficulty))
-            if image is not None: image = Sprite(image)
-            self.enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, image, difficulty, ai_type=type))
-
     def loop(self):
         """Main game loop"""
-        if not cfg.easter_eggs.secret_option:
+        if not cfg.easter_eggs.secret_option: # Secret option prevents background from being drawn
             self.draw_background()
 
-        if self.pregame_timer == 0:
+        if self.pregame_timer == 0: # Takeoff animation timer
             self.logic()
         else:
             self.pregame()
 
-        # Draw aircraft
+        # Draw player aircraft
         self.player.draw()
 
         self.process_particles()
@@ -98,6 +87,7 @@ class Game:
 
         self.hud()
 
+        # Logic when game is paused
         while self.game_paused and not self.frame_step:
             for event in pygame.event.get((pygame.MOUSEWHEEL, pygame.MOUSEBUTTONDOWN, pygame.QUIT)):
                 if event.type == pygame.QUIT: return
@@ -119,8 +109,37 @@ class Game:
         # Update display
         screen.update()
 
+    def pregame(self):
+        """Runs during takeoff"""
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
+                self.running = False
+
+        if self.pregame_timer > 100:
+            self.scroll_speed = int(((300-self.pregame_timer)/200) * cfg.scroll_speed)
+        else:
+            self.player.apply_acceleration(cfg.initial_aircraft_x, cfg.initial_aircraft_y)
+            self.player.update()
+
+        self.pregame_timer -= 1
+
+        if self.pregame_timer == 0:
+            self.wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
+            self.wave_mode_text_opacity = 255
+            screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
+            self.scroll_speed = cfg.scroll_speed
+            pygame.mouse.set_visible(cfg.debug.mouse_visibility)
+
+    def logic(self):
+        self.process_inputs()
+        self.process_player()
+        self.process_enemies()
+        self.spawn_new_enemies()
+        self.update_bullets()
+
     def draw_background(self):
-        # Draw background
+        # Draw background - bottom layer first
         i = 2
         for image in self.background:
             image.draw(self.scroll_x[i], 0)
@@ -147,6 +166,18 @@ class Game:
                 randint(-shake_mod, shake_mod),
                 randint(-shake_mod, shake_mod))
             self.shake *= 0.8
+
+    def spawn_enemy(self, image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False, type: int = 0):
+        if (cfg.easter_eggs.moth_chance and random() <= cfg.easter_eggs.moth_chance) or moth:
+            # Spawn moth and play music
+            if cfg.easter_eggs.moth_music and not pygame.mixer.music.get_busy():
+                pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
+                pygame.mixer.music.play(-1)
+            self.enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
+        else:
+            if type == 0: type = randint(1, min(5, difficulty))
+            if image is not None: image = Sprite(image)
+            self.enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, image, difficulty, ai_type=type))
 
     def spawn_particle(self, particle: Particle|None) -> bool:
         if not particle:
@@ -193,13 +224,6 @@ class Game:
             screen.render_text("How's your FPS looking??? :3", color="0xFFFFFF", opacity=64, x=10, y=cfg.screen_height//2, id="fps_looks_shit")
 
         screen.render_text(scoredisplay, x=0, y=0)
-
-    def logic(self):
-        self.process_inputs()
-        self.process_player()
-        self.process_enemies()
-        self.spawn_new_enemies()
-        self.update_bullets()
 
     def process_inputs(self):
         """Process keyboard and mouse inputs"""
@@ -393,28 +417,6 @@ class Game:
                 self.spawn_particle(bullet.explode(self.enemies))
 
             bullet.draw()
-
-    def pregame(self):
-        """Runs during takeoff"""
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
-                self.running = False
-
-        if self.pregame_timer > 100:
-            self.scroll_speed = int(((300-self.pregame_timer)/200) * cfg.scroll_speed)
-        else:
-            self.player.apply_acceleration(cfg.initial_aircraft_x, cfg.initial_aircraft_y)
-            self.player.update()
-
-        self.pregame_timer -= 1
-
-        if self.pregame_timer == 0:
-            self.wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
-            self.wave_mode_text_opacity = 255
-            screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
-            self.scroll_speed = cfg.scroll_speed
-            pygame.mouse.set_visible(cfg.debug.mouse_visibility)
 
 def play():
     game = Game()

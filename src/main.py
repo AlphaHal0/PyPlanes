@@ -41,7 +41,7 @@ def options(con = cfg, is_keybind: bool = False):
             x = 0
             for key, value in con.d[category].items():
                 if i > 12:
-                    i = 0
+                    i = 2
                     x += 1
                 elements.append(ConfigOption(cfg=con, category=category, key=key, grid_pos=(x, i), is_keybind=is_keybind))
                 i += 1
