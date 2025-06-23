@@ -24,7 +24,7 @@ def options(con = cfg, is_keybind: bool = False):
     Creates and manages a ui.menu.Menu for the con arg.
     If is_keybind, buttons will be set to manage keybinds"""
     categories = list(con.d.keys())
-    def refresh(page = 0, reset_confirm = 0, close = False): # TODO: function function ambiguous. TODO message also ambiguous. fix.
+    def refresh(page = 0, reset_confirm = 0, close = False): # TODO: disambiguate args
         global options_menu # TODO: remove global
 
         if options_menu: options_menu.run = False
@@ -39,8 +39,9 @@ def options(con = cfg, is_keybind: bool = False):
             elements.append(Text(category.replace('_', ' ').capitalize(), grid_pos=(0, 1), color="0xFFFFFF", size=40))
             i = 2
             x = 0
+            # loop each row
             for key, value in con.d[category].items():
-                if i > 12:
+                if i > 12: # next column
                     i = 2
                     x += 1
                 elements.append(ConfigOption(cfg=con, category=category, key=key, grid_pos=(x, i), is_keybind=is_keybind))

@@ -66,7 +66,7 @@ class Game:
 
         # Play music if enabled
         if cfg.easter_eggs.moth_music_is_main_music:
-            pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
+            pygame.mixer.music.load(f"./res/audio/moth.ogg", "music_moth")
             pygame.mixer.music.play(-1)
 
     def loop(self):
@@ -84,7 +84,6 @@ class Game:
 
         self.process_particles()
         self.apply_screen_shake()
-
         self.hud()
 
         # Logic when game is paused
@@ -108,6 +107,21 @@ class Game:
 
         # Update display
         screen.update()
+
+    def draw_background(self):
+        # Draw background - bottom layer first
+        i = 2
+        for image in self.background:
+            image.draw(self.scroll_x[i], 0)
+            image.draw(self.scroll_x[i] + cfg.screen_width, 0)
+            i -= 1
+
+        # Update scrolling background
+        for i in range(3):
+            self.scroll_x[i] -= self.scroll_speed // (i+1)
+
+            if self.scroll_x[i] < -cfg.screen_width:
+                self.scroll_x[i] = 0
 
     def pregame(self):
         """Runs during takeoff"""
@@ -133,25 +147,10 @@ class Game:
 
     def logic(self):
         self.process_inputs()
-        self.process_player()
-        self.process_enemies()
+        self.update_player()
+        self.update_enemies()
         self.spawn_new_enemies()
         self.update_bullets()
-
-    def draw_background(self):
-        # Draw background - bottom layer first
-        i = 2
-        for image in self.background:
-            image.draw(self.scroll_x[i], 0)
-            image.draw(self.scroll_x[i] + cfg.screen_width, 0)
-            i -= 1
-
-        # Update scrolling background
-        for i in range(3):
-            self.scroll_x[i] -= self.scroll_speed // (i+1)
-
-            if self.scroll_x[i] < -cfg.screen_width:
-                self.scroll_x[i] = 0
 
     def process_particles(self):
         self.particles = [particle for particle in self.particles if particle.alive]
@@ -166,34 +165,6 @@ class Game:
                 randint(-shake_mod, shake_mod),
                 randint(-shake_mod, shake_mod))
             self.shake *= 0.8
-
-    def spawn_enemy(self, image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False, type: int = 0):
-        if (cfg.easter_eggs.moth_chance and random() <= cfg.easter_eggs.moth_chance) or moth:
-            # Spawn moth and play music
-            if cfg.easter_eggs.moth_music and not pygame.mixer.music.get_busy():
-                pygame.mixer.music.load(f"./res/audio/really_good_soundtrack.mp3", "music_moth")
-                pygame.mixer.music.play(-1)
-            self.enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
-        else:
-            if type == 0: type = randint(1, min(5, difficulty))
-            if image is not None: image = Sprite(image)
-            self.enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, image, difficulty, ai_type=type))
-
-    def spawn_particle(self, particle: Particle|None) -> bool:
-        if not particle:
-            return False
-
-        else:
-            self.particles.append(particle)
-            return True
-
-    def spawn_bullet(self, weapon: weapon.Weapon|None) -> bool:
-        if not weapon:
-            return False
-
-        else:
-            self.bullets.append(weapon)
-            return True
 
     def hud(self):
         """Draw HUD elements"""
@@ -224,6 +195,8 @@ class Game:
             screen.render_text("How's your FPS looking??? :3", color="0xFFFFFF", opacity=64, x=10, y=cfg.screen_height//2, id="fps_looks_shit")
 
         screen.render_text(scoredisplay, x=0, y=0)
+
+
 
     def process_inputs(self):
         """Process keyboard and mouse inputs"""
@@ -312,7 +285,7 @@ class Game:
             if self.scroll_speed > cfg.scroll_speed:
                 self.scroll_speed -= 0.2
 
-    def process_player(self):
+    def update_player(self):
         """Update aircraft position and check for collisions"""
         target_x, target_y = pygame.mouse.get_pos()
         self.player.apply_acceleration(target_x, target_y, trackable_distance=50)
@@ -335,7 +308,7 @@ class Game:
                 self.spawn_particle(particle)
                 self.shake = 8
 
-    def process_enemies(self):
+    def update_enemies(self):
         """Update enemies"""
         self.enemies = [enemy for enemy in self.enemies if enemy.alive]
         for enemy in self.enemies:
@@ -417,6 +390,36 @@ class Game:
                 self.spawn_particle(bullet.explode(self.enemies))
 
             bullet.draw()
+
+
+
+    def spawn_enemy(self, image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False, type: int = 0):
+        if (cfg.easter_eggs.moth_chance and random() <= cfg.easter_eggs.moth_chance) or moth:
+            # Spawn moth and play music
+            if cfg.easter_eggs.moth_music and not pygame.mixer.music.get_busy():
+                pygame.mixer.music.load(f"./res/audio/moth.ogg", "music_moth")
+                pygame.mixer.music.play(-1)
+            self.enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
+        else:
+            if type == 0: type = randint(1, min(5, difficulty))
+            if image is not None: image = Sprite(image)
+            self.enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, image, difficulty, ai_type=type))
+
+    def spawn_particle(self, particle: Particle|None) -> bool:
+        if not particle:
+            return False
+
+        else:
+            self.particles.append(particle)
+            return True
+
+    def spawn_bullet(self, weapon: weapon.Weapon|None) -> bool:
+        if not weapon:
+            return False
+
+        else:
+            self.bullets.append(weapon)
+            return True
 
 def play():
     game = Game()
