@@ -8,6 +8,7 @@ from keybind import is_pressed
 from player import PlayerController
 from vehicle import bar_condition
 from display import screen
+import collision
 
 # ----------------------------- #
 # TODO: Change collision system #
@@ -60,7 +61,10 @@ class Game:
             shoot_cooldown=cfg.gameplay.player_shoot_cooldown,
             bomb_cooldown=cfg.gameplay.player_bomb_cooldown,
             max_health=cfg.gameplay.initial_health,
-            bar_condition=bar_condition.ALWAYS).index
+            bar_condition=bar_condition.ALWAYS,
+            collision_mask=collision.FRIENDLY_AIRCRAFT
+        ).index
+
 
         self.player_controller = PlayerController(game=self, entity=self.entities[self.player])
 

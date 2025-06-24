@@ -85,8 +85,9 @@ class PlayerController:
             #         enemy.hit()
             elif is_pressed(event, kb.debug.spawn_particle):
                 Particle(
-                    entity.x,
-                    entity.y,
+                    game=self.game,
+                    x=entity.x,
+                    y=entity.y,
                     sprite=choice((Sprite(im.particle.large_explosions), Sprite(im.particle.small_explosions), Sprite(im.aircraft.moth))),
                     duration=randint(10, 100),
                     scale=randint(1,5),

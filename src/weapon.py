@@ -4,6 +4,7 @@ from random import random
 from particle import Particle
 from sprite import Sprite
 from vehicle import Vehicle
+import collision
 from config import cfg
 
 class Weapon(Entity):
@@ -21,9 +22,10 @@ class Weapon(Entity):
         self.destroy()
 
         if self.explosion_power:
+            # TODO: compare with edges of rect, not position
             for i in entities:
-                if i.distance_to(self.x, self.y) < self.explosion_power * 30:
-                    i.damage(10)
+                if i.distance_to(self.x, self.y) < max(self.explosion_power * 30, 30):
+                    i.damage(self.explosion_power)
             return Particle(game=self.game, x=self.x, y=self.y, sprite=Sprite(im.particle.large_explosions, size_multiplier=self.explosion_power), duration=20 * self.explosion_power)
         else:
             return Particle(game=self.game, x=self.x, y=self.y, sprite=Sprite(im.particle.small_explosions), duration=10)
@@ -32,20 +34,23 @@ class Weapon(Entity):
         if not 0 <= self.rect.x <= cfg.screen_width:
             self.alive = False
 
-        # ----------------------------- #
-        # TODO: REWORK ALL OF THIS SHIT #
-        # ----------------------------- #
         if self.is_enemy:
-            if self.is_colliding(self.game.player_controller.entity.rect):
+            colliding = self.is_colliding(collision.FRIENDLY_AIRCRAFT)
+            if colliding:
                 # Bullet is colliding with player
-                self.game.player_controller.entity.damage(10)
                 self.game.shake = 8
-                self.explode(self.game.player_controller.entity)
+                for i in colliding:
+                    i.damage(10)
+                self.explode([self.game.player_controller.entity])
         else:
             self.game.enemy_ai_danger_zones.append(self.y)
-            if self.is_colliding([enemy for enemy in self.game.entities if isinstance(enemy, Vehicle) and enemy.is_enemy]) > 0:
+            colliding = self.is_colliding(collision.ENEMY_AIRCRAFT)
+            if colliding:
                 # Bullet colliding with enemy
-                print([enemy for enemy in self.game.entities if isinstance(enemy, Vehicle) and enemy.is_enemy])
+                for i in colliding:
+                    i.damage(10)
+
+                # TODO: this should be handled by another function
                 self.explode([enemy for enemy in self.game.entities if isinstance(enemy, Vehicle) and enemy.is_enemy])
 
         if self.ground_collision():

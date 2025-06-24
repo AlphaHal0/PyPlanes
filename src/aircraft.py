@@ -1,12 +1,11 @@
 import pygame
 import random
-import particle
 from config import cfg
 import ai
 import weapon
-import vfx
 from vehicle import Vehicle, bar_condition
 from sprite import Sprite
+import collision
 from images import im
 from display import screen
 import physics
@@ -112,10 +111,12 @@ class Aircraft(Vehicle):
                 y=self.y + self.height / 2,
                 is_enemy=self.is_enemy,
                 velocity_x=(cfg.physics.enemy_bullet_velocity if self.is_enemy else cfg.physics.player_bullet_velocity) + (self.velocity_x*cfg.physics.weapon_velocity_multiplier),
-                rotation=self.pitch)
+                rotation=self.pitch,
+                collision_mask=collision.ENEMY_WEAPON if self.is_enemy else collision.FRIENDLY_WEAPON)
 
     def bomb(self):
         """Summons a weapon.Bomb if not on cooldown, otherwise None"""
+        # TODO: fix repeated code
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
             weapon.Bomb(
@@ -126,7 +127,8 @@ class Aircraft(Vehicle):
                 velocity_x=self.velocity_x,
                 velocity_y=self.velocity_y * cfg.physics.bomb_init_y_multiplier,
                 explosion_power=random.randint(4,6),
-                rotation=self.pitch)
+                rotation=self.pitch,
+                collision_mask=collision.ENEMY_WEAPON if self.is_enemy else collision.FRIENDLY_WEAPON)
 
     def drop_rocket(self):
         """Summons a weapon.Rocket if not on cooldown, otherwise None"""
@@ -140,7 +142,8 @@ class Aircraft(Vehicle):
                 velocity_x=self.velocity_x,
                 velocity_y=self.velocity_y * cfg.physics.bomb_init_y_multiplier,
                 explosion_power=random.randint(4,6),
-                rotation=self.pitch)
+                rotation=self.pitch,
+                collision_mask=collision.ENEMY_WEAPON if self.is_enemy else collision.FRIENDLY_WEAPON)
 
 class EnemyAircraft(Aircraft):
     """An Aircraft with enemy AI"""
@@ -151,7 +154,7 @@ class EnemyAircraft(Aircraft):
         # Get type from index and init AI class
         self.ai: ai.BaseAI = ai.ai_types[ai_type](size=size, difficulty=difficulty, fire_rate=cfg.gameplay.enemy_shoot_cooldown)
 
-        super().__init__(x=cfg.screen_width, sprite=sprite, is_enemy=True, shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown, bar_condition=bar_condition.WHEN_BELOW_MAX_AND_NOT_INERT, **kwargs)
+        super().__init__(x=cfg.screen_width, sprite=sprite, is_enemy=True, max_health=random.randint(0, difficulty), shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown, bar_condition=bar_condition.WHEN_BELOW_MAX_AND_NOT_INERT, collision_mask=collision.ENEMY_AIRCRAFT, **kwargs)
 
     def update(self):
         self.ai.tick(danger_zones=self.game.enemy_ai_danger_zones, player_y=self.game.player_controller.entity.y, player_x=self.game.player_controller.entity.x, enemy_y=self.y)
@@ -175,7 +178,7 @@ class EnemyAircraft(Aircraft):
 class Moth(EnemyAircraft):
     """An EnemyAircraft that is a moth"""
     def __init__(self, **kwargs):
-        super().__init__(sprite=Sprite(im.aircraft.moth, animation_time=random.randint(1, 10)), **kwargs)
+        super().__init__(sprite=Sprite(im.aircraft.moth, animation_time=random.randint(1, 10)), max_health=200, **kwargs)
 
     def destroy(self) -> None:
         if not cfg.easter_eggs.moth_music_is_main_music:

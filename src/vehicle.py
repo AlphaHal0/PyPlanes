@@ -25,6 +25,7 @@ class Vehicle(Entity):
 
     def draw(self):
         super().draw()
+        if self.max_health <= 0: return
         if self.bar_condition == 1 or ((self.bar_condition >= 2 and self.health < self.max_health) and (self.bar_condition == 2 or (self.bar_condition == 3 and not self.inert))):
             health_bar = pygame.Surface((150,10))
             health_bar.fill(0xFF0000)
