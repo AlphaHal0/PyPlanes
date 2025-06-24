@@ -4,9 +4,9 @@ from entity import Entity
 
 class Particle(Entity):
     """A particle that contains a Sprite with a position."""
-    def __init__(self, x: int = 0, y: int = 0, duration: int = 0, scale: float = 1, adjust_pos: bool = True, move_with_screen: bool = False, **kwargs) -> None:
+    def __init__(self, duration: int = 0, scale: float = 1, adjust_pos: bool = True, move_with_screen: bool = False, **kwargs) -> None:
         """If adjust_pos is True, moves the centre of the particle to x,y"""
-        super().__init__(x=x, y=y, **kwargs)
+        super().__init__(**kwargs)
 
         if adjust_pos:
             self.x -= self.width / 2
@@ -18,10 +18,10 @@ class Particle(Entity):
         if duration != 0:
             self.sprite.anim_time = duration * self.sprite.anim_time // self.sprite.anim_frame_count
 
-    def draw(self, scroll_speed: int = cfg.scroll_speed):
+    def draw(self):
         """Draws this sprite onto the screen.
         If self.move_with_screen is set, move x pos by scroll_speed."""
-        if self.move_with_screen: self.x -= scroll_speed
+        if self.move_with_screen: self.x -= self.game.scroll_speed
 
         self.update()
         self.alive = self.sprite.draw(self.x, self.y, False)

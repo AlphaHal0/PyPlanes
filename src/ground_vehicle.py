@@ -38,7 +38,7 @@ class GroundVehicle(Entity):
             return False
 
     # TODO: make parent Vehicle class for GV and Aircraft and put this in there
-    def display_particle(self, sprite: Sprite, delay: int = 400) -> particle.Particle | None:
+    def spawn_particle(self, sprite: Sprite, delay: int = 400) -> particle.Particle | None:
         """Returns a Particle with the Sprite if this function has been run longer ago than the delay param.
         The Particle will move with the screen if this Aircraft is not an enemy"""
         current_time = pygame.time.get_ticks()

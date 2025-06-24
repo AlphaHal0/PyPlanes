@@ -9,6 +9,7 @@ import pygame
 import math
 from config import cfg
 from display import screen
+from particle import Particle
 
 try:
     import numpy
@@ -17,10 +18,9 @@ except ImportError:
     numpy_installed = False
     print("[!!!] Numpy is not installed. Advanced VFX will not be available")
 
-class ScreenDistortion:
+class ScreenDistortion(Particle):
     """A class that represents special screen effects"""
-    def __init__(self, x: int, y: int, velocity: int, direction: int = 0, angle: int = 360, width: int = 10, time_alive: int = 60, move_with_screen: bool = False) -> None:
-        self.x, self.y = x, y
+    def __init__(self, velocity: int, direction: int = 0, angle: int = 360, width: int = 10, time_alive: int = 60, move_with_screen: bool = False, **kwargs) -> None:
         self.velocity = velocity
         self.direction = direction
         self.angle = angle
@@ -30,6 +30,7 @@ class ScreenDistortion:
         self.alpha = 64
         self.move_with_screen = move_with_screen
         self.time_alive = time_alive - 64 # once this reaches 0, die
+        super().__init__(**kwargs)
 
     def draw(self, scroll_speed: int = cfg.scroll_speed):
         """Display the effect on screen"""

@@ -1,3 +1,9 @@
+# type checking without circular import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from game import Game
+
 import pygame
 from config import cfg
 from sprite import Sprite
@@ -6,13 +12,14 @@ import math
 class Entity:
     """Base class for all entities in the game.
     By default, Entities move by their velocity each tick. """
-    def __init__(self, sprite: Sprite|None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, id: int = 0):
+    def __init__(self, game: Game, sprite: Sprite|None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, id: int = 0):
         if sprite is None: sprite = Sprite()
 
-        self.rect = pygame.Rect((x, y), sprite.size)
+        self.game = game
+        self.sprite = sprite
         self.x, self.y = x, y
         self.width, self.height = sprite.size
-        self.sprite = sprite
+        self.rect = pygame.Rect((x, y), sprite.size)
         self.rotation = rotation
         self.id = id
 
@@ -23,6 +30,8 @@ class Entity:
         if rotation: self.sprite.rotate(rotation)
 
         if adj_velocity_for_rot and rotation:
+            # Rotate velocity vector to match sprite rotation
+            # Used for bullets and bombs, etc.
             rad = math.radians(-rotation)
             sr = math.sin(rad)
             cr = math.cos(rad)
@@ -31,6 +40,13 @@ class Entity:
         else:
             self.velocity_x = velocity_x
             self.velocity_y = velocity_y
+
+        self.spawn()
+
+    def spawn(self):
+        """Add self to game entity list and return index"""
+        self.game.entities.append(self)
+        return len(self.game.entities) - 1
 
     def apply_rotated_velocity(self, force: float, direction: int|None = None):
         """Apply a force to this Entity with a direction"""
@@ -45,6 +61,7 @@ class Entity:
         self.x += self.velocity_x
         self.y += self.velocity_y
         self.rect.update((self.x, self.y), self.rect.size)
+        self.draw()
 
     def draw(self) -> None:
         """Draws the Entity onto the screen"""

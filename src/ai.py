@@ -31,7 +31,7 @@ class BaseAI:
         elif self.target_y < self.ymin:
             self.target_y = self.ymin + 10
 
-    def tick(self, ctx: dict):
+    def tick(self, **kwargs):
         self.constrain()
 
     def check_is_obstructed(self, danger_zones: list) -> int:
@@ -44,14 +44,14 @@ class Fly(BaseAI):
     """AI with basic random movements."""
     debug_color = 0xFF0000
     default_aircraft_img = im.aircraft.enemy_1
-    def tick(self, ctx: dict):
+    def tick(self, **kwargs):
         self.target_x += random.randint(-self.speed, self.speed)
         self.target_y += random.randint(-self.speed, self.speed)
 
         if random.random() > 0.97:
             self.shoot += 1 # fire
 
-        super().tick(ctx)
+        super().tick(**kwargs)
 
 class Turret(BaseAI):
     """Move to a random position and shoot."""
@@ -62,7 +62,7 @@ class Turret(BaseAI):
         self.iteration = 0
         self.max_iteration = 100 + self.difficulty * self.fire_rate
 
-    def tick(self, ctx: dict):
+    def tick(self, **kwargs):
         if self.iteration == 0:
             self.target_x = random.randint(int(self.xmin), int(self.xmax))
             self.target_y = random.randint(int(self.ymin), int(self.ymax))
@@ -72,7 +72,7 @@ class Turret(BaseAI):
                 self.shoot += 1 # fire
             self.iteration -= 1
 
-        super().tick(ctx)
+        super().tick(**kwargs)
 
 class Dodger(BaseAI):
     """Avoid player bullets."""
@@ -83,9 +83,9 @@ class Dodger(BaseAI):
         self.max_shoot_time = self.fire_rate * max(1, 5 - self.difficulty//5)
         self.shoot_time = self.max_shoot_time
 
-    def tick(self, ctx: dict):
+    def tick(self, danger_zones, **kwargs):
         c = 0
-        while self.check_is_obstructed(ctx["danger_zones"]) and c < 10: # limit to 10 attempts
+        while self.check_is_obstructed(danger_zones) and c < 10: # limit to 10 attempts
             self.target_y = random.randint(int(self.ymin), int(self.ymax))
             self.target_x = random.randint(int(self.xmin), int(self.xmax))
             c += 1
@@ -96,7 +96,7 @@ class Dodger(BaseAI):
         else:
             self.shoot_time -= 1
 
-        super().tick(ctx)
+        super().tick(**kwargs)
 
 class Offence(BaseAI):
     """Follow the player."""
@@ -108,15 +108,15 @@ class Offence(BaseAI):
         self.shoot_time = self.max_shoot_time
         self.target_x = random.randint(int(self.xmin), int(self.xmax))
 
-    def tick(self, ctx: dict):
+    def tick(self, player_y, danger_zones, **kwargs):
         if self.shoot_time == 0:
             self.shoot += 1
             self.shoot_time = self.max_shoot_time
-            self.target_y = ctx['player_y']
+            self.target_y = player_y
         else:
             self.shoot_time -= 1
 
-        obstructed = self.check_is_obstructed(ctx["danger_zones"])
+        obstructed = self.check_is_obstructed(danger_zones)
         if obstructed:
             # Move up if:
             # - Danger zone is below the aircraft AND target Y can go up further
@@ -126,7 +126,7 @@ class Offence(BaseAI):
             else:
                 self.target_y -= 50
 
-        super().tick(ctx)
+        super().tick(**kwargs)
 
 class Bomber(BaseAI):
     """Shoot player from in front angles
@@ -142,13 +142,13 @@ class Bomber(BaseAI):
         self.ymin = cfg.screen_height * cfg.aircraft.bomber_minimum_y
 
 
-    def tick(self, ctx: dict):
+    def tick(self, **kwargs):
         self.target_x = random.randint(int(self.xmin), int(self.xmax))
         self.target_y = random.randint(int(self.ymin), int(self.ymax))
 
         self.shoot += 1
 
-        super().tick(ctx)
+        super().tick(**kwargs)
 
 # List of types
 ai_types: list[BaseAI] = [

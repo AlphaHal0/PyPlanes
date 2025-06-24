@@ -8,6 +8,7 @@ import ground_vehicle
 from images import im
 from keybind import is_pressed, is_held
 from vfx import ScreenDistortion
+from player import PlayerController
 from display import screen
 import weapon
 
@@ -15,15 +16,17 @@ import weapon
 # TODO: Change collision system #
 # ----------------------------- #
 
+#* Takeoff animation is currently hard-disabled
+
 class Game:
     """A class that represents the game logic"""
     def __init__(self):
+        cfg.gameplay.disable_takeoff = True #* override for now, will fix later
+
         # init vars
-        self.enemies = []
+        self.entities = []
         self.enemy_count = cfg.gameplay.initial_enemy_aircraft
         self.scroll_x = [0, 0, 0] # Background scroll of each parallax layer
-        self.bullets = []
-        self.particles = []
         self.enemy_ai_danger_zones = [] # Areas of the screen that the AI should avoid (not hard limits)
         self.score = 0
         self.wave = 1
@@ -51,13 +54,17 @@ class Game:
             self.wave_mode_text_opacity = 0
 
         # init player aircraft
+        # self.player holds the index of the controlled entity
         self.player = aircraft.Aircraft(
+            game=self,
             x=cfg.initial_aircraft_x,
             y=cfg.initial_aircraft_y if cfg.gameplay.disable_takeoff else cfg.floor_y - im.aircraft.aircraft.get_height(),
             sprite=Sprite(im.aircraft.aircraft),
             shoot_cooldown=cfg.gameplay.player_shoot_cooldown,
             bomb_cooldown=cfg.gameplay.player_bomb_cooldown,
-            health=cfg.gameplay.initial_health)
+            health=cfg.gameplay.initial_health).spawn()
+
+        self.player_controller = PlayerController(game=self, entity=self.entities[self.player])
 
         # spawn enemies
         if not cfg.gameplay.wave_mode:
@@ -74,15 +81,14 @@ class Game:
         if not cfg.easter_eggs.secret_option: # Secret option prevents background from being drawn
             self.draw_background()
 
-        if self.pregame_timer == 0: # Takeoff animation timer
-            self.logic()
-        else:
-            self.pregame()
+        # if self.pregame_timer == 0: # Takeoff animation timer
+        #     self.logic()
+        # else:
+        #     self.pregame()
 
-        # Draw player aircraft
-        self.player.draw()
-
-        self.process_particles()
+        self.player_controller.update()
+        self.update_entities()
+        self.spawn_new_enemies()
         self.apply_screen_shake()
         self.hud()
 
@@ -123,39 +129,28 @@ class Game:
             if self.scroll_x[i] < -cfg.screen_width:
                 self.scroll_x[i] = 0
 
-    def pregame(self):
-        """Runs during takeoff"""
+    #* DISABLED FOR NOW
+    # def pregame(self):
+    #     """Runs during takeoff"""
 
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
-                self.running = False
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
+    #             self.running = False
 
-        if self.pregame_timer > 100:
-            self.scroll_speed = int(((300-self.pregame_timer)/200) * cfg.scroll_speed)
-        else:
-            self.player.apply_acceleration(cfg.initial_aircraft_x, cfg.initial_aircraft_y)
-            self.player.update()
+    #     if self.pregame_timer > 100:
+    #         self.scroll_speed = int(((300-self.pregame_timer)/200) * cfg.scroll_speed)
+    #     else:
+    #         self.player.apply_acceleration(cfg.initial_aircraft_x, cfg.initial_aircraft_y)
+    #         self.player.update()
 
-        self.pregame_timer -= 1
+    #     self.pregame_timer -= 1
 
-        if self.pregame_timer == 0:
-            self.wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
-            self.wave_mode_text_opacity = 255
-            screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
-            self.scroll_speed = cfg.scroll_speed
-            pygame.mouse.set_visible(cfg.debug.mouse_visibility)
-
-    def logic(self):
-        self.process_inputs()
-        self.update_player()
-        self.update_enemies()
-        self.spawn_new_enemies()
-        self.update_bullets()
-
-    def process_particles(self):
-        self.particles = [particle for particle in self.particles if particle.alive]
-        for particle in self.particles:
-            particle.draw(self.scroll_speed)
+    #     if self.pregame_timer == 0:
+    #         self.wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
+    #         self.wave_mode_text_opacity = 255
+    #         screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
+    #         self.scroll_speed = cfg.scroll_speed
+    #         pygame.mouse.set_visible(cfg.debug.mouse_visibility)
 
     def apply_screen_shake(self):
         # Apply screen shake
@@ -168,15 +163,17 @@ class Game:
 
     def hud(self):
         """Draw HUD elements"""
+
+        # TODO: health bar should be handled by Entity
         health_bar = pygame.Surface((150,10))
         health_bar.fill(0xFF0000)
-        health_bar.fill(0x00FF00, rect=(0,0,(self.player.health/cfg.gameplay.initial_health)*150,10)),
+        health_bar.fill(0x00FF00, rect=(0,0,(self.player_controller.entity.health/cfg.gameplay.initial_health)*150,10)),
 
         # Draw health bar
         screen.surface.blit(
             health_bar,
-            (self.player.x+(self.player.width//2-80),
-            self.player.y-self.player.height)
+            (self.player_controller.entity.x+(self.player_controller.entity.width//2-80),
+            self.player_controller.entity.y-self.player_controller.entity.height)
         )
 
         scoredisplay = f"Score {self.score} | Difficulty {round(self.enemy_count, 1)}"
@@ -196,160 +193,32 @@ class Game:
 
         screen.render_text(scoredisplay, x=0, y=0)
 
-
-
-    def process_inputs(self):
-        """Process keyboard and mouse inputs"""
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
-                self.running = False
-            elif is_pressed(event, kb.weapons.shoot):
-                new_bullet = self.player.shoot()
-                if new_bullet is not None:
-                    self.spawn_bullet(new_bullet)
-            elif is_pressed(event, kb.weapons.bomb):
-                new_bomb = self.player.bomb()
-                if new_bomb is not None:
-                    self.spawn_bullet(new_bomb)
-            elif is_pressed(event, kb.weapons.rocket):
-                new_rocket = self.player.drop_rocket()
-                if new_rocket is not None:
-                    self.spawn_bullet(new_rocket)
-            elif is_pressed(event, kb.debug.spawn_enemy):
-                while True:
-                    event = pygame.event.wait()
-                    if event.type == pygame.KEYDOWN:
-                        match event.key:
-                            case kb.debug.spawn_enemy_ai_1: self.spawn_enemy(difficulty=int(self.enemy_count), type=1)
-                            case kb.debug.spawn_enemy_ai_2: self.spawn_enemy(difficulty=int(self.enemy_count), type=2)
-                            case kb.debug.spawn_enemy_ai_3: self.spawn_enemy(difficulty=int(self.enemy_count), type=3)
-                            case kb.debug.spawn_enemy_ai_4: self.spawn_enemy(difficulty=int(self.enemy_count), type=4)
-                            case kb.debug.spawn_enemy_ai_5: self.spawn_enemy(difficulty=int(self.enemy_count), type=5)
-
-                        break
-
-            elif is_pressed(event, kb.debug.spawn_ground_enemy):
-                self.enemies.append(ground_vehicle.GroundVehicle())
-
-            elif is_pressed(event, kb.debug.spawn_moth):
-                self.spawn_enemy(moth=True, difficulty=int(self.enemy_count))
-            elif is_pressed(event, kb.debug.kill_all):
-                for enemy in self.enemies:
-                    enemy.hit()
-            elif is_pressed(event, kb.debug.spawn_particle):
-                self.spawn_particle(Particle(
-                    self.player.x,
-                    self.player.y,
-                    sprite=choice((Sprite(im.particle.large_explosions), Sprite(im.particle.small_explosions), Sprite(im.aircraft.moth))),
-                    duration=randint(10, 100),
-                    scale=randint(1,5),
-                    adjust_pos=False))
-            elif is_pressed(event, kb.debug.shockwave):
-                self.spawn_particle(ScreenDistortion(self.player.x+self.player.width//2, self.player.y+-self.player.height//2, 50, direction=self.player.pitch, angle=360, width=10, time_alive=20))
-
-            elif is_pressed(event, kb.debug.pause_game):
-                print("Game paused")
-                self.game_paused = not self.game_paused
-
-            # pitch
-            elif is_pressed(event, kb.movement.pitch_up):
-                self.player.set_pitch(20)
-            elif is_pressed(event, kb.movement.pitch_down):
-                self.player.set_pitch(-20)
-            elif is_pressed(event, kb.movement.pitch_down, True) or is_pressed(event, kb.movement.pitch_up, True):
-                self.player.set_pitch(0)
-
-        pygame.event.set_grab(True)
-
-        if is_held(kb.weapons.shoot_hold):
-            new_bullet = self.player.shoot()
-            if new_bullet is not None:
-                self.spawn_bullet(new_bullet)
-
-        if is_held(kb.debug.thrust):
-            self.spawn_particle(Particle(
-                self.player.x + self.player.width * 0.3,
-                self.player.y + self.player.height * 0.5,
-                sprite=Sprite(im.particle.afterburner),
-                scale=1,
-                velocity_x=-40,
-                move_with_screen=True,
-                rotation=self.player.pitch,
-                adj_velocity_for_rot=True
-            ))
-            if self.scroll_speed < cfg.scroll_speed * 2:
-                self.scroll_speed += 0.2
-
-            self.shake = (self.scroll_speed - cfg.scroll_speed) / cfg.scroll_speed * 5
-        else:
-            if self.scroll_speed > cfg.scroll_speed:
-                self.scroll_speed -= 0.2
-
-    def update_player(self):
-        """Update aircraft position and check for collisions"""
-        target_x, target_y = pygame.mouse.get_pos()
-        self.player.apply_acceleration(target_x, target_y, trackable_distance=50)
-        self.player.update()
-
-        if not cfg.debug.invincible: self.player.check_health()
-
-        if self.player.falling:
-            particle = self.player.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
-            if particle: self.spawn_particle(particle)
-            self.shake = 2
-
-        if self.player.ground_collision():
-            self.player.health -= cfg.gameplay.ground_health_decay
-            if not cfg.debug.invincible and self.player.health <= 0:
-                print("Player hit the floor. Game over.")
-                self.running = False
-            particle = self.player.display_particle(Sprite(im.particle.small_explosions, animation_time=30, size_multiplier=2), 100)
-            if particle:
-                self.spawn_particle(particle)
-                self.shake = 8
-
-    def update_enemies(self):
-        """Update enemies"""
-        self.enemies = [enemy for enemy in self.enemies if enemy.alive]
-        for enemy in self.enemies:
-            enemy.draw()
-            if enemy.is_aircraft:
-                enemy.ai_tick(danger_zones=self.enemy_ai_danger_zones, player_y=self.player.y, player_x=self.player.x, enemy_y=enemy.y)
-                if enemy.ground_collision():
-                    enemy.destroy()
-                    self.spawn_particle(Particle(enemy.x, enemy.y, sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True))
-                    self.score += 20 if cfg.gameplay.wave_mode else 70
-                    self.enemy_count += cfg.gameplay.enemy_count_increment
-                if enemy.falling:
-                    particle = enemy.display_particle(Sprite(im.particle.small_explosions, animation_time=5))
-                    if particle: self.spawn_particle(particle)
-            else:
-                enemy.update()
-            if enemy.ai.shoot:
-                self.spawn_bullet(enemy.shoot())
-                enemy.ai.shoot -= 1
-
-            if cfg.debug.show_ai_type:
-                ai_marker = pygame.Surface((10,10))
-                ai_marker.fill(enemy.ai.debug_color)
-                screen.surface.blit(ai_marker, (enemy.x+enemy.sprite.size[0], enemy.y))
+    def update_entities(self):
+        """Update all entities"""
+        self.entities = [entity for entity in self.entities if entity is not None and entity.alive]
+        self.enemy_ai_danger_zones = []
+        for entity in self.entities:
+            entity.update()
 
     def spawn_new_enemies(self):
         """Try to spawn new enemies"""
+
         if self.wave_warmup_time:
-            self.player.health += self.enemy_count * cfg.gameplay.wave_regen_multiplier
+            self.player_controller.entity.health += self.enemy_count * cfg.gameplay.wave_regen_multiplier
             self.wave_warmup_time -= 1
             if self.wave_warmup_time == 0:
                 self.to_spawn = int(self.enemy_count)
                 for i in range(self.to_spawn):
                     self.spawn_enemy(difficulty=int(self.enemy_count))
+            return
 
+        enemies_alive = len([enemy for enemy in self.entities if isinstance(enemy, aircraft.EnemyAircraft)])
         # Spawn all enemies in one go if cfg.gameplay.wave_mode is True, otherwise spawn one enemy to keep up with the count.
-        elif len(self.enemies) < int(self.enemy_count) and not cfg.gameplay.wave_mode:
-            self.player.health += self.enemy_count * cfg.gameplay.enemy_regen_multiplier
+        if enemies_alive < int(self.enemy_count) and not cfg.gameplay.wave_mode:
+            self.player_controller.entity.health += self.enemy_count * cfg.gameplay.enemy_regen_multiplier
             self.spawn_enemy(difficulty=int(self.enemy_count))
 
-        elif len(self.enemies) == 0 and cfg.gameplay.wave_mode:
+        elif enemies_alive == 0 and cfg.gameplay.wave_mode:
             self.score += 50 * self.to_spawn
             print(f"Wave {self.wave} complete!")
             self.wave += 1
@@ -358,68 +227,17 @@ class Game:
             self.wave_mode_text_opacity = 255
             screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
 
-    def update_bullets(self):
-        """Update and draw bullets"""
-
-        self.bullets = [bullet for bullet in self.bullets if bullet is not None and bullet.alive]
-        self.enemy_ai_danger_zones = []
-        for bullet in self.bullets:
-            bullet.update()
-
-            if bullet.is_enemy:
-                # Bullet is colliding with player
-                if bullet.is_colliding(self.player.rect):
-                    self.player.health -= 10
-                    self.shake = 8
-                    self.spawn_particle(bullet.explode(self.enemies))
-            else:
-                collided_aircraft = bullet.is_colliding([enemy.rect for enemy in self.enemies])
-                if collided_aircraft > -1:
-                    if self.enemies[collided_aircraft].hit(): self.score += 30
-                    self.spawn_particle(bullet.explode(self.enemies)) # delete bullet
-
-                # NOT EFFICIENT: I'm sure there's a better way than this
-                for i in self.bullets:
-                    if bullet.is_colliding_entity(i): # Allow bullets to collide
-                        self.spawn_particle(bullet.explode(self.enemies))
-                        i.explode()
-
-                self.enemy_ai_danger_zones.append(bullet.y)
-
-            if bullet.ground_collision():
-                self.spawn_particle(bullet.explode(self.enemies))
-
-            bullet.draw()
-
-
-
-    def spawn_enemy(self, image: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False, type: int = 0):
+    def spawn_enemy(self, sprite: pygame.Surface|None = None, difficulty: int = 1, moth: bool = False, type: int = 0):
         if (cfg.easter_eggs.moth_chance and random() <= cfg.easter_eggs.moth_chance) or moth:
             # Spawn moth and play music
             if cfg.easter_eggs.moth_music and not pygame.mixer.music.get_busy():
                 pygame.mixer.music.load(f"./res/audio/moth.ogg", "music_moth")
                 pygame.mixer.music.play(-1)
-            self.enemies.append(aircraft.Moth(cfg.initial_aircraft_y, difficulty))
+            aircraft.Moth(game=self, y=cfg.initial_aircraft_y, difficulty=difficulty)
         else:
             if type == 0: type = randint(1, min(5, difficulty))
-            if image is not None: image = Sprite(image)
-            self.enemies.append(aircraft.EnemyAircraft(cfg.initial_aircraft_y, image, difficulty, ai_type=type))
-
-    def spawn_particle(self, particle: Particle|None) -> bool:
-        if not particle:
-            return False
-
-        else:
-            self.particles.append(particle)
-            return True
-
-    def spawn_bullet(self, weapon: weapon.Weapon|None) -> bool:
-        if not weapon:
-            return False
-
-        else:
-            self.bullets.append(weapon)
-            return True
+            if sprite is not None: sprite = Sprite(sprite)
+            aircraft.EnemyAircraft(game=self, y=cfg.initial_aircraft_y, sprite=sprite, difficulty=difficulty, ai_type=type)
 
 def play():
     game = Game()

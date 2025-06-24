@@ -13,7 +13,7 @@ import physics
 
 class Aircraft(Entity):
     """An Entity with aircraft mechanics"""
-    def __init__(self, x: int, y: int, sprite: Sprite|None = None, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, health: float = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown):
+    def __init__(self, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, health: float = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown, **kwargs):
         self.acceleration = cfg.physics.aircraft_acceleration
         self.terminal_velocity = cfg.physics.aircraft_terminal_velocity
         self.shoot_cooldown = 0
@@ -31,7 +31,7 @@ class Aircraft(Entity):
         self.enable_advanced_physics = (not is_enemy) and cfg.advanced_phys.enable_advanced_physics
         if self.enable_advanced_physics: self.physics = physics.AircraftPhysics()
 
-        super().__init__(sprite, x, y, spawn_cooldown=spawn_cooldown)
+        super().__init__(**kwargs)
 
     def update(self) -> None:
         """Tick"""
@@ -47,6 +47,14 @@ class Aircraft(Entity):
                 self.pitch -= 1
             else:
                 self.pitch += 1
+
+        if self.ground_collision():
+            self.destroy()
+            self.spawn_particle(sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True)
+            self.score += 20 if cfg.gameplay.wave_mode else 70
+            self.enemy_count += cfg.gameplay.enemy_count_increment
+        if self.falling:
+            self.spawn_particle(Sprite(im.particle.small_explosions, animation_time=5))
 
         super().update()
 
@@ -67,7 +75,7 @@ class Aircraft(Entity):
             self.max_shoot_cooldown *= cfg.gameplay.crashing_shoot_multiplier
         else: return False
 
-    def display_particle(self, sprite: Sprite, delay: int = 400) -> particle.Particle | None:
+    def spawn_particle(self, sprite: Sprite, delay: int = 400, **kwargs):
         """Returns a Particle with the Sprite if this function has been run longer ago than the delay param.
         The Particle will move with the screen if this Aircraft is not an enemy"""
         current_time = pygame.time.get_ticks()
@@ -75,10 +83,9 @@ class Aircraft(Entity):
             self.last_particle_time = current_time
 
             if cfg.easter_eggs.secret_option: # Don't mind this :)
-                return vfx.ScreenDistortion(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), 50, angle=360, width=sprite.size[0] // 5, time_alive=20, move_with_screen=not self.is_enemy)
+                return vfx.ScreenDistortion(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), 50, angle=360, width=sprite.size[0] // 5, time_alive=20, move_with_screen=not self.is_enemy, **kwargs)
             else:
-                return particle.Particle(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), sprite=sprite, move_with_screen=not self.is_enemy)
-        else: return None
+                return particle.Particle(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), sprite=sprite, move_with_screen=not self.is_enemy, **kwargs)
 
     def check_health(self) -> bool:
         """Check if the Aircraft's health is less than or equal to 0.
@@ -116,25 +123,25 @@ class Aircraft(Entity):
         self.velocity_x *= cfg.physics.aircraft_drag
         self.velocity_y *= cfg.physics.aircraft_drag
 
-    def shoot(self, id: str = 0) -> weapon.Bullet | None:
-        """Returns a shot weapon.Bullet if not on cooldown, otherwise None"""
+    def shoot(self, id: str = 0):
+        """Summons a weapon.Bullet if not on cooldown, otherwise None"""
         if self.shoot_cooldown <= 0:
             self.shoot_cooldown = self.max_shoot_cooldown
-            return weapon.Bullet(
+            weapon.Bullet(
+                game=self.game,
                 x=(self.x if self.is_enemy else self.x + self.width),
                 y=self.y + self.height / 2,
                 is_enemy=self.is_enemy,
                 velocity_x=(cfg.physics.enemy_bullet_velocity if self.is_enemy else cfg.physics.player_bullet_velocity) + (self.velocity_x*cfg.physics.weapon_velocity_multiplier),
                 rotation=self.pitch,
                 id=id)
-        else:
-            return None
 
-    def bomb(self, id: str = 0) -> weapon.Bomb | None:
-        """Returns a shot weapon.Bomb if not on cooldown, otherwise None"""
+    def bomb(self, id: str = 0):
+        """Summons a weapon.Bomb if not on cooldown, otherwise None"""
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
-            return weapon.Bomb(
+            weapon.Bomb(
+                game=self.game,
                 x=(self.x + self.width // 2),
                 y=self.y + self.height,
                 is_enemy=self.is_enemy,
@@ -144,14 +151,13 @@ class Aircraft(Entity):
                 rotation=self.pitch,
                 id=id
             )
-        else:
-            return None
 
-    def drop_rocket(self, id: str = 0) -> weapon.Rocket | None:
-        """Returns a shot weapon.Rocket if not on cooldown, otherwise None"""
+    def drop_rocket(self, id: str = 0):
+        """Summons a weapon.Rocket if not on cooldown, otherwise None"""
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
-            return weapon.Rocket(
+            weapon.Rocket(
+                game=self.game,
                 x=(self.x + self.width // 2),
                 y=self.y + self.height,
                 is_enemy=self.is_enemy,
@@ -161,36 +167,41 @@ class Aircraft(Entity):
                 rotation=self.pitch,
                 id=id
             )
-        else:
-            return None
 
 class EnemyAircraft(Aircraft):
     """An Aircraft with enemy AI"""
-    def __init__(self, y: int, sprite: Sprite|None = None, difficulty: int = 1, ai_type: int = 1):
+    def __init__(self, sprite: Sprite|None = None, difficulty: int = 1, ai_type: int = 1, **kwargs):
 
         if sprite is None: sprite = Sprite(ai.ai_types[ai_type].default_aircraft_img)
         size = sprite.size
         # Get type from index and init AI class
-        self.ai = ai.ai_types[ai_type](size=size, difficulty=difficulty, fire_rate=cfg.gameplay.enemy_shoot_cooldown)
+        self.ai: ai.BaseAI = ai.ai_types[ai_type](size=size, difficulty=difficulty, fire_rate=cfg.gameplay.enemy_shoot_cooldown)
 
-        super().__init__(x=cfg.screen_width, y=y, sprite=sprite, is_enemy=True, shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown)
+        super().__init__(x=cfg.screen_width, sprite=sprite, is_enemy=True, shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown, **kwargs)
 
-
-    def ai_tick(self, **ctx):
-        """Ticks the EnemyAircraft's AI and runs self.update()"""
-        self.ai.tick(ctx)
+    def update(self):
+        self.ai.tick(danger_zones=self.game.enemy_ai_danger_zones, player_y=self.game.player_controller.entity.y, player_x=self.game.player_controller.entity.x, enemy_y=self.y)
         self.apply_acceleration(self.ai.target_x, self.ai.target_y, trackable_distance=50)
-        self.update()
+        if self.ai.shoot:
+                self.shoot()
+                self.ai.shoot -= 1
 
-    def draw(self) -> None:
+        if cfg.debug.show_ai_type:
+            ai_marker = pygame.Surface((10,10))
+            ai_marker.fill(self.ai.debug_color)
+            screen.surface.blit(ai_marker, (self.x+self.sprite.size[0], self.y))
+
+        return super().update()
+
+    def draw(self):
         if cfg.debug.show_target_traces:
             pygame.draw.line(screen.surface, (255, 0, 0), (self.x, self.y), (self.ai.target_x, self.ai.target_y), 5)
         return super().draw()
 
 class Moth(EnemyAircraft):
     """An EnemyAircraft that is a moth"""
-    def __init__(self, y: int, difficulty: int = 1):
-        super().__init__(y=y, sprite=Sprite(im.aircraft.moth, animation_time=random.randint(1, 10)), difficulty=difficulty)
+    def __init__(self, **kwargs):
+        super().__init__(sprite=Sprite(im.aircraft.moth, animation_time=random.randint(1, 10)), **kwargs)
 
     def destroy(self) -> None:
         if not cfg.easter_eggs.moth_music_is_main_music:

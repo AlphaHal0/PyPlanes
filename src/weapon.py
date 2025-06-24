@@ -38,6 +38,24 @@ class Weapon(Entity):
     def update(self) -> None:
         if not 0 <= self.rect.x <= cfg.screen_width:
             self.alive = False
+
+        if self.is_enemy:
+            # Bullet is colliding with player
+            if self.is_colliding(self.game.player_controller.entity.rect):
+                self.game.player.health -= 10
+                self.game.shake = 8
+                self.explode([enemy for enemy in self.game.entities if enemy.is_enemy])
+        else:
+            # ---------------------- #
+            # TODO: REWORK COLLISION #
+            # ---------------------- #
+
+            self.game.enemy_ai_danger_zones.append(self.y)
+
+        if self.ground_collision():
+            self.explode(self.game.enemies)
+
+        self.draw()
         return super().update()
 
 class Bullet(Weapon):

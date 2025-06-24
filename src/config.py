@@ -9,17 +9,17 @@ def copy_missing_configs(source: str, dest: str) -> bool:
     Otherwise, reads through all config objects in source and copies over any objects that are not currently in dest.
     Returns False if dest had to be fully reset, else True"""
     with open(source, 'r') as _s: infile = json.load(_s)
-    
-    try: 
+
+    try:
         with open(dest, 'r') as _d: outfile = json.load(_d)
     except (json.JSONDecodeError, FileNotFoundError):
         # copy the file
         print(f"[!] Reloading file {dest} from defaults")
         with open(dest, 'w') as _d: json.dump(infile, _d)
         return False
-    
+
     has_any_changed = False
-    
+
     for category, contents in infile.items():
         try:
             outfile[category]
@@ -34,7 +34,7 @@ def copy_missing_configs(source: str, dest: str) -> bool:
             except KeyError:
                 outfile[category][key] = value
                 has_any_changed = True
-    
+
     if has_any_changed:
         with open(dest, 'w') as _s: json.dump(outfile, _s)
 
@@ -57,7 +57,7 @@ class Config:
     def __init__(self, fp: str = "cfg/config.json"):
         self.fp = fp
         self.try_load()
-            
+
     def try_load(self, only_once: bool = False) -> None:
         """Tries to load the config from self.fp. If it fails (and only_once is false) it resets the file and tries to load again.
         If that fails, raises ConfigLoadError"""
@@ -79,7 +79,7 @@ class Config:
 
         with open(self.fp) as _infile:
             d = json.load(_infile)
-        
+
         for category, contents in d.items():
             setattr(self, category, ConfigCategory())
             for key, value in contents.items():
@@ -108,7 +108,7 @@ class Config:
             return True
         else:
             return None
-        
+
     def reset(self):
         """Removes the file at self.fp and tries to load it from defaults"""
         if os.path.exists(self.fp): os.remove(self.fp)
