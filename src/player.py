@@ -24,10 +24,11 @@ class PlayerController:
 
     def update(self):
         """Update aircraft position and check for collisions"""
-        self.process_inputs()
-
         game = self.game
         entity = self.entity
+
+        if not game.pregame_timer:
+            self.process_inputs()
 
         target_x, target_y = pygame.mouse.get_pos()
         entity.apply_acceleration(target_x, target_y, trackable_distance=50)

@@ -19,8 +19,6 @@ import collision
 class Game:
     """A class that represents the game logic"""
     def __init__(self):
-        cfg.gameplay.disable_takeoff = True #* override for now, will fix later
-
         # init vars
         self.entities = []
         self.enemy_count = cfg.gameplay.initial_enemy_aircraft
@@ -65,7 +63,6 @@ class Game:
             collision_mask=collision.FRIENDLY_AIRCRAFT
         ).index
 
-
         self.player_controller = PlayerController(game=self, entity=self.entities[self.player])
 
         # spawn enemies
@@ -83,10 +80,9 @@ class Game:
         if not cfg.easter_eggs.secret_option: # Secret option prevents background from being drawn
             self.draw_background()
 
-        # if self.pregame_timer == 0: # Takeoff animation timer
-        #     self.logic()
-        # else:
-        #     self.pregame()
+        if self.pregame_timer > 0: # Takeoff animation timer
+            self.pregame()
+            return
 
         self.player_controller.update()
         self.update_entities()
@@ -131,28 +127,30 @@ class Game:
             if self.scroll_x[i] < -cfg.screen_width:
                 self.scroll_x[i] = 0
 
-    #* DISABLED FOR NOW
-    # def pregame(self):
-    #     """Runs during takeoff"""
+    def pregame(self):
+        """Runs during takeoff"""
 
-    #     for event in pygame.event.get():
-    #         if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
-    #             self.running = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
+                self.running = False
 
-    #     if self.pregame_timer > 100:
-    #         self.scroll_speed = int(((300-self.pregame_timer)/200) * cfg.scroll_speed)
-    #     else:
-    #         self.player.apply_acceleration(cfg.initial_aircraft_x, cfg.initial_aircraft_y)
-    #         self.player.update()
+        if self.pregame_timer > 100:
+            self.scroll_speed = int(((300-self.pregame_timer)/200) * cfg.scroll_speed)
+            self.player_controller.entity.draw()
+        else:
+            self.player_controller.entity.apply_acceleration(cfg.initial_aircraft_x, cfg.initial_aircraft_y)
+            self.player_controller.entity.update()
 
-    #     self.pregame_timer -= 1
+        self.pregame_timer -= 1
 
-    #     if self.pregame_timer == 0:
-    #         self.wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
-    #         self.wave_mode_text_opacity = 255
-    #         screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
-    #         self.scroll_speed = cfg.scroll_speed
-    #         pygame.mouse.set_visible(cfg.debug.mouse_visibility)
+        if self.pregame_timer == 0:
+            self.wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
+            self.wave_mode_text_opacity = 255
+            screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
+            self.scroll_speed = cfg.scroll_speed
+            pygame.mouse.set_visible(cfg.debug.mouse_visibility)
+
+        screen.update()
 
     def apply_screen_shake(self):
         # Apply screen shake
