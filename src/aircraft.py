@@ -5,24 +5,22 @@ from config import cfg
 import ai
 import weapon
 import vfx
-from entity import Entity
+from vehicle import Vehicle, bar_condition
 from sprite import Sprite
 from images import im
 from display import screen
 import physics
 
-class Aircraft(Entity):
+class Aircraft(Vehicle):
     """An Entity with aircraft mechanics"""
-    def __init__(self, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, health: float = 100, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown, **kwargs):
+    def __init__(self, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown, **kwargs):
         self.acceleration = cfg.physics.aircraft_acceleration
         self.terminal_velocity = cfg.physics.aircraft_terminal_velocity
         self.shoot_cooldown = 0
         self.bomb_cooldown = 0
         self.max_shoot_cooldown = shoot_cooldown
         self.falling = False
-        self.is_enemy = is_enemy
         self.last_particle_time = 0
-        self.health = health
         self.max_bomb_cooldown = bomb_cooldown
         self.pitch = 0
         self.target_pitch = 0
@@ -31,7 +29,7 @@ class Aircraft(Entity):
         self.enable_advanced_physics = (not is_enemy) and cfg.advanced_phys.enable_advanced_physics
         if self.enable_advanced_physics: self.physics = physics.AircraftPhysics()
 
-        super().__init__(**kwargs)
+        super().__init__(is_enemy=is_enemy, **kwargs)
 
     def update(self) -> None:
         """Tick"""
@@ -48,11 +46,11 @@ class Aircraft(Entity):
             else:
                 self.pitch += 1
 
-        if self.ground_collision():
+        if self.ground_collision() and self.is_enemy:
             self.destroy()
             self.spawn_particle(sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True)
-            self.score += 20 if cfg.gameplay.wave_mode else 70
-            self.enemy_count += cfg.gameplay.enemy_count_increment
+            self.game.player_controller.score += 20 if cfg.gameplay.wave_mode else 70
+            self.game.enemy_count += cfg.gameplay.enemy_count_increment
         if self.falling:
             self.spawn_particle(Sprite(im.particle.small_explosions, animation_time=5))
 
@@ -64,36 +62,17 @@ class Aircraft(Entity):
             self.target_pitch = value
         return self.pitch
 
-    def hit(self) -> bool:
+    def die(self) -> bool:
         """Marks the aircraft as 'falling' - its movement and rotation is limited to downwards.
         Returns False if already falling, else True"""
         if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
         if not self.falling:
             self.falling = True
+            self.inert = True
             self.pitch = 10 if self.is_enemy else -10
             self.sprite.rotate(self.pitch)
             self.max_shoot_cooldown *= cfg.gameplay.crashing_shoot_multiplier
         else: return False
-
-    def spawn_particle(self, sprite: Sprite, delay: int = 400, **kwargs):
-        """Returns a Particle with the Sprite if this function has been run longer ago than the delay param.
-        The Particle will move with the screen if this Aircraft is not an enemy"""
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_particle_time > delay:
-            self.last_particle_time = current_time
-
-            if cfg.easter_eggs.secret_option: # Don't mind this :)
-                return vfx.ScreenDistortion(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), 50, angle=360, width=sprite.size[0] // 5, time_alive=20, move_with_screen=not self.is_enemy, **kwargs)
-            else:
-                return particle.Particle(self.x + random.randint(0, int(self.width)), self.y + random.randint(0, int(self.height)), sprite=sprite, move_with_screen=not self.is_enemy, **kwargs)
-
-    def check_health(self) -> bool:
-        """Check if the Aircraft's health is less than or equal to 0.
-        If so, runs and returns the result from self.hit()"""
-        if self.health > cfg.gameplay.initial_health:
-            self.health = cfg.gameplay.initial_health
-        if self.health <= 0:
-            return self.hit()
 
     def apply_acceleration(self, target_x: int, target_y: int, trackable_distance: int = 50) -> None:
         """Accelerates towards the target pos if the distance is greater than trackable_distance"""
@@ -123,7 +102,7 @@ class Aircraft(Entity):
         self.velocity_x *= cfg.physics.aircraft_drag
         self.velocity_y *= cfg.physics.aircraft_drag
 
-    def shoot(self, id: str = 0):
+    def shoot(self):
         """Summons a weapon.Bullet if not on cooldown, otherwise None"""
         if self.shoot_cooldown <= 0:
             self.shoot_cooldown = self.max_shoot_cooldown
@@ -133,10 +112,9 @@ class Aircraft(Entity):
                 y=self.y + self.height / 2,
                 is_enemy=self.is_enemy,
                 velocity_x=(cfg.physics.enemy_bullet_velocity if self.is_enemy else cfg.physics.player_bullet_velocity) + (self.velocity_x*cfg.physics.weapon_velocity_multiplier),
-                rotation=self.pitch,
-                id=id)
+                rotation=self.pitch)
 
-    def bomb(self, id: str = 0):
+    def bomb(self):
         """Summons a weapon.Bomb if not on cooldown, otherwise None"""
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
@@ -148,11 +126,9 @@ class Aircraft(Entity):
                 velocity_x=self.velocity_x,
                 velocity_y=self.velocity_y * cfg.physics.bomb_init_y_multiplier,
                 explosion_power=random.randint(4,6),
-                rotation=self.pitch,
-                id=id
-            )
+                rotation=self.pitch)
 
-    def drop_rocket(self, id: str = 0):
+    def drop_rocket(self):
         """Summons a weapon.Rocket if not on cooldown, otherwise None"""
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
@@ -164,9 +140,7 @@ class Aircraft(Entity):
                 velocity_x=self.velocity_x,
                 velocity_y=self.velocity_y * cfg.physics.bomb_init_y_multiplier,
                 explosion_power=random.randint(4,6),
-                rotation=self.pitch,
-                id=id
-            )
+                rotation=self.pitch)
 
 class EnemyAircraft(Aircraft):
     """An Aircraft with enemy AI"""
@@ -177,7 +151,7 @@ class EnemyAircraft(Aircraft):
         # Get type from index and init AI class
         self.ai: ai.BaseAI = ai.ai_types[ai_type](size=size, difficulty=difficulty, fire_rate=cfg.gameplay.enemy_shoot_cooldown)
 
-        super().__init__(x=cfg.screen_width, sprite=sprite, is_enemy=True, shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown, **kwargs)
+        super().__init__(x=cfg.screen_width, sprite=sprite, is_enemy=True, shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown, bar_condition=bar_condition.WHEN_BELOW_MAX_AND_NOT_INERT, **kwargs)
 
     def update(self):
         self.ai.tick(danger_zones=self.game.enemy_ai_danger_zones, player_y=self.game.player_controller.entity.y, player_x=self.game.player_controller.entity.x, enemy_y=self.y)
@@ -194,9 +168,9 @@ class EnemyAircraft(Aircraft):
         return super().update()
 
     def draw(self):
+        super().draw()
         if cfg.debug.show_target_traces:
             pygame.draw.line(screen.surface, (255, 0, 0), (self.x, self.y), (self.ai.target_x, self.ai.target_y), 5)
-        return super().draw()
 
 class Moth(EnemyAircraft):
     """An EnemyAircraft that is a moth"""

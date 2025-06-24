@@ -1,16 +1,13 @@
 import pygame
 from config import cfg, kb
-from random import random, randint, choice
+from random import random, randint
 import aircraft
-from particle import Particle
 from sprite import Sprite
-import ground_vehicle
 from images import im
-from keybind import is_pressed, is_held
-from vfx import ScreenDistortion
+from keybind import is_pressed
 from player import PlayerController
+from vehicle import bar_condition
 from display import screen
-import weapon
 
 # ----------------------------- #
 # TODO: Change collision system #
@@ -28,7 +25,6 @@ class Game:
         self.enemy_count = cfg.gameplay.initial_enemy_aircraft
         self.scroll_x = [0, 0, 0] # Background scroll of each parallax layer
         self.enemy_ai_danger_zones = [] # Areas of the screen that the AI should avoid (not hard limits)
-        self.score = 0
         self.wave = 1
         self.wave_mode_text_x = cfg.screen_width
         self.wave_mode_text_y = cfg.screen_height // 2 - screen.font.get_height() // 2
@@ -57,12 +53,14 @@ class Game:
         # self.player holds the index of the controlled entity
         self.player = aircraft.Aircraft(
             game=self,
+            is_enemy=False,
             x=cfg.initial_aircraft_x,
             y=cfg.initial_aircraft_y if cfg.gameplay.disable_takeoff else cfg.floor_y - im.aircraft.aircraft.get_height(),
             sprite=Sprite(im.aircraft.aircraft),
             shoot_cooldown=cfg.gameplay.player_shoot_cooldown,
             bomb_cooldown=cfg.gameplay.player_bomb_cooldown,
-            health=cfg.gameplay.initial_health).spawn()
+            max_health=cfg.gameplay.initial_health,
+            bar_condition=bar_condition.ALWAYS).index
 
         self.player_controller = PlayerController(game=self, entity=self.entities[self.player])
 
@@ -163,20 +161,7 @@ class Game:
 
     def hud(self):
         """Draw HUD elements"""
-
-        # TODO: health bar should be handled by Entity
-        health_bar = pygame.Surface((150,10))
-        health_bar.fill(0xFF0000)
-        health_bar.fill(0x00FF00, rect=(0,0,(self.player_controller.entity.health/cfg.gameplay.initial_health)*150,10)),
-
-        # Draw health bar
-        screen.surface.blit(
-            health_bar,
-            (self.player_controller.entity.x+(self.player_controller.entity.width//2-80),
-            self.player_controller.entity.y-self.player_controller.entity.height)
-        )
-
-        scoredisplay = f"Score {self.score} | Difficulty {round(self.enemy_count, 1)}"
+        scoredisplay = f"Score {self.player_controller.score} | Difficulty {round(self.enemy_count, 1)}"
         if cfg.gameplay.wave_mode:
             scoredisplay += f"| Wave {self.wave}"
             if self.wave_mode_text_opacity > 0:
@@ -219,7 +204,7 @@ class Game:
             self.spawn_enemy(difficulty=int(self.enemy_count))
 
         elif enemies_alive == 0 and cfg.gameplay.wave_mode:
-            self.score += 50 * self.to_spawn
+            self.player_controller.score += 50 * self.to_spawn
             print(f"Wave {self.wave} complete!")
             self.wave += 1
             self.wave_warmup_time = 120
@@ -246,7 +231,7 @@ def play():
         game.loop()
 
     # Quit Pygame
-    print(f"Final score: {game.score}")
+    print(f"Final score: {game.player_controller.score}")
     pygame.mouse.set_visible(True)
     pygame.event.set_grab(False)
     pygame.mixer.stop()

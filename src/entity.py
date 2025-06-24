@@ -12,7 +12,7 @@ import math
 class Entity:
     """Base class for all entities in the game.
     By default, Entities move by their velocity each tick. """
-    def __init__(self, game: Game, sprite: Sprite|None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, id: int = 0):
+    def __init__(self, game: Game, sprite: Sprite|None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, spawn_cooldown: int = cfg.gameplay.spawn_cooldown):
         if sprite is None: sprite = Sprite()
 
         self.game = game
@@ -21,7 +21,6 @@ class Entity:
         self.width, self.height = sprite.size
         self.rect = pygame.Rect((x, y), sprite.size)
         self.rotation = rotation
-        self.id = id
 
         self.spawn_cooldown = spawn_cooldown
         self.time_of_spawn = pygame.time.get_ticks()
@@ -41,12 +40,8 @@ class Entity:
             self.velocity_x = velocity_x
             self.velocity_y = velocity_y
 
-        self.spawn()
-
-    def spawn(self):
-        """Add self to game entity list and return index"""
         self.game.entities.append(self)
-        return len(self.game.entities) - 1
+        self.index = len(self.game.entities) - 1
 
     def apply_rotated_velocity(self, force: float, direction: int|None = None):
         """Apply a force to this Entity with a direction"""

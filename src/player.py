@@ -20,6 +20,7 @@ class PlayerController:
     def __init__(self, game: Game, entity: Aircraft):
         self.game = game
         self.entity = entity
+        self.score = 0
 
     def update(self):
         """Update aircraft position and check for collisions"""
@@ -34,15 +35,15 @@ class PlayerController:
         if not cfg.debug.invincible: entity.check_health()
 
         if entity.falling:
-            entity.spawn_particle(Sprite(im.particle.small_explosions, animation_time=5))
+            entity.spawn_particle(sprite=Sprite(im.particle.small_explosions, animation_time=5), move_with_screen=True)
             game.shake = 2
 
         if entity.ground_collision():
-            entity.health -= cfg.gameplay.ground_health_decay
+            entity.damage(cfg.gameplay.ground_health_decay)
             if not cfg.debug.invincible and entity.health <= 0:
                 print("Player hit the floor. Game over.")
                 game.running = False
-            particle = entity.spawn_particle(Sprite(im.particle.small_explosions, animation_time=30, size_multiplier=2), 100)
+            particle = entity.spawn_particle(sprite=Sprite(im.particle.small_explosions, animation_time=30, size_multiplier=2), delay=100, move_with_screen=True)
             if particle:
                 game.shake = 8
 

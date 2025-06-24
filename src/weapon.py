@@ -3,6 +3,7 @@ from images import im
 from random import random
 from particle import Particle
 from sprite import Sprite
+from vehicle import Vehicle
 from config import cfg
 
 class Weapon(Entity):
@@ -14,48 +15,42 @@ class Weapon(Entity):
         self.is_enemy = is_enemy
         self.explosion_power = explosion_power
 
-    def is_colliding_entity(self, other: Entity, ignore_same_team: bool = True) -> bool:
-        """Checks if colliding with another Entity.
-        If ignore_same_team is True, does not collide with same-team bullets"""
-        if ignore_same_team and self.is_enemy == other.is_enemy:
-            return False
-
-        return super().is_colliding(other.rect)
-
     def explode(self, entities: list = []) -> Particle:
         """Destroys self and returns a Particle.
-        If entities is given, runs Entity.hit() if it is in the blast radius given by self.explosion_power."""
+        If entities is given, runs Entity.damage() if it is in the blast radius given by self.explosion_power."""
         self.destroy()
 
         if self.explosion_power:
             for i in entities:
                 if i.distance_to(self.x, self.y) < self.explosion_power * 30:
-                    i.hit()
-            return Particle(self.x, self.y, sprite=Sprite(im.particle.large_explosions, size_multiplier=self.explosion_power), duration=20 * self.explosion_power)
+                    i.damage(10)
+            return Particle(game=self.game, x=self.x, y=self.y, sprite=Sprite(im.particle.large_explosions, size_multiplier=self.explosion_power), duration=20 * self.explosion_power)
         else:
-            return Particle(self.x, self.y, sprite=Sprite(im.particle.small_explosions), duration=10)
+            return Particle(game=self.game, x=self.x, y=self.y, sprite=Sprite(im.particle.small_explosions), duration=10)
 
     def update(self) -> None:
         if not 0 <= self.rect.x <= cfg.screen_width:
             self.alive = False
 
+        # ----------------------------- #
+        # TODO: REWORK ALL OF THIS SHIT #
+        # ----------------------------- #
         if self.is_enemy:
-            # Bullet is colliding with player
             if self.is_colliding(self.game.player_controller.entity.rect):
-                self.game.player.health -= 10
+                # Bullet is colliding with player
+                self.game.player_controller.entity.damage(10)
                 self.game.shake = 8
-                self.explode([enemy for enemy in self.game.entities if enemy.is_enemy])
+                self.explode(self.game.player_controller.entity)
         else:
-            # ---------------------- #
-            # TODO: REWORK COLLISION #
-            # ---------------------- #
-
             self.game.enemy_ai_danger_zones.append(self.y)
+            if self.is_colliding([enemy for enemy in self.game.entities if isinstance(enemy, Vehicle) and enemy.is_enemy]) > 0:
+                # Bullet colliding with enemy
+                print([enemy for enemy in self.game.entities if isinstance(enemy, Vehicle) and enemy.is_enemy])
+                self.explode([enemy for enemy in self.game.entities if isinstance(enemy, Vehicle) and enemy.is_enemy])
 
         if self.ground_collision():
-            self.explode(self.game.enemies)
+            self.explode([entity for entity in self.game.entities if isinstance(entity, Vehicle) and entity.is_enemy != self.is_enemy])
 
-        self.draw()
         return super().update()
 
 class Bullet(Weapon):
