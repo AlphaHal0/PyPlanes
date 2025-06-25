@@ -45,11 +45,15 @@ class Aircraft(Vehicle):
             else:
                 self.pitch += 1
 
-        if self.ground_collision() and self.is_enemy:
-            self.destroy()
-            self.spawn_particle(sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True)
-            self.game.player_controller.score += 20 if cfg.gameplay.wave_mode else 70
-            self.game.enemy_count += cfg.gameplay.enemy_count_increment
+        if self.ground_collision():
+            if self.health <= 0:
+                self.spawn_particle(sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True)
+                self.game.player_controller.score += 20 if cfg.gameplay.wave_mode else 70
+                self.game.enemy_count += cfg.gameplay.enemy_count_increment
+                self.destroy()
+            else:
+                self.damage(cfg.gameplay.ground_health_decay)
+                self.spawn_particle(sprite=Sprite(im.particle.small_explosions, animation_time=30, size_multiplier=2), delay=100, move_with_screen=True)
         if self.falling:
             self.spawn_particle(Sprite(im.particle.small_explosions, animation_time=5))
 

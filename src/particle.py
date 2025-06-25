@@ -21,4 +21,7 @@ class Particle(Entity):
         If self.move_with_screen is set, move x pos by scroll_speed."""
         if self.move_with_screen: self.x -= self.game.scroll_speed
 
-        self.alive = self.sprite.draw(self.x, self.y, False)
+        if not self.sprite.draw(self.x, self.y, False):
+            self.destroy()
+
+        self.draw_debug_text()

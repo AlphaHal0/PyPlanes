@@ -29,6 +29,8 @@ def options(con = cfg, is_keybind: bool = False):
 
         if options_menu: options_menu.run = False
         if close:
+            cfg.save()
+            kb.save()
             return
         elements = []
         if len(con.d) < 1:
@@ -40,7 +42,7 @@ def options(con = cfg, is_keybind: bool = False):
             i = 2
             x = 0
             # loop each row
-            for key, value in con.d[category].items():
+            for key, _ in con.d[category].items():
                 if i > 12: # next column
                     i = 2
                     x += 1
@@ -84,7 +86,7 @@ def main():
 
     button_pos = cfg.screen_width // 2 - image_toc.ui.button['scale'][0] * cfg.screen_width // 2
     main_menu = Menu(
-        Sprite(im.ui.background),
+        Sprite(im.ui.background, disable_debug_size_box=True),
         elements=[
             Text("PyPlanes", x=cfg.screen_width // 2, y=cfg.screen_height // 8 + 50, color="0xFFFFFF", center=True, size=cfg.screen_height // 10),
             Button(x=button_pos, y=2 * cfg.screen_height // 8 + 50, content="PLAY", on_click=start_game),

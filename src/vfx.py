@@ -26,7 +26,6 @@ class ScreenDistortion(Particle):
         self.angle = angle
         self.radius = 0
         self.width = width
-        self.alive = True
         self.alpha = 64
         self.move_with_screen = move_with_screen
         self.time_alive = time_alive - 64 # once this reaches 0, die
@@ -106,6 +105,6 @@ class ScreenDistortion(Particle):
         if -64 < self.time_alive < 0:
             self.alpha -= 1
         elif self.time_alive <= -64:
-            self.alive = False
+            self.destroy()
 
         if self.move_with_screen: self.x -= scroll_speed

@@ -24,7 +24,7 @@ class GroundVehicle(Vehicle):
         """Update.
         If the vehicle is outside the screen, delete self"""
         if self.x < 0:
-            self.alive = False
+            self.destroy()
         self.x -= self.game.scroll_speed
         return super().update()
 

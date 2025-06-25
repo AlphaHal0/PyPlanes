@@ -32,7 +32,7 @@ class Weapon(Entity):
 
     def update(self) -> None:
         if not 0 <= self.rect.x <= cfg.screen_width:
-            self.alive = False
+            self.destroy()
 
         if self.is_enemy:
             colliding = self.is_colliding(collision.FRIENDLY_AIRCRAFT)

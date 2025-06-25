@@ -6,6 +6,7 @@ from config import cfg
 import vfx
 import particle
 from display import screen
+from images import im
 
 class bar_condition:
     """Constants for health bar draw conditions"""
@@ -39,22 +40,20 @@ class Vehicle(Entity):
             )
 
     def die(self):
-        if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return False
-        if not self.inert:
-            self.inert = True
+        self.inert = True
 
     def damage(self, amt: float):
-        self.health -= amt
+        if pygame.time.get_ticks() - self.time_of_spawn < self.spawn_cooldown: return
+        if not (self.is_player_controlled and cfg.debug.invincible):
+            self.health -= amt
+        if self.is_player_controlled:
+            self.game.shake = amt
+
         self.check_health()
 
     def check_health(self) -> bool:
         """Check if the Vehicle's health is less than or equal to 0.
         If so, runs and returns the result from self.die()"""
-        if self.health > self.max_health:
-            self.health = self.max_health
-        if self.health <= 0:
-            return self.die()
-
         if cfg.debug.display_entity_text:
             screen.render_text(
                 f"{round(self.health,1)}/{round(self.max_health,1)}",
@@ -62,6 +61,11 @@ class Vehicle(Entity):
                 display=False,
                 id=f"debug_text@{self.index}"
             )
+
+        if self.health > self.max_health:
+            self.health = self.max_health
+        if self.health <= 0:
+            self.die()
 
     def spawn_particle(self, sprite: Sprite, delay: int = 400, **kwargs):
         """Returns a Particle with the Sprite if this function has been run longer ago than the delay param.

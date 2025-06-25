@@ -32,6 +32,7 @@ class Game:
         self.frame_step = 0 # number of frames to step if the game is paused
         self.background = [Sprite(i, disable_debug_size_box=True) for i in (im.background.layer_1, im.background.layer_2, im.background.layer_3)] # background sprites
         self.shake = 0 # screen shake
+        self.pregame_timer = 0 # takeoff animation
 
     def begin(self):
         """Start the game"""
@@ -177,7 +178,7 @@ class Game:
                 if self.wave_warmup_time <= 0:
                     self.wave_mode_text_opacity -= 2
 
-        if cfg.debug.show_fps: scoredisplay += f" | FPS {round(screen.clock.get_fps())}"
+        if cfg.debug.show_fps: scoredisplay += f" | FPS {round(screen.clock.get_fps())} | ECount {len(self.entities)}"
 
         if cfg.easter_eggs.secret_option and screen.clock.get_fps() < 10: # Nothing to see here
             screen.render_text("How's your FPS looking??? :3", color="0xFFFFFF", opacity=64, x=10, y=cfg.screen_height//2, id="fps_easteregg")
@@ -186,11 +187,18 @@ class Game:
 
     def update_entities(self):
         """Update all entities"""
-        # Clear out any entities that are not alive
-        self.entities = [entity for entity in self.entities if entity is not None and entity.alive]
+        if len(self.entities) == 0: return
+
+        while self.entities[-1] is None:
+            # Remove last entity if it has been destroyed
+            # self.entities behaves like a stack so that each entity's index variable always matches index in list
+            # TODO: probably inefficient? will change someday
+            #! Nah, definitely inefficient. Change before merging to dev
+            self.entities.pop()
+
         self.enemy_ai_danger_zones = []
         for entity in self.entities:
-            entity.update()
+            if entity is not None: entity.update()
 
     def spawn_new_enemies(self):
         """Try to spawn new enemies"""

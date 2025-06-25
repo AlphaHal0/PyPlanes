@@ -22,6 +22,7 @@ class Entity:
         self.width, self.height = sprite.size
         self.rect = pygame.Rect((x, y), sprite.size)
         self.rotation = rotation
+        self.is_player_controlled = False
 
         if isinstance(collision_mask, int):
             self.collision_mask = [collision_mask] # convert to list if not already
@@ -80,7 +81,9 @@ class Entity:
     def draw(self) -> None:
         """Draws the Entity onto the screen"""
         self.sprite.draw(self.x, self.y)
+        self.draw_debug_text()
 
+    def draw_debug_text(self) -> None:
         if cfg.debug.display_entity_text:
             screen.display_cached_text(
                 id=f"debug_text@{self.index}",
@@ -88,8 +91,13 @@ class Entity:
                 y=self.y-self.height
             )
 
+
     def destroy(self) -> None:
         self.alive = False
+        self.game.entities[self.index] = None
+        if self.is_player_controlled:
+            print("Game over.")
+            self.game.running = False
 
     def is_colliding(self, mask: list|int = [], ignore_self: bool = True) -> list:
         """Returns if this Entity is colliding with other Entities with this collision mask"""
@@ -97,6 +105,7 @@ class Entity:
         colliding = []
 
         for entity in self.game.entities:
+            if entity is None: continue
             if ignore_self and entity == self: continue
 
             for i in mask:

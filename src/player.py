@@ -20,6 +20,7 @@ class PlayerController:
     def __init__(self, game: Game, entity: Aircraft):
         self.game = game
         self.entity = entity
+        self.entity.is_player_controlled = True
         self.score = 0
 
     def update(self):
@@ -39,14 +40,6 @@ class PlayerController:
             entity.spawn_particle(sprite=Sprite(im.particle.small_explosions, animation_time=5), move_with_screen=True)
             game.shake = 2
 
-        if entity.ground_collision():
-            entity.damage(cfg.gameplay.ground_health_decay)
-            if not cfg.debug.invincible and entity.health <= 0:
-                print("Player hit the floor. Game over.")
-                game.running = False
-            particle = entity.spawn_particle(sprite=Sprite(im.particle.small_explosions, animation_time=30, size_multiplier=2), delay=100, move_with_screen=True)
-            if particle:
-                game.shake = 8
 
     def process_inputs(self):
         """Process keyboard and mouse inputs"""
@@ -115,8 +108,9 @@ class PlayerController:
 
         if is_held(kb.debug.thrust):
             Particle(
-                entity.x + entity.width * 0.3,
-                entity.y + entity.height * 0.5,
+                game=game,
+                x=entity.x + entity.width * 0.3,
+                y=entity.y + entity.height * 0.5,
                 sprite=Sprite(im.particle.afterburner),
                 scale=1,
                 velocity_x=-40,
