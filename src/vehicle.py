@@ -55,6 +55,14 @@ class Vehicle(Entity):
         if self.health <= 0:
             return self.die()
 
+        if cfg.debug.display_entity_text:
+            screen.render_text(
+                f"{round(self.health,1)}/{round(self.max_health,1)}",
+                opacity=196,
+                display=False,
+                id=f"debug_text@{self.index}"
+            )
+
     def spawn_particle(self, sprite: Sprite, delay: int = 400, **kwargs):
         """Returns a Particle with the Sprite if this function has been run longer ago than the delay param.
         The Particle will move with the screen if this Aircraft is not an enemy"""

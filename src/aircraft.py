@@ -147,12 +147,16 @@ class Aircraft(Vehicle):
 
 class EnemyAircraft(Aircraft):
     """An Aircraft with enemy AI"""
-    def __init__(self, sprite: Sprite|None = None, difficulty: int = 1, ai_type: int = 1, **kwargs):
+    def __init__(self, sprite: Sprite|None = None, difficulty: int = 1, ai_type: int = 1, max_health: float = -1.0, **kwargs):
 
         if sprite is None: sprite = Sprite(ai.ai_types[ai_type].default_aircraft_img)
         size = sprite.size
         # Get type from index and init AI class
         self.ai: ai.BaseAI = ai.ai_types[ai_type](size=size, difficulty=difficulty, fire_rate=cfg.gameplay.enemy_shoot_cooldown)
+
+        if max_health == -1.0:
+            # if max_health argument left blank, generate a random health amount
+            max_health=random.randint(0, difficulty)
 
         super().__init__(x=cfg.screen_width, sprite=sprite, is_enemy=True, max_health=random.randint(0, difficulty), shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown, bar_condition=bar_condition.WHEN_BELOW_MAX_AND_NOT_INERT, collision_mask=collision.ENEMY_AIRCRAFT, **kwargs)
 

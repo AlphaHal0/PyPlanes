@@ -8,6 +8,7 @@ import pygame
 from config import cfg
 from sprite import Sprite
 import math
+from display import screen
 
 class Entity:
     """Base class for all entities in the game.
@@ -52,6 +53,15 @@ class Entity:
             # report unexpected arguments
             print(f"warning: arguments {kwargs} not assigned to {self.__class__.__name__} at index {self.index}")
 
+        if cfg.debug.display_entity_text:
+            # Print info as text for debug
+            screen.render_text(
+                f"ID {self.index}",
+                opacity=196,
+                display=False,
+                id=f"debug_text@{self.index}"
+            )
+
     def apply_rotated_velocity(self, force: float, direction: int|None = None):
         """Apply a force to this Entity with a direction"""
         if direction == None:
@@ -70,6 +80,13 @@ class Entity:
     def draw(self) -> None:
         """Draws the Entity onto the screen"""
         self.sprite.draw(self.x, self.y)
+
+        if cfg.debug.display_entity_text:
+            screen.display_cached_text(
+                id=f"debug_text@{self.index}",
+                x=self.x+(self.width//2-80),
+                y=self.y-self.height
+            )
 
     def destroy(self) -> None:
         self.alive = False

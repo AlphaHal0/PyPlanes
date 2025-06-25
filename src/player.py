@@ -77,7 +77,7 @@ class PlayerController:
                         break
 
             elif is_pressed(event, kb.debug.spawn_ground_enemy):
-                GroundVehicle()
+                GroundVehicle(game=game)
 
             elif is_pressed(event, kb.debug.spawn_moth):
                 game.spawn_enemy(moth=True, difficulty=int(game.enemy_count))

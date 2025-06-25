@@ -30,7 +30,7 @@ class Game:
         self.running = True
         self.game_paused = False
         self.frame_step = 0 # number of frames to step if the game is paused
-        self.background = [Sprite(i) for i in (im.background.layer_1, im.background.layer_2, im.background.layer_3)] # background sprites
+        self.background = [Sprite(i, disable_debug_size_box=True) for i in (im.background.layer_1, im.background.layer_2, im.background.layer_3)] # background sprites
         self.shake = 0 # screen shake
 
     def begin(self):

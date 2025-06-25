@@ -82,6 +82,7 @@
     "mouse_visibility": false,
     "show_image_inits": false,
     "big_mode": false,
-    "show_distortion": false
+    "show_distortion": false,
+    "display_entity_text": false
   }
 }
