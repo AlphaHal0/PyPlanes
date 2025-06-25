@@ -92,7 +92,6 @@ class Aircraft(Vehicle):
         elif distance > trackable_distance:
             self.velocity_x += min(dx / distance * self.acceleration, self.terminal_velocity)
 
-
         if self.y < 0:
             self.y = 0
             self.velocity_y = 0

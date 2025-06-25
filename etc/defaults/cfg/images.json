@@ -55,6 +55,10 @@
             "fp": "ui/button",
             "scale": [0.08, 0.05],
             "alpha": false
+        },
+        "mouse_gradient": {
+            "fp": "ui/mouse_gradient",
+            "scale": 0.3
         }
     },
     "aircraft": {

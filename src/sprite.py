@@ -7,13 +7,15 @@ class Sprite:
     """A class to manage an image or animated list of images with transformation."""
     def __init__(self, image: pygame.Surface|list[pygame.Surface]|None = None,
     animation_time: int = 1, size: tuple|None = None, size_multiplier: int = 1,
-    rotation: int = 0, flip_x: bool = False, flip_y: bool = False, disable_debug_size_box: bool = False) -> None:
+    rotation: int = 0, flip_x: bool = False, flip_y: bool = False,
+    opacity: int = 255, disable_debug_size_box: bool = False) -> None:
 
         self.base_image = image
         self.is_animated = isinstance(image, list)
         self.rotation = rotation
         self.flip_x = flip_x
         self.flip_y = flip_y
+        self.opacity = opacity
         self.disable_debug_size_box = disable_debug_size_box
 
         if not image or (self.is_animated and len(image) == 0):
@@ -37,6 +39,7 @@ class Sprite:
         """Reloads this sprite with its transformation values.
         If animated, this does so with each of its frames."""
         try:
+            # TODO: remove repeated code
             if self.is_animated:
                 image = []
                 for i in self.base_image:
@@ -117,4 +120,10 @@ class Sprite:
         else:
             self.base_size = size
             self.size = (size[0] * size_multiplier, size[1] * size_multiplier)
+        if not no_update: self.update()
+
+    def set_opacity(self, opacity: int = 255, no_update: bool = False):
+        """Change the opacity of this Sprite.
+        If no_update is True, does not apply to this Sprite's images immediately"""
+        self.opacity = opacity
         if not no_update: self.update()

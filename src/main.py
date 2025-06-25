@@ -65,7 +65,8 @@ def options(con = cfg, is_keybind: bool = False):
         options_menu = Menu(
             Sprite(im.ui.background),
             elements=elements,
-            grid_type=ALIGN_LEFT
+            grid_type=ALIGN_LEFT,
+            #mouse_effect=Sprite(im.ui.mouse_gradient)
         )
 
         options_menu.loop()
@@ -95,7 +96,8 @@ def main():
             Button(x=button_pos, y=6 * cfg.screen_height // 8 + 50, content="QUIT", on_click=finish),
         ],
         on_close=finish,
-        grid_type=ALIGN_NONE
+        grid_type=ALIGN_NONE,
+        #mouse_effect=Sprite(im.ui.mouse_gradient)
     )
 
     main_menu.loop()

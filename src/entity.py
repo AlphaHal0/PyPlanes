@@ -91,7 +91,6 @@ class Entity:
                 y=self.y-self.height
             )
 
-
     def destroy(self) -> None:
         self.alive = False
         self.game.entities[self.index] = None
