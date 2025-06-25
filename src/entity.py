@@ -12,7 +12,7 @@ import math
 class Entity:
     """Base class for all entities in the game.
     By default, Entities move by their velocity each tick. """
-    def __init__(self, game: Game, sprite: Sprite|None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, collision_mask: list|int = []):
+    def __init__(self, game: Game, sprite: Sprite|None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, collision_mask: list|int = [], **kwargs):
         if sprite is None: sprite = Sprite()
 
         self.game = game
@@ -47,6 +47,10 @@ class Entity:
 
         self.game.entities.append(self)
         self.index = len(self.game.entities) - 1
+
+        if kwargs:
+            # report unexpected arguments
+            print(f"warning: arguments {kwargs} not assigned to {self.__class__.__name__} at index {self.index}")
 
     def apply_rotated_velocity(self, force: float, direction: int|None = None):
         """Apply a force to this Entity with a direction"""

@@ -6,7 +6,7 @@ from sprite import Sprite
 from images import im
 from keybind import is_pressed
 from player import PlayerController
-from vehicle import bar_condition
+from vehicle import bar_condition, Vehicle
 from display import screen
 import collision
 
@@ -21,7 +21,7 @@ class Game:
     def __init__(self):
         # init vars
         self.entities = []
-        self.enemy_count = cfg.gameplay.initial_enemy_aircraft
+        self.enemy_count = cfg.gameplay.initial_enemy_aircraft # Number of entities that should be on screen, or that spawn at the start of a wave
         self.scroll_x = [0, 0, 0] # Background scroll of each parallax layer
         self.enemy_ai_danger_zones = [] # Areas of the screen that the AI should avoid (not hard limits)
         self.wave = 1
@@ -33,16 +33,12 @@ class Game:
         self.background = [Sprite(i) for i in (im.background.layer_1, im.background.layer_2, im.background.layer_3)] # background sprites
         self.shake = 0 # screen shake
 
+    def begin(self):
+        """Start the game"""
         if cfg.gameplay.disable_takeoff:
-            # Set initial values for when not taking off
-            self.wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
-            self.wave_mode_text_opacity = 255
-            screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
-            self.scroll_speed = cfg.scroll_speed
-            self.pregame_timer = 0
-            pygame.mouse.set_visible(cfg.debug.mouse_visibility)
+            self.finish_takeoff()
         else:
-            # Set initial values for taking off
+            # Set values for taking off animation
             self.wave_warmup_time = 0
             self.pregame_timer = 300
             self.scroll_speed = 0
@@ -63,6 +59,7 @@ class Game:
             collision_mask=collision.FRIENDLY_AIRCRAFT
         ).index
 
+        # Class to handle player inputs and control an associated player Entity
         self.player_controller = PlayerController(game=self, entity=self.entities[self.player])
 
         # spawn enemies
@@ -128,32 +125,39 @@ class Game:
                 self.scroll_x[i] = 0
 
     def pregame(self):
-        """Runs during takeoff"""
+        """Runs during takeoff animation"""
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT or is_pressed(event, kb.other.quit):
                 self.running = False
 
         if self.pregame_timer > 100:
+            # Ramp up the background speed
             self.scroll_speed = int(((300-self.pregame_timer)/200) * cfg.scroll_speed)
             self.player_controller.entity.draw()
         else:
+            # Tell the aircraft to go to starting position in the air
             self.player_controller.entity.apply_acceleration(cfg.initial_aircraft_x, cfg.initial_aircraft_y)
             self.player_controller.entity.update()
 
         self.pregame_timer -= 1
 
         if self.pregame_timer == 0:
-            self.wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0
-            self.wave_mode_text_opacity = 255
-            screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
-            self.scroll_speed = cfg.scroll_speed
-            pygame.mouse.set_visible(cfg.debug.mouse_visibility)
+            self.finish_takeoff() # Start the game
+
 
         screen.update()
 
+    def finish_takeoff(self):
+        """Runs after the takeoff animation has finished"""
+        self.wave_warmup_time = 120 if cfg.gameplay.wave_mode else 0 # time between waves
+        self.wave_mode_text_opacity = 255
+        screen.render_text(f"Wave {self.wave}", display=False, id="wavemode")
+        self.scroll_speed = cfg.scroll_speed
+        pygame.mouse.set_visible(cfg.debug.mouse_visibility)
+
     def apply_screen_shake(self):
-        # Apply screen shake
+        """Apply screen shake"""
         if self.shake > 0.1:
             shake_mod = int(self.shake * cfg.display.shake_intensity)
             screen.surface.scroll(
@@ -176,12 +180,13 @@ class Game:
         if cfg.debug.show_fps: scoredisplay += f" | FPS {round(screen.clock.get_fps())}"
 
         if cfg.easter_eggs.secret_option and screen.clock.get_fps() < 10: # Nothing to see here
-            screen.render_text("How's your FPS looking??? :3", color="0xFFFFFF", opacity=64, x=10, y=cfg.screen_height//2, id="fps_looks_shit")
+            screen.render_text("How's your FPS looking??? :3", color="0xFFFFFF", opacity=64, x=10, y=cfg.screen_height//2, id="fps_easteregg")
 
         screen.render_text(scoredisplay, x=0, y=0)
 
     def update_entities(self):
         """Update all entities"""
+        # Clear out any entities that are not alive
         self.entities = [entity for entity in self.entities if entity is not None and entity.alive]
         self.enemy_ai_danger_zones = []
         for entity in self.entities:
@@ -189,17 +194,18 @@ class Game:
 
     def spawn_new_enemies(self):
         """Try to spawn new enemies"""
-
         if self.wave_warmup_time:
-            self.player_controller.entity.health += self.enemy_count * cfg.gameplay.wave_regen_multiplier
+            # Time between waves
+            self.player_controller.entity.health += self.enemy_count * cfg.gameplay.wave_regen_multiplier # Slowly regen health
             self.wave_warmup_time -= 1
             if self.wave_warmup_time == 0:
+                # Spawn new entities
                 self.to_spawn = int(self.enemy_count)
                 for i in range(self.to_spawn):
                     self.spawn_enemy(difficulty=int(self.enemy_count))
             return
 
-        enemies_alive = len([enemy for enemy in self.entities if isinstance(enemy, aircraft.EnemyAircraft)])
+        enemies_alive = len([enemy for enemy in self.entities if isinstance(enemy, Vehicle) and enemy.is_enemy]) # count number of enemies
         # Spawn all enemies in one go if cfg.gameplay.wave_mode is True, otherwise spawn one enemy to keep up with the count.
         if enemies_alive < int(self.enemy_count) and not cfg.gameplay.wave_mode:
             self.player_controller.entity.health += self.enemy_count * cfg.gameplay.enemy_regen_multiplier
@@ -228,6 +234,7 @@ class Game:
 
 def play():
     game = Game()
+    game.begin()
 
     while game.running:
         game.loop()
