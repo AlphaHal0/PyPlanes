@@ -14,8 +14,6 @@ import collision
 # TODO: Change collision system #
 # ----------------------------- #
 
-#* Takeoff animation is currently hard-disabled
-
 class Game:
     """A class that represents the game logic"""
     def __init__(self):
@@ -189,12 +187,8 @@ class Game:
         """Update all entities"""
         if len(self.entities) == 0: return
 
-        while self.entities[-1] is None:
-            # Remove last entity if it has been destroyed
-            # self.entities behaves like a stack so that each entity's index variable always matches index in list
-            # TODO: probably inefficient? will change someday
-            #! Nah, definitely inefficient. Change before merging to dev
-            self.entities.pop()
+        # clear entities that aren't alive
+        self.entities = [entity for entity in self.entities if entity.alive]
 
         self.enemy_ai_danger_zones = []
         for entity in self.entities:
@@ -239,6 +233,10 @@ class Game:
             if type == 0: type = randint(1, min(5, difficulty))
             if sprite is not None: sprite = Sprite(sprite)
             aircraft.EnemyAircraft(game=self, y=cfg.initial_aircraft_y, sprite=sprite, difficulty=difficulty, ai_type=type)
+
+    def get_vehicle_list(self, enemy: bool = True):
+        """Get a list of enemy vehicles or friendly vehicles if enemy is False"""
+        return [entity for entity in self.entities if isinstance(entity, Vehicle) and entity.is_enemy == enemy]
 
 def play():
     game = Game()

@@ -50,11 +50,11 @@ class Weapon(Entity):
                 for i in colliding:
                     i.damage(10)
 
-                # TODO: this should be handled by another function
-                self.explode([enemy for enemy in self.game.entities if isinstance(enemy, Vehicle) and enemy.is_enemy])
+                self.explode(self.game.get_vehicle_list())
 
         if self.ground_collision():
-            self.explode([entity for entity in self.game.entities if isinstance(entity, Vehicle) and entity.is_enemy != self.is_enemy])
+            # Damage all
+            self.explode(self.game.get_vehicle_list(not self.is_enemy))
 
         return super().update()
 

@@ -10,8 +10,8 @@ class Sprite:
     rotation: int = 0, flip_x: bool = False, flip_y: bool = False,
     opacity: int = 255, disable_debug_size_box: bool = False) -> None:
 
-        self.base_image = image
         self.is_animated = isinstance(image, list)
+        self.base_image = image if self.is_animated else [image] # if not a list, convert to list for easier processing
         self.rotation = rotation
         self.flip_x = flip_x
         self.flip_y = flip_y
@@ -39,32 +39,19 @@ class Sprite:
         """Reloads this sprite with its transformation values.
         If animated, this does so with each of its frames."""
         try:
-            # TODO: remove repeated code
-            if self.is_animated:
-                image = []
-                for i in self.base_image:
-                    image.append(pygame.transform.rotate(
-                        pygame.transform.flip(
-                            pygame.transform.scale(
-                                i,
-                                self.size
-                            ),
-                            self.flip_x, self.flip_y
-                        ),
-                        self.rotation
-                    ))
-                self.image = image
-            else:
-                self.image = pygame.transform.rotate(
+            image = []
+            for i in self.base_image:
+                image.append(pygame.transform.rotate(
                     pygame.transform.flip(
                         pygame.transform.scale(
-                            self.base_image,
+                            i,
                             self.size
                         ),
                         self.flip_x, self.flip_y
                     ),
                     self.rotation
-                )
+                ))
+            self.image = image
         except: pass
 
     def draw(self, x: int, y: int, loop: bool = True) -> bool:
@@ -84,8 +71,7 @@ class Sprite:
             pygame.draw.rect(screen.surface, (255, 0, 255), ((x,y), self.size))
         else:
             if self.is_animated:
-                # TODO: Redo animation system, this is ambiguous
-                # and I can't be bothered to describe it because I've forgotten how it works already
+                # TODO: Explain animation system with comments
 
                 frame = self.anim_frame // self.anim_time
                 screen.draw_image(self.image[frame], ((x,y), self.size))
@@ -94,7 +80,7 @@ class Sprite:
                     self.anim_frame = 0
                     if not loop: return False
             else:
-                screen.draw_image(self.image, ((x,y), self.size))
+                screen.draw_image(self.image[0], ((x,y), self.size))
 
         return True
 

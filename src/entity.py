@@ -93,7 +93,6 @@ class Entity:
 
     def destroy(self) -> None:
         self.alive = False
-        self.game.entities[self.index] = None
         if self.is_player_controlled:
             print("Game over.")
             self.game.running = False

@@ -9,7 +9,7 @@ import math
 
 ALIGN_NONE = 0 # does not automatically set element x/y (must be given manually)
 ALIGN_LEFT = 1 # grids x/y to left
-ALIGN_CENTERED = 2 # [TODO]
+ALIGN_CENTERED = 2 # TODO
 
 class Menu:
     """A class for a menu with a background and a list of elements"""
@@ -25,6 +25,7 @@ class Menu:
         self.mouse_effect_y = 0
         self.mouse_effect_velocity_x = 0
         self.mouse_effect_velocity_y = 0
+        self.mouse_effect_opacity = 0
 
     def distance_to(self, x: int, y: int) -> float:
         """Returns the distance from this Entity to (x, y)"""
@@ -53,6 +54,7 @@ class Menu:
             self.mouse_effect_x += self.mouse_effect_velocity_x
             self.mouse_effect_y += self.mouse_effect_velocity_y
 
+            self.mouse_effect.se
             self.mouse_effect.draw(self.mouse_effect_x-self.mouse_effect.size[0]//2, self.mouse_effect_y-self.mouse_effect.size[1]//2)
 
         # Check if any elements of this Menu are waiting for an input

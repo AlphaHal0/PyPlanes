@@ -23,7 +23,6 @@ class Aircraft(Vehicle):
         self.max_bomb_cooldown = bomb_cooldown
         self.pitch = 0
         self.target_pitch = 0
-        self.is_aircraft = True
         # Enable advanced physics if aircraft belongs to player and advanced physics is enabled
         self.enable_advanced_physics = (not is_enemy) and cfg.advanced_phys.enable_advanced_physics
         if self.enable_advanced_physics: self.physics = physics.AircraftPhysics()
@@ -119,7 +118,6 @@ class Aircraft(Vehicle):
 
     def bomb(self):
         """Summons a weapon.Bomb if not on cooldown, otherwise None"""
-        # TODO: fix repeated code
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
             weapon.Bomb(
@@ -133,7 +131,7 @@ class Aircraft(Vehicle):
                 rotation=self.pitch,
                 collision_mask=collision.ENEMY_WEAPON if self.is_enemy else collision.FRIENDLY_WEAPON)
 
-    def drop_rocket(self):
+    def rocket(self):
         """Summons a weapon.Rocket if not on cooldown, otherwise None"""
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown

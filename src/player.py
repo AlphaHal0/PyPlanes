@@ -55,7 +55,7 @@ class PlayerController:
             elif is_pressed(event, kb.weapons.bomb):
                 entity.bomb()
             elif is_pressed(event, kb.weapons.rocket):
-                entity.drop_rocket()
+                entity.rocket()
             elif is_pressed(event, kb.debug.spawn_enemy):
                 while True:
                     event = pygame.event.wait()
@@ -74,6 +74,7 @@ class PlayerController:
 
             elif is_pressed(event, kb.debug.spawn_moth):
                 game.spawn_enemy(moth=True, difficulty=int(game.enemy_count))
+            # TODO: add kill all keybind
             # elif is_pressed(event, kb.debug.kill_all):
             #     for enemy in game.enemies:
             #         enemy.hit()
