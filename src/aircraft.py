@@ -5,14 +5,16 @@ import ai
 import weapon
 from vehicle import Vehicle, bar_condition
 from sprite import Sprite
+from particle import Particle
 import collision
 from images import im
 from display import screen
 import physics
+import math
 
 class Aircraft(Vehicle):
     """An Entity with aircraft mechanics"""
-    def __init__(self, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown, **kwargs):
+    def __init__(self, is_enemy: bool = False, shoot_cooldown: int = cfg.gameplay.enemy_shoot_cooldown, bomb_cooldown: int = cfg.gameplay.enemy_bomb_cooldown, uses_turret: bool = False, **kwargs):
         self.acceleration = cfg.physics.aircraft_acceleration
         self.terminal_velocity = cfg.physics.aircraft_terminal_velocity
         self.shoot_cooldown = 0
@@ -23,6 +25,13 @@ class Aircraft(Vehicle):
         self.max_bomb_cooldown = bomb_cooldown
         self.pitch = 0
         self.target_pitch = 0
+
+        self.uses_turret = uses_turret # Do bullets shoot from the nose of the plane?
+        self.turret_angle = 0 # if uses_turret, shoot from this angle instead
+        self.turret_target_angle = 0
+        self.turret_min_angle = -10 # relative to aircraft pitch
+        self.turret_max_angle = 80
+
         # Enable advanced physics if aircraft belongs to player and advanced physics is enabled
         self.enable_advanced_physics = (not is_enemy) and cfg.advanced_phys.enable_advanced_physics
         if self.enable_advanced_physics: self.physics = physics.AircraftPhysics()
@@ -41,12 +50,14 @@ class Aircraft(Vehicle):
             self.sprite.rotate(self.pitch)
             if self.pitch > self.target_pitch:
                 self.pitch -= 1
+                self.turret_angle -= 1
             else:
                 self.pitch += 1
+                self.turret_angle += 1
 
         if self.ground_collision():
             if self.health <= 0:
-                self.spawn_particle(sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=False, move_with_screen=True)
+                Particle(game=self.game, x=self.x, y=self.y, sprite=Sprite(im.particle.large_explosions, animation_time=40), scale=3, adjust_pos=True, move_with_screen=True)
                 self.game.player_controller.score += 20 if cfg.gameplay.wave_mode else 70
                 self.game.enemy_count += cfg.gameplay.enemy_count_increment
                 self.destroy()
@@ -56,7 +67,27 @@ class Aircraft(Vehicle):
         if self.falling:
             self.spawn_particle(Sprite(im.particle.small_explosions, animation_time=5))
 
+        self.constrain()
         super().update()
+
+    def constrain(self):
+        if self.uses_turret:
+            # clamp turret angle
+            if self.turret_target_angle > self.turret_max_angle:
+                self.turret_target_angle = self.turret_max_angle
+            elif self.turret_target_angle < self.turret_min_angle:
+                self.turret_target_angle = self.turret_min_angle
+
+            if self.turret_angle - 1 > self.turret_target_angle:
+                self.turret_angle -= 0.2
+            elif self.turret_angle + 1 < self.turret_target_angle:
+                self.turret_angle += 0.2
+
+    def draw(self):
+        super().draw()
+        if cfg.debug.show_sprite_sizes:
+            rad = math.radians(self.get_actual_rotation(self.turret_angle))
+            pygame.draw.line(screen.surface, (64, 196, 128), (self.x, self.y), (math.cos(rad) * 100 + self.x, -(math.sin(rad) * 100) + self.y), 5) # Turret angle indicator
 
     def set_pitch(self, value: int = 0) -> int:
         """Sets pitch. Will not work if aircraft is falling."""
@@ -103,8 +134,15 @@ class Aircraft(Vehicle):
         self.velocity_x *= cfg.physics.aircraft_drag
         self.velocity_y *= cfg.physics.aircraft_drag
 
+    def get_actual_rotation(self, val: float|None = None):
+        """Flip the given value if is_enemy (facing other way)
+        If val is None, uses aircraft pitch"""
+        if not val:
+            val = self.pitch
+        return val + 180 if self.is_enemy else val
+
     def shoot(self):
-        """Summons a weapon.Bullet if not on cooldown, otherwise None"""
+        """Summons a weapon.Bullet if not on cooldown"""
         if self.shoot_cooldown <= 0:
             self.shoot_cooldown = self.max_shoot_cooldown
             weapon.Bullet(
@@ -113,11 +151,11 @@ class Aircraft(Vehicle):
                 y=self.y + self.height / 2,
                 is_enemy=self.is_enemy,
                 velocity_x=(cfg.physics.enemy_bullet_velocity if self.is_enemy else cfg.physics.player_bullet_velocity) + (self.velocity_x*cfg.physics.weapon_velocity_multiplier),
-                rotation=self.pitch,
+                rotation=self.get_actual_rotation(self.turret_angle if self.uses_turret else self.pitch),
                 collision_mask=collision.ENEMY_WEAPON if self.is_enemy else collision.FRIENDLY_WEAPON)
 
     def bomb(self):
-        """Summons a weapon.Bomb if not on cooldown, otherwise None"""
+        """Summons a weapon.Bomb if not on cooldown"""
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
             weapon.Bomb(
@@ -128,11 +166,11 @@ class Aircraft(Vehicle):
                 velocity_x=self.velocity_x,
                 velocity_y=self.velocity_y * cfg.physics.bomb_init_y_multiplier,
                 explosion_power=random.randint(4,6),
-                rotation=self.pitch,
+                rotation=self.get_actual_rotation(),
                 collision_mask=collision.ENEMY_WEAPON if self.is_enemy else collision.FRIENDLY_WEAPON)
 
     def rocket(self):
-        """Summons a weapon.Rocket if not on cooldown, otherwise None"""
+        """Summons a weapon.Rocket if not on cooldown"""
         if self.bomb_cooldown <= 0:
             self.bomb_cooldown = self.max_bomb_cooldown
             weapon.Rocket(
@@ -143,7 +181,7 @@ class Aircraft(Vehicle):
                 velocity_x=self.velocity_x,
                 velocity_y=self.velocity_y * cfg.physics.bomb_init_y_multiplier,
                 explosion_power=random.randint(4,6),
-                rotation=self.pitch,
+                rotation=self.get_actual_rotation(),
                 collision_mask=collision.ENEMY_WEAPON if self.is_enemy else collision.FRIENDLY_WEAPON)
 
 class EnemyAircraft(Aircraft):
@@ -153,20 +191,17 @@ class EnemyAircraft(Aircraft):
         if sprite is None: sprite = Sprite(ai.ai_types[ai_type].default_aircraft_img)
         size = sprite.size
         # Get type from index and init AI class
-        self.ai: ai.BaseAI = ai.ai_types[ai_type](size=size, difficulty=difficulty, fire_rate=cfg.gameplay.enemy_shoot_cooldown)
+        self.ai: ai.BaseAI = ai.ai_types[ai_type](aircraft=self, size=size, difficulty=difficulty)
 
         if max_health == -1.0:
             # if max_health argument left blank, generate a random health amount
             max_health=random.randint(0, difficulty)
 
-        super().__init__(x=cfg.screen_width, sprite=sprite, is_enemy=True, max_health=random.randint(0, difficulty), shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown, bar_condition=bar_condition.WHEN_BELOW_MAX_AND_NOT_INERT, collision_mask=collision.ENEMY_AIRCRAFT, **kwargs)
+        super().__init__(x=cfg.screen_width, sprite=sprite, is_enemy=True, max_health=random.randint(0, difficulty), shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown, bar_condition=bar_condition.WHEN_BELOW_MAX_AND_NOT_INERT, collision_mask=collision.ENEMY_AIRCRAFT, uses_turret=self.ai.uses_turret, **kwargs)
 
     def update(self):
         self.ai.tick(danger_zones=self.game.enemy_ai_danger_zones, player_y=self.game.player_controller.entity.y, player_x=self.game.player_controller.entity.x, enemy_y=self.y)
         self.apply_acceleration(self.ai.target_x, self.ai.target_y, trackable_distance=50)
-        if self.ai.shoot:
-                self.shoot()
-                self.ai.shoot -= 1
 
         if cfg.debug.show_ai_type:
             ai_marker = pygame.Surface((10,10))

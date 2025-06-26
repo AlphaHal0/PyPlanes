@@ -53,7 +53,8 @@
   },
 
   "aircraft": {
-    "bomber_minimum_y": 0.2
+    "bomber_maximum_y": 0.1,
+    "bomber_shoot_cooldown": 120
   },
 
   "ui": {
