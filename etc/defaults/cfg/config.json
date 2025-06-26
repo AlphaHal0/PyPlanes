@@ -53,7 +53,8 @@
   },
 
   "aircraft": {
-    "bomber_minimum_y": 0.2
+    "bomber_maximum_y": 0.1,
+    "bomber_shoot_cooldown": 120
   },
 
   "ui": {
@@ -61,7 +62,10 @@
     "font_size": 70,
     "narrow_font_size": 30,
     "grid_margins": [0.01, 0.0025, 0.01, 0.0025],
-    "menu_grid_divisions": [4, 16]
+    "menu_grid_divisions": [4, 16],
+    "mouse_effect_drag": 0.91,
+    "mouse_effect_max_speed": 50,
+    "mouse_effect_min_distance": 50
   },
 
   "easter_eggs": {
@@ -82,6 +86,7 @@
     "mouse_visibility": false,
     "show_image_inits": false,
     "big_mode": false,
-    "show_distortion": false
+    "show_distortion": false,
+    "display_entity_text": false
   }
 }

@@ -1,20 +1,33 @@
+# type checking without circular import
+from __future__ import annotations
+from typing import TYPE_CHECKING
+if TYPE_CHECKING:
+    from game import Game
+
 import pygame
 from config import cfg
 from sprite import Sprite
 import math
+from display import screen
 
 class Entity:
     """Base class for all entities in the game.
     By default, Entities move by their velocity each tick. """
-    def __init__(self, sprite: Sprite|None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, id: int = 0):
+    def __init__(self, game: Game, sprite: Sprite|None = None, x: int = 0, y: int = 0, velocity_x: int = 0, velocity_y: int = 0, rotation: int = 0, adj_velocity_for_rot: bool = True, spawn_cooldown: int = cfg.gameplay.spawn_cooldown, collision_mask: list|int = [], **kwargs):
         if sprite is None: sprite = Sprite()
 
-        self.rect = pygame.Rect((x, y), sprite.size)
+        self.game = game
+        self.sprite = sprite
         self.x, self.y = x, y
         self.width, self.height = sprite.size
-        self.sprite = sprite
+        self.rect = pygame.Rect((x, y), sprite.size)
         self.rotation = rotation
-        self.id = id
+        self.is_player_controlled = False
+
+        if isinstance(collision_mask, int):
+            self.collision_mask = [collision_mask] # convert to list if not already
+        else:
+            self.collision_mask = collision_mask
 
         self.spawn_cooldown = spawn_cooldown
         self.time_of_spawn = pygame.time.get_ticks()
@@ -23,6 +36,8 @@ class Entity:
         if rotation: self.sprite.rotate(rotation)
 
         if adj_velocity_for_rot and rotation:
+            # Rotate velocity vector to match sprite rotation
+            # Used for bullets and bombs, etc.
             rad = math.radians(-rotation)
             sr = math.sin(rad)
             cr = math.cos(rad)
@@ -31,6 +46,22 @@ class Entity:
         else:
             self.velocity_x = velocity_x
             self.velocity_y = velocity_y
+
+        self.game.entities.append(self)
+        self.index = len(self.game.entities) - 1
+
+        if kwargs:
+            # report unexpected arguments
+            print(f"warning: arguments {kwargs} not assigned to {self.__class__.__name__} at index {self.index}")
+
+        if cfg.debug.display_entity_text:
+            # Print info as text for debug
+            screen.render_text(
+                f"ID {self.index}",
+                opacity=196,
+                display=False,
+                id=f"debug_text@{self.index}"
+            )
 
     def apply_rotated_velocity(self, force: float, direction: int|None = None):
         """Apply a force to this Entity with a direction"""
@@ -45,20 +76,42 @@ class Entity:
         self.x += self.velocity_x
         self.y += self.velocity_y
         self.rect.update((self.x, self.y), self.rect.size)
+        self.draw()
 
     def draw(self) -> None:
         """Draws the Entity onto the screen"""
         self.sprite.draw(self.x, self.y)
+        self.draw_debug_text()
+
+    def draw_debug_text(self) -> None:
+        if cfg.debug.display_entity_text:
+            screen.display_cached_text(
+                id=f"debug_text@{self.index}",
+                x=self.x+(self.width//2-80),
+                y=self.y-self.height
+            )
 
     def destroy(self) -> None:
         self.alive = False
+        if self.is_player_controlled:
+            print("Game over.")
+            self.game.running = False
 
-    def is_colliding(self, rect: pygame.Rect|list[pygame.Rect]) -> int:
-        """Returns if this Entity is colliding with a Rect or a list of Rects"""
-        if isinstance(rect, list):
-            return pygame.Rect.collidelist(self.rect, rect)
-        else:
-            return pygame.Rect.colliderect(self.rect, rect)
+    def is_colliding(self, mask: list|int = [], ignore_self: bool = True) -> list:
+        """Returns if this Entity is colliding with other Entities with this collision mask"""
+        if isinstance(mask, int): mask = [mask] # convert to list if not already
+        colliding = []
+
+        for entity in self.game.entities:
+            if entity is None: continue
+            if ignore_self and entity == self: continue
+
+            for i in mask:
+                if i in entity.collision_mask and pygame.Rect.colliderect(self.rect, entity.rect):
+                    colliding.append(entity)
+                    break
+
+        return colliding
 
     def distance_to(self, x: int, y: int) -> float:
         """Returns the distance from this Entity to (x, y)"""
@@ -68,7 +121,7 @@ class Entity:
         return math.sqrt(dx+dy)
 
     def ground_collision(self) -> bool:
-        """Returns if this Entity """
+        """Returns if this Entity is colliding with the ground"""
         return self.y + self.height >= cfg.floor_y
 
     def hit(self) -> bool:

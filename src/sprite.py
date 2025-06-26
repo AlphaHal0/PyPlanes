@@ -5,15 +5,18 @@ from display import screen
 
 class Sprite:
     """A class to manage an image or animated list of images with transformation."""
-    def __init__(self, image: pygame.Surface|list[pygame.Surface]|None = None, 
-    animation_time: int = 1, size: tuple|None = None, size_multiplier: int = 1, 
-    rotation: int = 0, flip_x: bool = False, flip_y: bool = False) -> None:
-        
-        self.base_image = image
+    def __init__(self, image: pygame.Surface|list[pygame.Surface]|None = None,
+    animation_time: int = 1, size: tuple|None = None, size_multiplier: int = 1,
+    rotation: int = 0, flip_x: bool = False, flip_y: bool = False,
+    opacity: int = 255, disable_debug_size_box: bool = False) -> None:
+
         self.is_animated = isinstance(image, list)
+        self.base_image = image if self.is_animated else [image] # if not a list, convert to list for easier processing
         self.rotation = rotation
         self.flip_x = flip_x
         self.flip_y = flip_y
+        self.opacity = opacity
+        self.disable_debug_size_box = disable_debug_size_box
 
         if not image or (self.is_animated and len(image) == 0):
             size = (100, 100)
@@ -36,31 +39,19 @@ class Sprite:
         """Reloads this sprite with its transformation values.
         If animated, this does so with each of its frames."""
         try:
-            if self.is_animated:
-                image = []
-                for i in self.base_image:
-                    image.append(pygame.transform.rotate(
-                        pygame.transform.flip(
-                            pygame.transform.scale(
-                                i,
-                                self.size
-                            ),
-                            self.flip_x, self.flip_y
-                        ),
-                        self.rotation
-                    ))
-                self.image = image
-            else:
-                self.image = pygame.transform.rotate(
+            image = []
+            for i in self.base_image:
+                image.append(pygame.transform.rotate(
                     pygame.transform.flip(
                         pygame.transform.scale(
-                            self.base_image,
+                            i,
                             self.size
                         ),
                         self.flip_x, self.flip_y
                     ),
                     self.rotation
-                )
+                ))
+            self.image = image
         except: pass
 
     def draw(self, x: int, y: int, loop: bool = True) -> bool:
@@ -68,10 +59,10 @@ class Sprite:
         If textures are disabled, returns False.
         If loop is False and this sprite has run through all of its animation frames, returns False.
         Otherwise, returns True"""
-        if cfg.debug.show_sprite_sizes:
+        if cfg.debug.show_sprite_sizes and not self.disable_debug_size_box:
             pygame.draw.rect(screen.surface, (255, 0, 255), ((x,y), self.size))
             rad = math.radians(self.rotation)
-            pygame.draw.line(screen.surface, (0, 0, 255), (x, y), (math.sin(rad) * 50 + x, math.cos(rad) * 50 + y), 5) # Points upwards (at 0 degrees) 
+            pygame.draw.line(screen.surface, (0, 0, 255), (x, y), (math.sin(rad) * 50 + x, math.cos(rad) * 50 + y), 5) # Points upwards (at 0 degrees)
             pygame.draw.line(screen.surface, (0, 255, 0), (x, y), (math.cos(rad) * 100 + x, -(math.sin(rad) * 100) + y), 5) # Points forward (at 90 degrees)
 
         if cfg.debug.disable_sprite_textures: return False
@@ -80,8 +71,7 @@ class Sprite:
             pygame.draw.rect(screen.surface, (255, 0, 255), ((x,y), self.size))
         else:
             if self.is_animated:
-                # TODO: Redo animation system, this is ambiguous
-                # and I can't be bothered to describe it because I've forgotten how it works already
+                # TODO: Explain animation system with comments
 
                 frame = self.anim_frame // self.anim_time
                 screen.draw_image(self.image[frame], ((x,y), self.size))
@@ -90,10 +80,10 @@ class Sprite:
                     self.anim_frame = 0
                     if not loop: return False
             else:
-                screen.draw_image(self.image, ((x,y), self.size))
+                screen.draw_image(self.image[0], ((x,y), self.size))
 
         return True
-    
+
     def flip(self, flip_x: bool = True, flip_y: bool = False, no_update: bool = False):
         """Flips the texture of this Sprite.
         If no_update is True, does not apply to this Sprite's images immediately"""
@@ -114,6 +104,12 @@ class Sprite:
         if size is None:
             self.size = (self.base_size[0] * size_multiplier, self.base_size[1] * size_multiplier)
         else:
-            self.base_size = size    
+            self.base_size = size
             self.size = (size[0] * size_multiplier, size[1] * size_multiplier)
+        if not no_update: self.update()
+
+    def set_opacity(self, opacity: int = 255, no_update: bool = False):
+        """Change the opacity of this Sprite.
+        If no_update is True, does not apply to this Sprite's images immediately"""
+        self.opacity = opacity
         if not no_update: self.update()

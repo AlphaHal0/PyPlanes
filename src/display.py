@@ -31,7 +31,7 @@ class PygameDisplay(Display):
         self.surface.blit(image, dest, special_flags=pygame.BLEND_ALPHA_SDL2)
 
     def render_text(self, content: str, color: pygame.Color = 0, antialias: bool = False, opacity: int = 255, x: int = 0, y: int = 0, display: bool = True, id: str = ""):
-        """Display text onto screen. 
+        """Display text onto screen.
         If id is given, stores in cache.
         If display is False, does not show straight away"""
 
@@ -47,11 +47,13 @@ class PygameDisplay(Display):
         if display:
             self.surface.blit(rendered, (x, y))
 
-    def display_cached_text(self, id: str = "", x: int = 0, y: int = 0):
+    def display_cached_text(self, id: str, x: int = 0, y: int = 0):
         """Display text that is stored in the cache"""
         rendered = self.text_cache.get(id)
         if rendered:
             self.surface.blit(rendered, (x, y))
+        else:
+            print(f"warning: text with ID {id} does not exist")
 
     def set_cached_text_alpha(self, id: str, opacity: int = 255):
         rendered = self.text_cache.get(id)

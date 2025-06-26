@@ -1,18 +1,20 @@
 import pygame
 from sprite import Sprite
 from ui.element import UIElement
+from ui.mouse_effect import MouseEffect
 from typing import Callable
 from keybind import is_pressed
 from config import kb
 from display import screen
+import math
 
 ALIGN_NONE = 0 # does not automatically set element x/y (must be given manually)
 ALIGN_LEFT = 1 # grids x/y to left
-ALIGN_CENTERED = 2 # [TODO]
+ALIGN_CENTERED = 2 # TODO
 
 class Menu:
     """A class for a menu with a background and a list of elements"""
-    def __init__(self, background: Sprite, elements: list[UIElement], on_close: Callable|None = None, grid_type: int = 0):
+    def __init__(self, background: Sprite, elements: list[UIElement], on_close: Callable|None = None, grid_type: int = 0, mouse_effect_sprite: Sprite = None):
         self.grid_type = grid_type
         self.background = background
         self.elements = elements
@@ -20,9 +22,25 @@ class Menu:
         self.any_listening = False
         self.run = True
 
+        if mouse_effect_sprite:
+            self.mouse_effect = MouseEffect(mouse_effect_sprite)
+        else:
+            self.mouse_effect = None
+
+    def distance_to(self, x: int, y: int) -> float:
+        """Returns the distance from this Entity to (x, y)"""
+        dx = abs(x - self.mouse_effect_x)**2
+        dy = abs(y - self.mouse_effect_y)**2
+
+        return math.sqrt(dx+dy)
+
     def tick(self):
         """Draw on screen and update contained elements."""
         self.background.draw(0, 0)
+
+        mouse_pos = pygame.mouse.get_pos()
+        if self.mouse_effect:
+            self.mouse_effect.update(mouse_pos)
 
         # Check if any elements of this Menu are waiting for an input
         any_listening = False
@@ -49,8 +67,6 @@ class Menu:
         else:
             click = False
             rclick = False
-
-        mouse_pos = pygame.mouse.get_pos()
 
         for element in self.elements:
             element.update(mouse_x=mouse_pos[0], mouse_y=mouse_pos[1], click=click, release=release, rclick=rclick, rrelease=rrelease)

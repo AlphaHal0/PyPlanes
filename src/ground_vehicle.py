@@ -1,13 +1,12 @@
-from entity import Entity
+from vehicle import Vehicle
 from random import randint
 from config import cfg
 from sprite import Sprite
 from images import im
 import ai
 import pygame
-import particle
 
-class GroundVehicle(Entity):
+class GroundVehicle(Vehicle):
     """Ground vehicle"""
     def __init__(self, sprite: Sprite|None = None, **kwargs):
         if sprite is None: sprite = Sprite(im.ground_vehicles.tank)
@@ -25,7 +24,8 @@ class GroundVehicle(Entity):
         """Update.
         If the vehicle is outside the screen, delete self"""
         if self.x < 0:
-            self.alive = False
+            self.destroy()
+        self.x -= self.game.scroll_speed
         return super().update()
 
     def hit(self) -> bool:
@@ -36,13 +36,3 @@ class GroundVehicle(Entity):
             return True
         else:
             return False
-
-    # TODO: make parent Vehicle class for GV and Aircraft and put this in there
-    def display_particle(self, sprite: Sprite, delay: int = 400) -> particle.Particle | None:
-        """Returns a Particle with the Sprite if this function has been run longer ago than the delay param.
-        The Particle will move with the screen if this Aircraft is not an enemy"""
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_particle_time > delay:
-            self.last_particle_time = current_time
-            return particle.Particle(self.x + randint(0, int(self.width)), self.y + randint(0, int(self.height)), sprite=sprite, move_with_screen=not self.is_enemy)
-        else: return None
