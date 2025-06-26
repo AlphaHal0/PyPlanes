@@ -40,7 +40,7 @@ class Weapon(Entity):
                     i.damage(10)
                 self.explode([self.game.player_controller.entity])
         else:
-            self.game.enemy_ai_danger_zones.append(self.y)
+            self.game.enemy_ai_danger_zones[0].append(self.y)
             colliding = self.is_colliding(collision.ENEMY_AIRCRAFT)
             if colliding:
                 # Bullet colliding with enemy

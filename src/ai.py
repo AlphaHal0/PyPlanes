@@ -9,6 +9,10 @@ import math
 from config import cfg
 from images import im
 
+# --------------------------------------------------- #
+# TODO: redo how game information is passed to the AI #
+# --------------------------------------------------- #
+
 class BaseAI:
     """The base AI with no special features."""
     debug_color = 0x000000

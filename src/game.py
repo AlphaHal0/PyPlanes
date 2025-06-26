@@ -21,7 +21,7 @@ class Game:
         self.entities = []
         self.enemy_count = cfg.gameplay.initial_enemy_aircraft # Number of entities that should be on screen, or that spawn at the start of a wave
         self.scroll_x = [0, 0, 0] # Background scroll of each parallax layer
-        self.enemy_ai_danger_zones = [] # Areas of the screen that the AI should avoid (not hard limits)
+        self.enemy_ai_danger_zones = ([], []) # Areas of the screen that the AI should avoid (not hard limits)
         self.wave = 1
         self.wave_mode_text_x = cfg.screen_width
         self.wave_mode_text_y = cfg.screen_height // 2 - screen.font.get_height() // 2
@@ -190,7 +190,7 @@ class Game:
         # clear entities that aren't alive
         self.entities = [entity for entity in self.entities if entity.alive]
 
-        self.enemy_ai_danger_zones = []
+        self.enemy_ai_danger_zones = ([], self.enemy_ai_danger_zones[0]) # First index of tuple is a the list that Weapons add to, second is the list that AIs use
         for entity in self.entities:
             if entity is not None: entity.update()
 

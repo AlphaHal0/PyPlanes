@@ -200,7 +200,7 @@ class EnemyAircraft(Aircraft):
         super().__init__(x=cfg.screen_width, sprite=sprite, is_enemy=True, max_health=random.randint(0, difficulty), shoot_cooldown=cfg.gameplay.enemy_shoot_cooldown, bar_condition=bar_condition.WHEN_BELOW_MAX_AND_NOT_INERT, collision_mask=collision.ENEMY_AIRCRAFT, uses_turret=self.ai.uses_turret, **kwargs)
 
     def update(self):
-        self.ai.tick(danger_zones=self.game.enemy_ai_danger_zones, player_y=self.game.player_controller.entity.y, player_x=self.game.player_controller.entity.x, enemy_y=self.y)
+        self.ai.tick(danger_zones=self.game.enemy_ai_danger_zones[1], player_y=self.game.player_controller.entity.y, player_x=self.game.player_controller.entity.x, enemy_y=self.y)
         self.apply_acceleration(self.ai.target_x, self.ai.target_y, trackable_distance=50)
 
         if cfg.debug.show_ai_type:
